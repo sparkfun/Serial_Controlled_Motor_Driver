@@ -23566,7 +23566,9 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <part name="SUPPLY2" library="SparkFun-Aesthetics" deviceset="VCC" device=""/>
 <part name="C7" library="SparkFun-Capacitors" deviceset="0.1UF" device="-0402-16V-10%" value="0.1uF"/>
 <part name="GND9" library="SparkFun-Aesthetics" deviceset="GND" device=""/>
-<part name="U2" library="PSOC4TempLib" deviceset="DRV883X" device="" value="DRV8835"/>
+<part name="U2" library="PSOC4TempLib" deviceset="DRV883X" device="" value="DRV8835">
+<attribute name="PROD_ID" value="IC-13342"/>
+</part>
 <part name="J1" library="SparkFun-Connectors" deviceset="M04" device="PTH" value="DNP"/>
 <part name="GND10" library="SparkFun-Aesthetics" deviceset="GND" device=""/>
 <part name="SUPPLY3" library="SparkFun-Aesthetics" deviceset="VCC" device=""/>
@@ -23658,7 +23660,7 @@ XRES SRES
 VDDD Vtarget
 VSS Gnd</text>
 <text x="4.064" y="108.458" size="2.54" layer="97" font="vector" ratio="15">Serial Ports</text>
-<text x="75.184" y="179.578" size="2.54" layer="97" font="vector" ratio="15">Power Port</text>
+<text x="70.104" y="180.594" size="2.54" layer="97" font="vector" ratio="15">Power Port</text>
 <text x="120.904" y="179.578" size="2.54" layer="97" font="vector" ratio="15">Programming Header</text>
 <text x="95.504" y="108.458" size="2.54" layer="97" font="vector" ratio="15">H-Bridge Driver</text>
 <text x="5.08" y="169.418" size="2.54" layer="97" font="vector" ratio="15" align="top-left">A driver for controlling 2
@@ -23678,6 +23680,7 @@ VSS Gnd</text>
 <text x="181.356" y="178.054" size="1.778" layer="97" font="vector" align="top-left">The default, all open, is the UART mode.
 A '1' indicated solder bridge.</text>
 <text x="34.29" y="157.226" size="1.778" layer="97" font="vector" align="top-left">Status</text>
+<text x="71.12" y="177.038" size="1.778" layer="97" font="vector" ratio="15">(3.0 to 11.0V)</text>
 </plain>
 <instances>
 <instance part="U1" gate="G1" x="38.1" y="132.08"/>
@@ -24171,19 +24174,20 @@ A '1' indicated solder bridge.</text>
 <wire x1="198.12" y1="50.8" x2="193.04" y2="50.8" width="0.1524" layer="91"/>
 <wire x1="193.04" y1="50.8" x2="193.04" y2="60.96" width="0.1524" layer="91"/>
 <junction x="193.04" y="60.96"/>
-<wire x1="193.04" y1="60.96" x2="182.88" y2="60.96" width="0.1524" layer="91"/>
+<wire x1="193.04" y1="60.96" x2="185.42" y2="60.96" width="0.1524" layer="91"/>
+<wire x1="185.42" y1="60.96" x2="182.88" y2="60.96" width="0.1524" layer="91"/>
 <wire x1="182.88" y1="60.96" x2="170.18" y2="60.96" width="0.1524" layer="91"/>
-<wire x1="170.18" y1="60.96" x2="185.42" y2="60.96" width="0.1524" layer="91"/>
+<wire x1="182.88" y1="60.96" x2="185.42" y2="60.96" width="0.1524" layer="91"/>
 <wire x1="185.42" y1="60.96" x2="185.42" y2="63.5" width="0.1524" layer="91"/>
 <pinref part="SUPPLY10" gate="G$1" pin="VIN"/>
 <pinref part="C9" gate="G$1" pin="1"/>
 <wire x1="170.18" y1="58.42" x2="170.18" y2="60.96" width="0.1524" layer="91"/>
-<junction x="170.18" y="60.96"/>
 <pinref part="U$3" gate="G$1" pin="IN"/>
 <pinref part="U$3" gate="G$1" pin="GND"/>
 <pinref part="C10" gate="G$1" pin="+"/>
 <wire x1="182.88" y1="60.96" x2="182.88" y2="58.42" width="0.1524" layer="91"/>
 <junction x="182.88" y="60.96"/>
+<junction x="185.42" y="60.96"/>
 </segment>
 <segment>
 <pinref part="SUPPLY11" gate="G$1" pin="VIN"/>
