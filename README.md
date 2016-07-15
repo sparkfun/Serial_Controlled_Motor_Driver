@@ -13,6 +13,13 @@ Repository Contents
 * **/Firmware** - Firmware for driving the motor driver 
 * **/Hardware** - All Eagle design files (.brd, .sch)
 
+Version History
+---------------
+* [HW_1.2_FW_1.2](https://github.com/sparkfun/Serial_Controlled_Motor_Driver/tree/HW_1.2_FW_1.2) - Original product
+* [V_1.5](https://github.com/sparkfun/Serial_Controlled_Motor_Driver/tree/V_1.5) - Revision prototype 1
+* [V_1.6](https://github.com/sparkfun/Serial_Controlled_Motor_Driver/tree/V_1.6) - Revision prototype 2
+* [V_1.6.1](https://github.com/sparkfun/Serial_Controlled_Motor_Driver/tree/V_1.6.1) - Revision prototype 2 with non-zero width poly outlines and dev board version V_1.X
+
 
 License Information
 -------------------
