@@ -23003,7 +23003,7 @@ Motor Driver</text>
 <wire x1="83.82" y1="58.42" x2="83.82" y2="114.3" width="0.1524" layer="97" style="longdash"/>
 <wire x1="83.82" y1="114.3" x2="187.96" y2="114.3" width="0.1524" layer="97" style="longdash"/>
 <text x="149.86" y="78.74" size="2.54" layer="97" font="vector" ratio="15">3.3V Regulator</text>
-<text x="238.76" y="7.62" size="2.54" layer="94" font="vector">1.6</text>
+<text x="237.49" y="7.62" size="2.54" layer="94" font="vector">1.6.1</text>
 <text x="114.3" y="172.72" size="1.27" layer="97" rot="MR180">P3.2 swd_io[0]
 P3.3 swd_clk[0]
 XRES SRES
