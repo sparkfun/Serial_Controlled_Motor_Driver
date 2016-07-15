@@ -24,20 +24,20 @@
 <layer number="14" name="Route14" color="1" fill="6" visible="no" active="no"/>
 <layer number="15" name="Route15" color="4" fill="6" visible="no" active="no"/>
 <layer number="16" name="Bottom" color="1" fill="1" visible="yes" active="yes"/>
-<layer number="17" name="Pads" color="2" fill="1" visible="yes" active="yes"/>
-<layer number="18" name="Vias" color="2" fill="1" visible="yes" active="yes"/>
-<layer number="19" name="Unrouted" color="6" fill="1" visible="yes" active="yes"/>
-<layer number="20" name="Dimension" color="15" fill="1" visible="yes" active="yes"/>
-<layer number="21" name="tPlace" color="16" fill="1" visible="yes" active="yes"/>
-<layer number="22" name="bPlace" color="14" fill="1" visible="yes" active="yes"/>
-<layer number="23" name="tOrigins" color="15" fill="1" visible="yes" active="yes"/>
-<layer number="24" name="bOrigins" color="15" fill="1" visible="yes" active="yes"/>
+<layer number="17" name="Pads" color="2" fill="1" visible="no" active="yes"/>
+<layer number="18" name="Vias" color="2" fill="1" visible="no" active="yes"/>
+<layer number="19" name="Unrouted" color="6" fill="1" visible="no" active="yes"/>
+<layer number="20" name="Dimension" color="15" fill="1" visible="no" active="yes"/>
+<layer number="21" name="tPlace" color="16" fill="1" visible="no" active="yes"/>
+<layer number="22" name="bPlace" color="14" fill="1" visible="no" active="yes"/>
+<layer number="23" name="tOrigins" color="15" fill="1" visible="no" active="yes"/>
+<layer number="24" name="bOrigins" color="15" fill="1" visible="no" active="yes"/>
 <layer number="25" name="tNames" color="7" fill="1" visible="no" active="yes"/>
 <layer number="26" name="bNames" color="7" fill="1" visible="no" active="yes"/>
 <layer number="27" name="tValues" color="7" fill="1" visible="no" active="yes"/>
 <layer number="28" name="bValues" color="7" fill="1" visible="no" active="yes"/>
-<layer number="29" name="tStop" color="7" fill="3" visible="no" active="yes"/>
-<layer number="30" name="bStop" color="7" fill="6" visible="no" active="yes"/>
+<layer number="29" name="tStop" color="7" fill="3" visible="yes" active="yes"/>
+<layer number="30" name="bStop" color="7" fill="6" visible="yes" active="yes"/>
 <layer number="31" name="tCream" color="7" fill="4" visible="no" active="yes"/>
 <layer number="32" name="bCream" color="7" fill="5" visible="no" active="yes"/>
 <layer number="33" name="tFinish" color="6" fill="3" visible="no" active="yes"/>
@@ -52,13 +52,13 @@
 <layer number="42" name="bRestrict" color="1" fill="10" visible="no" active="yes"/>
 <layer number="43" name="vRestrict" color="2" fill="10" visible="no" active="yes"/>
 <layer number="44" name="Drills" color="7" fill="1" visible="no" active="yes"/>
-<layer number="45" name="Holes" color="7" fill="1" visible="yes" active="yes"/>
+<layer number="45" name="Holes" color="7" fill="1" visible="no" active="yes"/>
 <layer number="46" name="Milling" color="3" fill="1" visible="no" active="yes"/>
 <layer number="47" name="Measures" color="7" fill="1" visible="no" active="yes"/>
 <layer number="48" name="Document" color="7" fill="1" visible="no" active="yes"/>
 <layer number="49" name="Reference" color="7" fill="1" visible="no" active="yes"/>
 <layer number="50" name="dxf" color="7" fill="1" visible="no" active="no"/>
-<layer number="51" name="tDocu" color="6" fill="1" visible="yes" active="yes"/>
+<layer number="51" name="tDocu" color="6" fill="1" visible="no" active="yes"/>
 <layer number="52" name="bDocu" color="7" fill="1" visible="no" active="yes"/>
 <layer number="53" name="tGND_GNDA" color="7" fill="9" visible="no" active="no"/>
 <layer number="54" name="bGND_GNDA" color="1" fill="9" visible="no" active="no"/>
@@ -216,7 +216,7 @@ PU</text>
 <rectangle x1="10.033" y1="35.56" x2="10.287" y2="39.37" layer="51"/>
 <wire x1="15.24" y1="35.56" x2="5.08" y2="35.56" width="0.2032" layer="22"/>
 <wire x1="19.05" y1="17.78" x2="1.27" y2="17.78" width="0.2032" layer="22"/>
-<polygon width="0.002540625" layer="30">
+<polygon width="0.0254" layer="30">
 <vertex x="0" y="34.925"/>
 <vertex x="20.32" y="34.925"/>
 <vertex x="20.32" y="18.415"/>
@@ -282,7 +282,7 @@ typical TO-220 heatsinks.</text>
 <wire x1="17.541875" y1="13.0175" x2="17.700625" y2="13.0175" width="0.254" layer="22"/>
 <wire x1="17.383125" y1="13.17625" x2="17.541875" y2="13.0175" width="0.254" layer="22"/>
 <text x="17.541875" y="3.889375" size="0.8128" layer="22" font="vector" ratio="15" rot="MR90" align="center-left">VCC</text>
-<polygon width="0.002540625" layer="29">
+<polygon width="0.0254" layer="29">
 <vertex x="3.7703125" y="26.67" curve="-90"/>
 <vertex x="6.35" y="29.2496875" curve="-90"/>
 <vertex x="8.9296875" y="26.67" curve="-90"/>
@@ -2529,7 +2529,7 @@ These rules have been curated by SparkFuns DFM commitee. After doing much resear
 <vertex x="20.32" y="0"/>
 <vertex x="20.32" y="38.1"/>
 </polygon>
-<polygon width="0.002540625" layer="1" orphans="yes" thermals="no">
+<polygon width="0.0254" layer="1" orphans="yes" thermals="no">
 <vertex x="12.065" y="30.226"/>
 <vertex x="12.065" y="30.6578"/>
 <vertex x="12.1031" y="30.6578"/>
@@ -2800,7 +2800,7 @@ These rules have been curated by SparkFuns DFM commitee. After doing much resear
 <wire x1="12.3825" y1="33.3375" x2="12.54125" y2="33.17875" width="0.3048" layer="1"/>
 <wire x1="12.54125" y1="33.17875" x2="12.54125" y2="32.250625" width="0.3048" layer="1"/>
 <wire x1="16.367125" y1="32.258" x2="15.53845" y2="33.086675" width="0.8128" layer="1"/>
-<polygon width="0.002540625" layer="1" thermals="no">
+<polygon width="0.0254" layer="1" thermals="no">
 <vertex x="12.3317" y="33.4899"/>
 <vertex x="13.5001" y="33.4899"/>
 <vertex x="13.5001" y="32.8168"/>
@@ -3085,7 +3085,7 @@ These rules have been curated by SparkFuns DFM commitee. After doing much resear
 <signal name="AOUT1">
 <contactref element="U2" pad="2"/>
 <contactref element="J1" pad="1"/>
-<polygon width="0.002540625" layer="1" thermals="no">
+<polygon width="0.0254" layer="1" thermals="no">
 <vertex x="12.6619" y="36.8554"/>
 <vertex x="13.5763" y="37.7698"/>
 <vertex x="14.3637" y="37.7698"/>
@@ -3105,7 +3105,7 @@ These rules have been curated by SparkFuns DFM commitee. After doing much resear
 <signal name="AOUT2">
 <contactref element="U2" pad="3"/>
 <contactref element="J1" pad="2"/>
-<polygon width="0.002540625" layer="1" thermals="no">
+<polygon width="0.0254" layer="1" thermals="no">
 <vertex x="11.0363" y="37.7698"/>
 <vertex x="10.2997" y="37.0332"/>
 <vertex x="10.2997" y="35.306"/>
@@ -3123,7 +3123,7 @@ These rules have been curated by SparkFuns DFM commitee. After doing much resear
 <signal name="BOUT1">
 <contactref element="U2" pad="4"/>
 <contactref element="J3" pad="1"/>
-<polygon width="0.002540625" layer="1" thermals="no">
+<polygon width="0.0254" layer="1" thermals="no">
 <vertex x="9.2837" y="37.7698"/>
 <vertex x="10.0203" y="37.0332"/>
 <vertex x="10.0203" y="35.306"/>
@@ -3141,7 +3141,7 @@ These rules have been curated by SparkFuns DFM commitee. After doing much resear
 <signal name="BOUT2">
 <contactref element="U2" pad="5"/>
 <contactref element="J3" pad="2"/>
-<polygon width="0.002540625" layer="1" thermals="no">
+<polygon width="0.0254" layer="1" thermals="no">
 <vertex x="7.6581" y="36.8554"/>
 <vertex x="6.7437" y="37.7698"/>
 <vertex x="5.9563" y="37.7698"/>
@@ -3278,6 +3278,12 @@ These rules have been curated by SparkFuns DFM commitee. After doing much resear
 <approved hash="3,1,994699469b441b44"/>
 <approved hash="3,1,0b5e8b5e895c895c"/>
 <approved hash="3,1,fca0fca0fea2fea2"/>
+<approved hash="3,1,9a303d023d609a52"/>
+<approved hash="3,1,70e90a1b0ae8701a"/>
+<approved hash="3,1,0d06387834730905"/>
+<approved hash="3,1,4602d4705870e202"/>
+<approved hash="3,1,82022870b4700602"/>
+<approved hash="3,1,190a14f408f73d01"/>
 </errors>
 </board>
 </drawing>
