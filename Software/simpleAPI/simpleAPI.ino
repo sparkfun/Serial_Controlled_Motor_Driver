@@ -260,40 +260,40 @@ void loop()
 
 				case 2:
 				Serial.println("Running A forward.");
-				for( int i = 0x00; i <= 0xFF; i = i + 0x20)
+				for( int i = 0x00; i <= 0xFF; i = i + 0x08)
 				{
 					myMotorDriver.setDrive(0,1,i);
-					delay(500);
+					delay(100);
 				}
 				break;
 				
 				
 				case 3:
 				Serial.println("Running A backward.");
-				for( int i = 0x00; i <= 0xFF; i = i + 0x20)
+				for( int i = 0x00; i <= 0xFF; i = i + 0x08)
 				{
 					myMotorDriver.setDrive(0,0,i);
-					delay(500);
+					delay(100);
 				}
 				break;
 
 
 				case 4:
 				Serial.println("Running B forward.");
-				for( int i = 0x00; i <= 0xFF; i = i + 0x20)
+				for( int i = 0x00; i <= 0xFF; i = i + 0x08)
 				{
 					myMotorDriver.setDrive(1,1,i);
-					delay(500);
+					delay(100);
 				}
 				break;
 
 				
 				case 5:
 				Serial.println("Running B backward.");
-				for( int i = 0x00; i <= 0xFF; i = i + 0x20)
+				for( int i = 0x00; i <= 0xFF; i = i + 0x08)
 				{
 					myMotorDriver.setDrive(1,0,i);
-					delay(500);
+					delay(100);
 				}
 				break;
 				

@@ -1,0 +1,29 @@
+## Mini .gitignore for psoc projects
+
+#############
+## Cypress Creator
+#############
+
+
+.DS_Store
+
+ComponentUpdateLog.txt
+codegentemp/
+Export/
+Generated_Source/
+
+*.cywrk.*
+*.cyprj.*
+*.cycdx
+*.cyfit
+*.rpt
+*.svd
+*.html
+*.uvopt
+*.uvproj
+*_timing.html
+*.cydsn/codegentemp
+*.cydsn/DP8051
+*.cydsn/Generated_Source
+
+
