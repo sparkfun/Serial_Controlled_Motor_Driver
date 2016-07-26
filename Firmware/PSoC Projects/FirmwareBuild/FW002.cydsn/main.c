@@ -12,7 +12,9 @@
 #include <project.h>
 #include "devRegisters.h"
 
-uint8_t debugLED = 0;
+
+//To use software to define the config bits, uncomment this #define and set value below.
+#define USE_SW_CONFIG_BITS
 
 volatile uint8_t CONFIG_BITS = 0x3;
     //0 -- UART
@@ -20,16 +22,17 @@ volatile uint8_t CONFIG_BITS = 0x3;
     //2 -- I2C slave on slave port
     //3 -- I2C @ 0x58
 
+    
+
+    
 /*******************************************************************************
 * Define Interrupt service routine and allocate an vector to the Interrupt
 ********************************************************************************/
-//CY_ISR(InterruptHandler)
+//CY_ISR(debugLedInterrupt)
 //{
-//	/* Clear TC Inerrupt */
-//   	PWM_1_ClearInterrupt(PWM_1_INTR_MASK_TC);
-//    
-//	/* Increment the Compare for LED brighrness decrease */ 
-//    PWM_1_WriteCompare(10000u);
+//    ShiftReg_1_Stop();
+//    ShiftReg_1_WriteRegValue(0x000C0055);
+//    ShiftReg_1_Start();
 //}
 
 
@@ -215,22 +218,44 @@ cystatus SetExpansionScbConfiguration(void)
     return (status);
 }
 
+uint8_t lastDiagLeds = 0;
+void setDiagLeds(uint8_t input)
+{
+    if(input == lastDiagLeds) return;
+    lastDiagLeds = input;
+    int i;
+    uint32_t outputPattern = 0;
+    for(i = 0; i < input; i++)
+    {
+        outputPattern = outputPattern << 2;
+        outputPattern |= 1;
+    }
+    ShiftReg_1_Stop();
+    ShiftReg_1_WriteRegValue(outputPattern);
+    ShiftReg_1_Start();
+
+}
+
 int main()
 {
-   
-    /* Place your initialization/startup code here (e.g. MyInst_Start()) */
-    LED_R_Write(1);
+    DIAG_LED_CLK_Start();
+    setDiagLeds(4);
+    CyDelay(500u);
+    //isr_1_StartEx(debugLedInterrupt);
+    //CyGlobalIntEnable;
+    
     MODE_Write(1);
     A_EN_Write(1);
     B_EN_Write(1);
     
     initDevRegisters();  //Prep device registers
-    writeDevRegister(0x03, CONFIG_BITS);
+    writeDevRegister(0x03, CONFIG_BITS_REG_Read() ^ 0x0F);    // Read HW config bits
     writeDevRegister(0x10, 0x80);
     writeDevRegister(0x11, 0x80);
     
-    
-    //P2_4_Write(1);
+#ifndef USE_SW_CONFIG_BITS
+    CONFIG_BITS = readDevRegister(0x03); //Get the bits value
+#endif
 
     //stuff from example TCPWM
        
@@ -377,6 +402,8 @@ int main()
             /* Write complete: parse command packet */
             if (0u != (USER_PORT_I2CSlaveStatus() & USER_PORT_I2C_SSTAT_WR_CMPLT))
             {
+                setDiagLeds(2);
+                
                 /* Check packet length */
                 if (USER_PORT_I2CSlaveGetWriteBufSize() == 2)
                 {
@@ -392,7 +419,6 @@ int main()
                 }
             USER_PORT_I2CSlaveClearWriteStatus();
             USER_PORT_I2CSlaveClearWriteBuf();
-                
             }
             //always expose buffer?
             /*expose buffer to master */
@@ -400,12 +426,14 @@ int main()
     
             if (0u != (USER_PORT_I2CSlaveStatus() & USER_PORT_I2C_SSTAT_RD_CMPLT))
             {
-                LED_R_Write(LED_R_Read()^0x01);
+                setDiagLeds(3);
                 /* Clear slave read buffer and status */
                 USER_PORT_I2CSlaveClearReadBuf();
                 (void) USER_PORT_I2CSlaveClearReadStatus();
             }
+            
         }
+        setDiagLeds(1);
         
         //Do slave
         {
