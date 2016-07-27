@@ -22,7 +22,18 @@ volatile uint8_t CONFIG_BITS = 0x3;
     //2 -- I2C slave on slave port
     //3 -- I2C @ 0x58
 
-    
+#define ID_WORD 0xA9 //Device ID to be programmed into memory for reads
+
+#define SCMD_STATUS          0x00
+#define SCMD_ID              0x01
+#define SCMD_ADDRESS         0x02
+#define SCMD_CONFIG_BITS     0x03
+#define SCMD_I2C_FAULTS      0x04
+#define SCMD_I2C_RD_ERR      0x05
+#define SCMD_I2C_WR_ERR      0x06
+#define SCMD_SPI_FAULTS      0x07
+#define SCMD_UART_FAULTS     0x08
+#define SCMD_UPORT_TIME	     0x09  
 
     
 /*******************************************************************************
@@ -249,15 +260,19 @@ int main()
     B_EN_Write(1);
     
     initDevRegisters();  //Prep device registers
-    writeDevRegister(0x03, CONFIG_BITS_REG_Read() ^ 0x0F);    // Read HW config bits
+    writeDevRegister(SCMD_STATUS, 0x1A);
+    writeDevRegister(SCMD_ID, ID_WORD);
+    writeDevRegister(SCMD_CONFIG_BITS, CONFIG_BITS_REG_Read() ^ 0x0F);    // Read HW config bits
     writeDevRegister(0x10, 0x80);
     writeDevRegister(0x11, 0x80);
-    
 #ifndef USE_SW_CONFIG_BITS
-    CONFIG_BITS = readDevRegister(0x03); //Get the bits value
+    CONFIG_BITS = readDevRegister(SCMD_CONFIG_BITS); //Get the bits value
 #endif
 
-    //stuff from example TCPWM
+    //Debug timer
+    DEBUG_CLK_Start();
+    DEBUG_TIMER_Start();
+    
        
     CyDelay(50u);
     
@@ -399,6 +414,9 @@ int main()
         }
         if(CONFIG_BITS == 3) //I2C 0x58 
         {
+            DEBUG_TIMER_Stop();
+            DEBUG_TIMER_WriteCounter(0);
+            DEBUG_TIMER_Start();
             /* Write complete: parse command packet */
             if (0u != (USER_PORT_I2CSlaveStatus() & USER_PORT_I2C_SSTAT_WR_CMPLT))
             {
@@ -417,21 +435,27 @@ int main()
                     //for now, limit address
                     addressPointer = bufferRx[0];
                 }
-            USER_PORT_I2CSlaveClearWriteStatus();
+            //Count errors while clearing the status
+            if( USER_PORT_I2CSlaveClearWriteStatus() & USER_PORT_I2C_SSTAT_WR_ERR ) incrementDevRegister( SCMD_I2C_WR_ERR );
+            
             USER_PORT_I2CSlaveClearWriteBuf();
             }
             //always expose buffer?
             /*expose buffer to master */
             bufferTx[0] = readDevRegister(addressPointer);
-    
             if (0u != (USER_PORT_I2CSlaveStatus() & USER_PORT_I2C_SSTAT_RD_CMPLT))
             {
                 setDiagLeds(3);
                 /* Clear slave read buffer and status */
                 USER_PORT_I2CSlaveClearReadBuf();
-                (void) USER_PORT_I2CSlaveClearReadStatus();
+                //Count errors while clearing the status
+                if( USER_PORT_I2CSlaveClearReadStatus() & USER_PORT_I2C_SSTAT_RD_ERR ) incrementDevRegister( SCMD_I2C_RD_ERR );
             }
-            
+            uint32_t tempValue = DEBUG_TIMER_ReadCounter();
+            if(tempValue > 0xFF) tempValue = 0xFF;
+            //do 'peak hold' on SCMD_UPORT_TIME -- write 0 to reset
+            if(tempValue > readDevRegister(SCMD_UPORT_TIME)) writeDevRegister(SCMD_UPORT_TIME, tempValue);
+
         }
         setDiagLeds(1);
         

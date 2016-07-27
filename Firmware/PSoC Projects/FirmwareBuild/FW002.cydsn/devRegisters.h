@@ -5,5 +5,6 @@
 void initDevRegisters( void );
 uint8_t readDevRegister( uint8_t );
 void writeDevRegister( uint8_t, uint8_t );
+void incrementDevRegister( uint8_t );
 
 #endif
