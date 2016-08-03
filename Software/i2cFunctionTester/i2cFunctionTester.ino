@@ -8,8 +8,8 @@
 #include "HOS_char.h"
 
 //Globals
-uint16_t maxTimer = 60000;
-uint16_t maxInterval = 2000;
+uint16_t maxTimer = 40000;
+uint16_t maxInterval = 12000;
 
 #define LEDPIN 13
 #include "timerModule.h"
@@ -135,7 +135,8 @@ void loop()
 	{
 		//User code
 		digitalWrite( LEDPIN, digitalRead( LEDPIN ) ^ 0x01 );
-		Serial.println("OOoo..   Debug Interval Timer   ..ooOO");
+		Serial.print(msTicks);
+		Serial.println(" OOoo..   Debug Interval Timer   ..ooOO");
 	}
 	//**Check for new characters******************//  
 	if(serialReadTimer.flagStatus() == PENDING)
@@ -314,6 +315,32 @@ void loop()
 				}	
 				break;
 				
+				case 6:
+				Serial.println("MEMORY DUMP:");
+				for( int i = 0; i < 0x20; i++)
+				{
+					Serial.print("0x");
+					Serial.print(i, HEX);
+					Wire.beginTransmission(0x58);
+					Wire.write(i);
+					if( Wire.endTransmission() != 0 )
+					{
+						//error thing
+					}	
+					delay(10);
+
+					Wire.beginTransmission(0x58);
+					Wire.requestFrom(0x58, 1);
+					while ( Wire.available() ) // slave may send less than requested
+					{
+						result = Wire.read(); // receive a byte as a proper uint8_t
+					}
+					Serial.print(": 0x");
+					Serial.println(result, HEX);
+					delay(10);
+				}
+				break;
+
 				
 				default:
 				break;
@@ -334,6 +361,7 @@ void serviceMS(void)
 #else
 #endif
 {
+	msTicksLocked = 1;
 	uint32_t returnVar = 0;
 	if( msTicks >= ( maxTimer + maxInterval ) )
 	{

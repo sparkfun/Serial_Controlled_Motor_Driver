@@ -33,18 +33,17 @@ volatile uint8_t CONFIG_BITS = 0x3;
 #define SCMD_I2C_WR_ERR      0x06
 #define SCMD_SPI_FAULTS      0x07
 #define SCMD_UART_FAULTS     0x08
-#define SCMD_UPORT_TIME	     0x09  
+#define SCMD_UPORT_TIME	     0x09
 
-    
-/*******************************************************************************
-* Define Interrupt service routine and allocate an vector to the Interrupt
-********************************************************************************/
-//CY_ISR(debugLedInterrupt)
-//{
-//    ShiftReg_1_Stop();
-//    ShiftReg_1_WriteRegValue(0x000C0055);
-//    ShiftReg_1_Start();
-//}
+#define SCMD_SLAVE_ID        0x10
+
+#define SCMD_FSAFE_TIME      0x18
+#define SCMD_FSAFE_FAULTS    0x19
+
+#define SCMD_MA_DRIVE        0x20
+#define SCMD_MB_DRIVE        0x21
+
+
 
 
 #define USER_PORT_BUFFER_SIZE (10u)
@@ -136,9 +135,26 @@ const USER_PORT_SPI_INIT_STRUCT configSPI =
 uint8 expansionBufferRx[USER_PORT_BUFFER_SIZE + 1u];/* RX software buffer requires one extra entry for correct operation in UART mode */
 uint8 expansionBufferTx[USER_PORT_BUFFER_SIZE]; /* TX software buffer */
 
+//***Known good config for slave***//
+//const EXPANSION_PORT_I2C_INIT_STRUCT expansionConfigI2C =
+//{
+//    USER_PORT_I2C_MODE_SLAVE, /* mode: slave */
+//    0u, /* oversampleLow: N/A for slave, SCBCLK determines maximum data rate*/
+//    0u, /* oversampleHigh: N/A for slave, SCBCLK determines maximum data rate*/
+//    0u, /* enableMedianFilter: N/A since SCB v2.0 */
+//    0x58u, /* slaveAddr: slave address */
+//    //0x2Cu,
+//    0xFEu, /* slaveAddrMask: signle slave address */
+//    0u, /* acceptAddr: disable */
+//    0u, /* enableWake: disable */
+//    0u, /* enableByteMode: disable */
+//    100u /* dataRate: 100 kbps */
+//};
+
+//***Known good config for slave***//
 const EXPANSION_PORT_I2C_INIT_STRUCT expansionConfigI2C =
 {
-    USER_PORT_I2C_MODE_SLAVE, /* mode: slave */
+    USER_PORT_I2C_MODE_MASTER, /* mode: master */
     0u, /* oversampleLow: N/A for slave, SCBCLK determines maximum data rate*/
     0u, /* oversampleHigh: N/A for slave, SCBCLK determines maximum data rate*/
     0u, /* enableMedianFilter: N/A since SCB v2.0 */
@@ -150,7 +166,6 @@ const EXPANSION_PORT_I2C_INIT_STRUCT expansionConfigI2C =
     0u, /* enableByteMode: disable */
     100u /* dataRate: 100 kbps */
 };
-
 
 
 /* The clock divider value written into the register has to be one less from calculated */
@@ -213,6 +228,24 @@ cystatus SetScbConfiguration(uint32 opMode)
     return (status);
 }
 
+// ***Known good config for slave*** //
+//cystatus SetExpansionScbConfiguration(void)
+//{
+//    cystatus status = CYRET_SUCCESS;
+//    EXPANSION_PORT_Stop(); /* Disable component before configuration change */
+//    /* Change clock divider */
+//    EXPANSION_SCBCLK_Stop();
+//    EXPANSION_SCBCLK_SetFractionalDividerRegister(SCBCLK_I2C_DIVIDER, 0u);
+//    EXPANSION_SCBCLK_Start();
+//    /* Configure to I2C slave operation */
+//    EXPANSION_PORT_I2CSlaveInitReadBuf (expansionBufferTx, USER_PORT_BUFFER_SIZE);
+//    EXPANSION_PORT_I2CSlaveInitWriteBuf(expansionBufferRx, USER_PORT_BUFFER_SIZE);
+//    EXPANSION_PORT_I2CInit(&expansionConfigI2C);
+//    EXPANSION_PORT_Start(); /* Enable component after configuration change */
+//    return (status);
+//}
+
+//Expansion port config
 cystatus SetExpansionScbConfiguration(void)
 {
     cystatus status = CYRET_SUCCESS;
@@ -228,6 +261,7 @@ cystatus SetExpansionScbConfiguration(void)
     EXPANSION_PORT_Start(); /* Enable component after configuration change */
     return (status);
 }
+
 
 uint8_t lastDiagLeds = 0;
 void setDiagLeds(uint8_t input)
@@ -247,32 +281,117 @@ void setDiagLeds(uint8_t input)
 
 }
 
+uint8_t errorLevelMemory[8] = {0,0,0,0,0,0,0,0}; //put flash codes within
+
+void sendDiagMessage( void ) //send error level
+{
+    int i;
+    for(i = 7; i >= 0; i--)
+    {
+        if(errorLevelMemory[i])//message persists
+        {
+            setDiagLeds(errorLevelMemory[i]);
+            return;
+        }
+    }
+}
+
+void setDiagMessage( uint8_t errorLevel, uint8_t message ) //send error level
+{
+    errorLevelMemory[errorLevel] = message;
+    sendDiagMessage();
+}
+
+void clearDiagMessage( uint8_t errorLevel ) //send error level
+{
+    errorLevelMemory[errorLevel] = 0;
+    sendDiagMessage();
+}
+
+/*******************************************************************************
+* Define Interrupt service routine and allocate an vector to the Interrupt
+********************************************************************************/
+CY_ISR(FSAFE_TIMER_Interrupt)
+{
+	/* Clear TC Inerrupt */
+   	FSAFE_TIMER_ClearInterrupt(FSAFE_TIMER_INTR_MASK_CC_MATCH);
+    uint16_t tempValue = readDevRegister(SCMD_FSAFE_FAULTS);
+    if( tempValue < 255)
+    {
+        writeDevRegister( SCMD_FSAFE_FAULTS, tempValue + 1 );
+    }
+
+    //Take remedial actions
+    //  Stop the motors
+    writeDevRegister( SCMD_MA_DRIVE, 0x80 );
+    writeDevRegister( SCMD_MB_DRIVE, 0x80 );
+    //  Reconfigure?  Try and recover the bus?
+    
+    //  Tell someone
+    setDiagMessage(7,8);
+
+    
+    //reset the counter
+    FSAFE_TIMER_Stop();
+    FSAFE_TIMER_WriteCounter(0);
+    FSAFE_TIMER_Start();
+}
+
+uint8 ReadSlaveData( uint8_t address )
+{
+    uint8  buffer[10];
+
+    (void) EXPANSION_PORT_I2CMasterReadBuf(address, buffer, 1, EXPANSION_PORT_I2C_MODE_COMPLETE_XFER);
+
+    /* Waits until master complete read transfer */
+    while (0u == (EXPANSION_PORT_I2CMasterStatus() & EXPANSION_PORT_I2C_MSTAT_RD_CMPLT))
+    {
+    }
+
+    /* Displays transfer status */
+    if (0u == (EXPANSION_PORT_I2C_MSTAT_ERR_XFER & EXPANSION_PORT_I2CMasterStatus()))
+    {
+        /* Check packet structure */
+        if ((EXPANSION_PORT_I2CMasterGetReadBufSize() == 1 ))
+        {
+        }
+    }
+
+    (void) EXPANSION_PORT_I2CMasterClearStatus();
+
+    return buffer[0];
+}
+
 int main()
 {
+    initDevRegisters();  //Prep device registers
+    writeDevRegister(SCMD_STATUS, 0x1A);
+    writeDevRegister(SCMD_ID, ID_WORD);
+    writeDevRegister(SCMD_CONFIG_BITS, CONFIG_BITS_REG_Read() ^ 0x0F);    // Read HW config bits
+    writeDevRegister( SCMD_FSAFE_TIME, 0 );
+    writeDevRegister(SCMD_MA_DRIVE, 0x80);
+    writeDevRegister(SCMD_MB_DRIVE, 0x80);
+#ifndef USE_SW_CONFIG_BITS
+    CONFIG_BITS = readDevRegister(SCMD_CONFIG_BITS); //Get the bits value
+#endif
+
     DIAG_LED_CLK_Start();
-    setDiagLeds(4);
-    CyDelay(500u);
-    //isr_1_StartEx(debugLedInterrupt);
-    //CyGlobalIntEnable;
+    KHZ_CLK_Start();
+    setDiagMessage(0, CONFIG_BITS);
+    CyDelay(1300u);
     
     MODE_Write(1);
     A_EN_Write(1);
     B_EN_Write(1);
     
-    initDevRegisters();  //Prep device registers
-    writeDevRegister(SCMD_STATUS, 0x1A);
-    writeDevRegister(SCMD_ID, ID_WORD);
-    writeDevRegister(SCMD_CONFIG_BITS, CONFIG_BITS_REG_Read() ^ 0x0F);    // Read HW config bits
-    writeDevRegister(0x10, 0x80);
-    writeDevRegister(0x11, 0x80);
-#ifndef USE_SW_CONFIG_BITS
-    CONFIG_BITS = readDevRegister(SCMD_CONFIG_BITS); //Get the bits value
-#endif
-
     //Debug timer
     DEBUG_CLK_Start();
     DEBUG_TIMER_Start();
     
+    //Failsafe timer
+    FSAFE_ISR_StartEx(FSAFE_TIMER_Interrupt);
+    FSAFE_CLK_Start();
+    FSAFE_TIMER_Start();
        
     CyDelay(50u);
     
@@ -316,7 +435,8 @@ int main()
     uint8_t rxBufferPtr = 0;
 
     char rxBuffer[20];
-    
+
+    setDiagMessage(1, 1);    
     while(1)
     {
         if(CONFIG_BITS == 0) //UART
@@ -420,7 +540,16 @@ int main()
             /* Write complete: parse command packet */
             if (0u != (USER_PORT_I2CSlaveStatus() & USER_PORT_I2C_SSTAT_WR_CMPLT))
             {
-                setDiagLeds(2);
+                LED_PULSE_Write(1);
+                if(readDevRegister(SCMD_FSAFE_TIME)) //Active, clear watchdog
+                {
+                    //reset the counter
+                    FSAFE_TIMER_Stop();
+                    FSAFE_TIMER_WriteCounter(0);
+                    FSAFE_TIMER_Start();
+                    //Clear error message
+                    clearDiagMessage(7);
+                }
                 
                 /* Check packet length */
                 if (USER_PORT_I2CSlaveGetWriteBufSize() == 2)
@@ -435,17 +564,17 @@ int main()
                     //for now, limit address
                     addressPointer = bufferRx[0];
                 }
-            //Count errors while clearing the status
-            if( USER_PORT_I2CSlaveClearWriteStatus() & USER_PORT_I2C_SSTAT_WR_ERR ) incrementDevRegister( SCMD_I2C_WR_ERR );
-            
-            USER_PORT_I2CSlaveClearWriteBuf();
+                //Count errors while clearing the status
+                if( USER_PORT_I2CSlaveClearWriteStatus() & USER_PORT_I2C_SSTAT_WR_ERR ) incrementDevRegister( SCMD_I2C_WR_ERR );
+                
+                USER_PORT_I2CSlaveClearWriteBuf();
+                LED_PULSE_Write(0);
             }
             //always expose buffer?
             /*expose buffer to master */
             bufferTx[0] = readDevRegister(addressPointer);
             if (0u != (USER_PORT_I2CSlaveStatus() & USER_PORT_I2C_SSTAT_RD_CMPLT))
             {
-                setDiagLeds(3);
                 /* Clear slave read buffer and status */
                 USER_PORT_I2CSlaveClearReadBuf();
                 //Count errors while clearing the status
@@ -456,50 +585,72 @@ int main()
             //do 'peak hold' on SCMD_UPORT_TIME -- write 0 to reset
             if(tempValue > readDevRegister(SCMD_UPORT_TIME)) writeDevRegister(SCMD_UPORT_TIME, tempValue);
 
+            //Get slave data
+            //writeDevRegister(SCMD_SLAVE_ID, ReadSlaveData(0x58));
+            
+            
         }
-        setDiagLeds(1);
         
-        //Do slave
+//        //Do slave
+//        {
+//            /* Write complete: parse command packet */
+//            if (0u != (EXPANSION_PORT_I2CSlaveStatus() & EXPANSION_PORT_I2C_SSTAT_WR_CMPLT))
+//            {
+//                /* Check packet length */
+//                if (EXPANSION_PORT_I2CSlaveGetWriteBufSize() == 2)
+//                {
+//                    //we have a address and data to write
+//                    addressPointer = expansionBufferRx[0];
+//                    writeDevRegister(addressPointer, expansionBufferRx[1]);
+//                }
+//                if (EXPANSION_PORT_I2CSlaveGetWriteBufSize() == 1)
+//                {
+//                    //we have a address only, expose
+//                    //for now, limit address
+//                    addressPointer = expansionBufferRx[0];
+//                }
+//            EXPANSION_PORT_I2CSlaveClearWriteStatus();
+//            EXPANSION_PORT_I2CSlaveClearWriteBuf();
+//                
+//            }
+//            //always expose buffer?
+//            /*expose buffer to master */
+//            expansionBufferTx[0] = readDevRegister(addressPointer);
+//    
+//            if (0u != (EXPANSION_PORT_I2CSlaveStatus() & EXPANSION_PORT_I2C_SSTAT_RD_CMPLT))
+//            {
+//                LED_R_Write(LED_R_Read()^0x01);
+//                /* Clear slave read buffer and status */
+//                EXPANSION_PORT_I2CSlaveClearReadBuf();
+//                (void) EXPANSION_PORT_I2CSlaveClearReadStatus();
+//            }
+//
+//        }
+        //Get changes -- Here, check if any registers have a changed flag that need to be serviced
+        //  Check for change of failsafe time/enable register SCMD_FSAFE_TIME
+        if(getChangedStatus(SCMD_FSAFE_TIME))
         {
-            /* Write complete: parse command packet */
-            if (0u != (EXPANSION_PORT_I2CSlaveStatus() & EXPANSION_PORT_I2C_SSTAT_WR_CMPLT))
+            uint8_t tempValue = readDevRegister( SCMD_FSAFE_TIME );
+            if( tempValue )
             {
-                /* Check packet length */
-                if (EXPANSION_PORT_I2CSlaveGetWriteBufSize() == 2)
-                {
-                    //we have a address and data to write
-                    addressPointer = expansionBufferRx[0];
-                    writeDevRegister(addressPointer, expansionBufferRx[1]);
-                }
-                if (EXPANSION_PORT_I2CSlaveGetWriteBufSize() == 1)
-                {
-                    //we have a address only, expose
-                    //for now, limit address
-                    addressPointer = expansionBufferRx[0];
-                }
-            EXPANSION_PORT_I2CSlaveClearWriteStatus();
-            EXPANSION_PORT_I2CSlaveClearWriteBuf();
-                
+                //Set new time and restart
+                FSAFE_TIMER_Stop();
+                FSAFE_TIMER_WriteCounter(0);
+                FSAFE_TIMER_WriteCompare( tempValue );
+                FSAFE_TIMER_Start();
             }
-            //always expose buffer?
-            /*expose buffer to master */
-            expansionBufferTx[0] = readDevRegister(addressPointer);
-    
-            if (0u != (EXPANSION_PORT_I2CSlaveStatus() & EXPANSION_PORT_I2C_SSTAT_RD_CMPLT))
+            else
             {
-                LED_R_Write(LED_R_Read()^0x01);
-                /* Clear slave read buffer and status */
-                EXPANSION_PORT_I2CSlaveClearReadBuf();
-                (void) EXPANSION_PORT_I2CSlaveClearReadStatus();
+                //stop timer
+                FSAFE_TIMER_Stop();
             }
-
+            clearChangedStatus(SCMD_FSAFE_TIME);
         }
-        
         
         //Set outputs
         
-        PWM_1_WriteCompare(readDevRegister(0x10));
-        PWM_2_WriteCompare(readDevRegister(0x11));    
+        PWM_1_WriteCompare(readDevRegister(SCMD_MA_DRIVE));
+        PWM_2_WriteCompare(readDevRegister(SCMD_MB_DRIVE));  
         
     }//End of while loop
 
