@@ -15,6 +15,9 @@ uint16_t maxInterval = 12000;
 #include "timerModule.h"
 #include "stdint.h"
 
+//Set I2C address here
+#define TARGET_I2C_ADDRESS 0x5A
+
 //Not used by this sketch but dependant on one 
 #include "Wire.h"
 
@@ -235,13 +238,13 @@ void loop()
 			{
 				case 0:
 				Serial.println("Getting status register");
-				Wire.beginTransmission(0x58);
+				Wire.beginTransmission(TARGET_I2C_ADDRESS);
 				Wire.write(0x00);
 				if( Wire.endTransmission() != 0 )
 				{
 					//error thing
 				}	
-				Wire.requestFrom(0x58, 1);
+				Wire.requestFrom(TARGET_I2C_ADDRESS, 1);
 				while ( Wire.available() ) // slave may send less than requested
 				{
 					result = Wire.read(); // receive a byte as a proper uint8_t
@@ -253,13 +256,13 @@ void loop()
 				
 				case 1:
 				Serial.println("Getting ID register");
-				Wire.beginTransmission(0x58);
+				Wire.beginTransmission(TARGET_I2C_ADDRESS);
 				Wire.write(0x01);
 				if( Wire.endTransmission() != 0 )
 				{
 					//error thing
 				}	
-				Wire.requestFrom(0x58, 1);
+				Wire.requestFrom(TARGET_I2C_ADDRESS, 1);
 				while ( Wire.available() ) // slave may send less than requested
 				{
 					result = Wire.read(); // receive a byte as a proper uint8_t
@@ -272,7 +275,7 @@ void loop()
 				case 2:
 				Serial.print("Setting remote address: 0x");
 				Serial.println(userInputValue, HEX);
-				Wire.beginTransmission(0x58);
+				Wire.beginTransmission(TARGET_I2C_ADDRESS);
 				Wire.write(userInputValue);
 				if( Wire.endTransmission() != 0 )
 				{
@@ -283,8 +286,8 @@ void loop()
 				
 				case 3:
 				Serial.println("Getting remote value");
-				Wire.beginTransmission(0x58);
-				Wire.requestFrom(0x58, 1);
+				Wire.beginTransmission(TARGET_I2C_ADDRESS);
+				Wire.requestFrom(TARGET_I2C_ADDRESS, 1);
 				while ( Wire.available() ) // slave may send less than requested
 				{
 					result = Wire.read(); // receive a byte as a proper uint8_t
@@ -306,7 +309,7 @@ void loop()
 				Serial.print(localAddress, HEX);
 				Serial.print("to value: ");
 				Serial.print(userInputValue, HEX);
-				Wire.beginTransmission(0x58);
+				Wire.beginTransmission(TARGET_I2C_ADDRESS);
 				Wire.write(localAddress);
 				Wire.write(userInputValue);
 				if( Wire.endTransmission() != 0 )
@@ -321,23 +324,23 @@ void loop()
 				{
 					Serial.print("0x");
 					Serial.print(i, HEX);
-					Wire.beginTransmission(0x58);
+					Wire.beginTransmission(TARGET_I2C_ADDRESS);
 					Wire.write(i);
 					if( Wire.endTransmission() != 0 )
 					{
 						//error thing
 					}	
-					delay(10);
+					delay(50);
 
-					Wire.beginTransmission(0x58);
-					Wire.requestFrom(0x58, 1);
+					Wire.beginTransmission(TARGET_I2C_ADDRESS);
+					Wire.requestFrom(TARGET_I2C_ADDRESS, 1);
 					while ( Wire.available() ) // slave may send less than requested
 					{
 						result = Wire.read(); // receive a byte as a proper uint8_t
 					}
 					Serial.print(": 0x");
 					Serial.println(result, HEX);
-					delay(10);
+					delay(50);
 				}
 				break;
 
