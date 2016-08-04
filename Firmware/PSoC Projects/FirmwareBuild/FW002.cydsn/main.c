@@ -34,6 +34,7 @@ volatile uint8_t CONFIG_BITS = 0x3;
 #define SCMD_SPI_FAULTS      0x07
 #define SCMD_UART_FAULTS     0x08
 #define SCMD_UPORT_TIME	     0x09
+#define SCMD_SLV_POLL_CNT    0x0A
 
 #define SCMD_SLAVE_ID        0x10
 #define SCMD_REM_ADDR        0x11
@@ -47,7 +48,10 @@ volatile uint8_t CONFIG_BITS = 0x3;
 
 #define SCMD_MA_DRIVE        0x20
 #define SCMD_MB_DRIVE        0x21
-
+#define SCMD_S1A_DRIVE       0x22
+#define SCMD_S1B_DRIVE       0x23
+#define SCMD_S2A_DRIVE       0x24
+#define SCMD_S2B_DRIVE       0x25
 
 
 
@@ -316,11 +320,27 @@ void clearDiagMessage( uint8_t errorLevel ) //send error level
     sendDiagMessage();
 }
 
+#define SCMDSlaveIdle 0
+#define SCMDSlaveWaitForSync 1
+#define SCMDSlaveWaitForAddr 2
+#define SCMDSlaveDone 3
+
+uint8_t slaveState = SCMDSlaveIdle;
+
+#define SCMDMasterIdle 0
+#define SCMDMasterPollDefault 1
+#define SCMDMasterSendAddr 2
+#define SCMDMasterDone 3
+
+uint8_t masterState = SCMDMasterIdle;
+
+uint8_t slaveAddrEnumerator = 0x50;
 /*******************************************************************************
 * Define Interrupt service routine and allocate an vector to the Interrupt
 ********************************************************************************/
 CY_ISR(FSAFE_TIMER_Interrupt)
 {
+    
 	/* Clear TC Inerrupt */
    	FSAFE_TIMER_ClearInterrupt(FSAFE_TIMER_INTR_MASK_CC_MATCH);
     uint16_t tempValue = readDevRegister(SCMD_FSAFE_FAULTS);
@@ -378,7 +398,9 @@ uint8 ReadSlaveData( uint8_t address, uint8_t offset )
         }
     }
 
-    (void) EXPANSION_PORT_I2CMasterClearStatus();
+    EXPANSION_PORT_I2CMasterClearStatus();
+    EXPANSION_PORT_I2CMasterClearReadBuf();
+    EXPANSION_PORT_I2CMasterClearWriteBuf();
 
     return returnVar;
 }
@@ -398,7 +420,9 @@ uint8 WriteSlaveData( uint8_t address, uint8_t offset, uint8_t data )
     {
     }
 
-    //(void) EXPANSION_PORT_I2CMasterClearStatus();
+    EXPANSION_PORT_I2CMasterClearStatus();
+    EXPANSION_PORT_I2CMasterClearReadBuf();
+    EXPANSION_PORT_I2CMasterClearWriteBuf();
 
     return returnVar;
 }
@@ -409,11 +433,17 @@ int main()
     writeDevRegister(SCMD_STATUS, 0x1A);
     writeDevRegister(SCMD_ID, ID_WORD);
     writeDevRegister(SCMD_CONFIG_BITS, CONFIG_BITS_REG_Read() ^ 0x0F);    // Read HW config bits
-    writeDevRegister( SCMD_FSAFE_TIME, 0 );
+    writeDevRegister(SCMD_FSAFE_TIME, 0 );
     writeDevRegister(SCMD_MA_DRIVE, 0x80);
     writeDevRegister(SCMD_MB_DRIVE, 0x80);
     writeDevRegister(SCMD_REM_OFFSET, 0x01);
     writeDevRegister(SCMD_REM_ADDR, 0x4A);
+    writeDevRegister(SCMD_SLV_POLL_CNT, 0);
+    writeDevRegister(SCMD_SLAVE_ADDR, 0x10); // No one should ever ask for data on 0x10
+    writeDevRegister(SCMD_S1A_DRIVE, 0x81);
+    writeDevRegister(SCMD_S1B_DRIVE, 0x82);
+    writeDevRegister(SCMD_S2A_DRIVE, 0x83);
+    writeDevRegister(SCMD_S2B_DRIVE, 0x84);
 #ifndef USE_SW_CONFIG_BITS
     CONFIG_BITS = readDevRegister(SCMD_CONFIG_BITS); //Get the bits value
 #endif
@@ -421,7 +451,9 @@ int main()
     DIAG_LED_CLK_Start();
     KHZ_CLK_Start();
     setDiagMessage(0, CONFIG_BITS);
-    CyDelay(2500u);
+    CyDelay(1500u);
+    if(CONFIG_BITS != 0x02) CyDelay(1000u); //Give the slaves extra time
+    
     
     MODE_Write(1);
     A_EN_Write(1);
@@ -664,14 +696,96 @@ int main()
                 EXPANSION_PORT_I2CSlaveClearReadBuf();
                 (void) EXPANSION_PORT_I2CSlaveClearReadStatus();
             }
+            //Now do the states.
+            uint8_t slaveNextState = slaveState;
+            switch( slaveState )
+            {
+            case SCMDSlaveIdle:
+                slaveNextState = SCMDSlaveWaitForSync;
+                break;
+            case SCMDSlaveWaitForSync:
+                if( CONFIG_IN_Read() == 1 )
+                {
+                    //Become 4A
+                    writeDevRegister(SCMD_SLAVE_ADDR, 0x4A);
+                    slaveNextState = SCMDSlaveWaitForAddr;
+                }
+                break;
+            case SCMDSlaveWaitForAddr:
+                if( readDevRegister(SCMD_SLAVE_ADDR) != 0x4A )
+                {
+                    //New address has been programmed
+                    CONFIG_OUT_Write(1);
+                    slaveNextState = SCMDSlaveDone;
+                }
+                break;
+            case SCMDSlaveDone:
+                break;
+            default:
+                break;
+            }
+            slaveState = slaveNextState;
         }
         else
         {
             //Not slave, do master operations
+            //Now do the states.
+            uint8_t masterNextState = masterState;
+            switch( masterState )
+            {
+            case SCMDMasterIdle:
+                CONFIG_OUT_Write(1);
+                writeDevRegister(SCMD_SLV_POLL_CNT, 0);
+                //Target 0x4A, point to address slot, clear local data
+                writeDevRegister(SCMD_REM_ADDR, 0x4A);
+                writeDevRegister(SCMD_REM_OFFSET, SCMD_SLAVE_ADDR);
+                writeDevRegister(SCMD_REM_DATA_RD, 0);
+                masterNextState = SCMDMasterPollDefault;
+                break;
+            case SCMDMasterPollDefault:
+                //Poll address 0x4A
+                incrementDevRegister(SCMD_SLV_POLL_CNT);
+                if( readDevRegister(SCMD_REM_DATA_RD) == 0x4A )//if the address came back reflected
+                {
+                    writeDevRegister(SCMD_REM_DATA_WR, slaveAddrEnumerator);
+                    writeDevRegister(SCMD_REM_WRITE, 1);//flag the transfer
+                    slaveAddrEnumerator++;
+                    writeDevRegister(SCMD_SLV_POLL_CNT, 0);
+                    masterNextState = SCMDMasterPollDefault; //go back to this state
+                }
+                if( readDevRegister(SCMD_SLV_POLL_CNT) > 200 )
+                {
+                    //Must be done
+                    masterNextState = SCMDMasterDone;
+                }
+                CyDelay(10);
+                break;
+            case SCMDMasterDone:
+                break;
+            default:
+                break;
+            }
+            masterState = masterNextState;
             //Get data from next slave
             
-            writeDevRegister(SCMD_SLAVE_ID, ReadSlaveData(0x4A, 0x01));
-            writeDevRegister(SCMD_REM_DATA_RD, ReadSlaveData(readDevRegister(SCMD_REM_ADDR), readDevRegister(SCMD_REM_OFFSET)));
+            if( masterState != SCMDMasterDone )//Needs to get data for state machine
+            {
+                writeDevRegister(SCMD_SLAVE_ID, ReadSlaveData(readDevRegister(SCMD_REM_ADDR), SCMD_ID));
+                writeDevRegister(SCMD_REM_DATA_RD, ReadSlaveData(readDevRegister(SCMD_REM_ADDR), readDevRegister(SCMD_REM_OFFSET)));
+            }
+            if( masterState == SCMDMasterDone )//If the init is complete
+            {
+                int slaveAddri;
+                for (slaveAddri = 0x50; slaveAddri < (slaveAddrEnumerator - 1); slaveAddri++)
+                {
+                    //Write drive states out to slaves
+                    WriteSlaveData( slaveAddri, SCMD_MA_DRIVE, readDevRegister(SCMD_S1A_DRIVE + ((slaveAddri - 0x50) << 1 )) );
+                    //WriteSlaveData( slaveAddri, SCMD_MA_DRIVE, 0x8A );
+                    CyDelay(1);
+                    WriteSlaveData( slaveAddri, SCMD_MB_DRIVE, readDevRegister(SCMD_S1B_DRIVE + ((slaveAddri - 0x50) << 1 )) );
+                    CyDelay(1);
+                }
+            }
             CyDelay(10);
         }
 
@@ -703,7 +817,15 @@ int main()
             }
             writeDevRegister( SCMD_REM_WRITE, 0 );
             clearChangedStatus(SCMD_REM_WRITE);
-        }        
+        } 
+        if(getChangedStatus(SCMD_SLAVE_ADDR))
+        {
+            if( CONFIG_BITS == 0x02 ) //We are actually a slave
+            {
+                EXPANSION_PORT_I2CSlaveSetAddress(readDevRegister(SCMD_SLAVE_ADDR));
+            }
+            clearChangedStatus(SCMD_SLAVE_ADDR);
+        } 
         //Set outputs
         
         PWM_1_WriteCompare(readDevRegister(SCMD_MA_DRIVE));

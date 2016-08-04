@@ -307,8 +307,8 @@ void loop()
 				case 5:
 				Serial.print("Setting remote address: 0x");
 				Serial.print(localAddress, HEX);
-				Serial.print("to value: ");
-				Serial.print(userInputValue, HEX);
+				Serial.print(" to value: ");
+				Serial.println(userInputValue, HEX);
 				Wire.beginTransmission(TARGET_I2C_ADDRESS);
 				Wire.write(localAddress);
 				Wire.write(userInputValue);
@@ -343,8 +343,31 @@ void loop()
 					delay(50);
 				}
 				break;
+				case 7:
+				Serial.println("MEMORY DUMP:");
+				for( int i = 0x20; i < 0x30; i++)
+				{
+					Serial.print("0x");
+					Serial.print(i, HEX);
+					Wire.beginTransmission(TARGET_I2C_ADDRESS);
+					Wire.write(i);
+					if( Wire.endTransmission() != 0 )
+					{
+						//error thing
+					}	
+					delay(50);
 
-				
+					Wire.beginTransmission(TARGET_I2C_ADDRESS);
+					Wire.requestFrom(TARGET_I2C_ADDRESS, 1);
+					while ( Wire.available() ) // slave may send less than requested
+					{
+						result = Wire.read(); // receive a byte as a proper uint8_t
+					}
+					Serial.print(": 0x");
+					Serial.println(result, HEX);
+					delay(50);
+				}
+				break;
 				default:
 				break;
 			}
