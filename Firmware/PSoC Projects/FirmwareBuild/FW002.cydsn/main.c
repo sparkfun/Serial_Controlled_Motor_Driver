@@ -23,6 +23,8 @@ volatile uint8_t CONFIG_BITS = 0x3;
     //3 -- I2C @ 0x58
 
 #define ID_WORD 0xA9 //Device ID to be programmed into memory for reads
+#define START_SLAVE_ADDR 0x50//Start address of slaves
+#define MAX_SLAVE_ADDR 0x5F//Max address of slaves
 
 #define SCMD_STATUS          0x00
 #define SCMD_ID              0x01
@@ -35,6 +37,7 @@ volatile uint8_t CONFIG_BITS = 0x3;
 #define SCMD_UART_FAULTS     0x08
 #define SCMD_UPORT_TIME	     0x09
 #define SCMD_SLV_POLL_CNT    0x0A
+#define SCMD_SLV_TOP_ADDR    0x0B
 
 #define SCMD_SLAVE_ID        0x10
 #define SCMD_REM_ADDR        0x11
@@ -42,6 +45,7 @@ volatile uint8_t CONFIG_BITS = 0x3;
 #define SCMD_REM_DATA_WR     0x13
 #define SCMD_REM_DATA_RD     0x14
 #define SCMD_REM_WRITE       0x15
+#define SCMD_REM_READ        0x16
 
 #define SCMD_FSAFE_TIME      0x18
 #define SCMD_FSAFE_FAULTS    0x19
@@ -52,6 +56,34 @@ volatile uint8_t CONFIG_BITS = 0x3;
 #define SCMD_S1B_DRIVE       0x23
 #define SCMD_S2A_DRIVE       0x24
 #define SCMD_S2B_DRIVE       0x25
+#define SCMD_S3A_DRIVE       0x26
+#define SCMD_S3B_DRIVE       0x27
+#define SCMD_S4A_DRIVE       0x28
+#define SCMD_S4B_DRIVE       0x29
+#define SCMD_S5A_DRIVE       0x2A
+#define SCMD_S5B_DRIVE       0x2B
+#define SCMD_S6A_DRIVE       0x2C
+#define SCMD_S6B_DRIVE       0x2D
+#define SCMD_S7A_DRIVE       0x2E
+#define SCMD_S7B_DRIVE       0x2F
+#define SCMD_S8A_DRIVE       0x30
+#define SCMD_S8B_DRIVE       0x31
+#define SCMD_S9A_DRIVE       0x32
+#define SCMD_S9B_DRIVE       0x33
+#define SCMD_S10A_DRIVE       0x34
+#define SCMD_S10B_DRIVE       0x35
+#define SCMD_S11A_DRIVE       0x36
+#define SCMD_S11B_DRIVE       0x37
+#define SCMD_S12A_DRIVE       0x38
+#define SCMD_S12B_DRIVE       0x39
+#define SCMD_S13A_DRIVE       0x3A
+#define SCMD_S13B_DRIVE       0x3B
+#define SCMD_S14A_DRIVE       0x3C
+#define SCMD_S14B_DRIVE       0x3D
+#define SCMD_S15A_DRIVE       0x3E
+#define SCMD_S15B_DRIVE       0x3F
+#define SCMD_S16A_DRIVE       0x40
+#define SCMD_S16B_DRIVE       0x41
 
 
 
@@ -178,8 +210,9 @@ const EXPANSION_PORT_I2C_INIT_STRUCT expansionConfigI2CMaster =
 
 
 /* The clock divider value written into the register has to be one less from calculated */
-#define SCBCLK_I2C_DIVIDER (14u) /* I2C Slave: 100 kbps Required SCBCLK = 1.6 MHz, Div = 15 */
-#define SCBCLK_UART_DIVIDER (12u) /* UART: 115200 kbps with OVS = 16. Required SCBCLK = 1.846 MHz, Div = 13 */
+#define SCBCLK_I2C_DIVIDER (14u) // I2C Slave: 100 kbps Required SCBCLK = 1.6 MHz, Div = 15  ----- good for 100kHZ
+//#define SCBCLK_I2C_DIVIDER (4u) // I2C Slave: 100 kbps Required SCBCLK = 1.6 MHz, Div = 15  ----- Kind of ok for 400kHZ
+#define SCBCLK_UART_DIVIDER (12u) // UART: 115200 kbps with OVS = 16. Required SCBCLK = 1.846 MHz, Div = 13
 #define SCBCLK_SPI_DIVIDER (1u) //Max for now -- Does this even matter?
 
 /* Operation mode: I2C slave or UART */
@@ -334,7 +367,7 @@ uint8_t slaveState = SCMDSlaveIdle;
 
 uint8_t masterState = SCMDMasterIdle;
 
-uint8_t slaveAddrEnumerator = 0x50;
+uint8_t slaveAddrEnumerator = START_SLAVE_ADDR;
 /*******************************************************************************
 * Define Interrupt service routine and allocate an vector to the Interrupt
 ********************************************************************************/
@@ -440,10 +473,41 @@ int main()
     writeDevRegister(SCMD_REM_ADDR, 0x4A);
     writeDevRegister(SCMD_SLV_POLL_CNT, 0);
     writeDevRegister(SCMD_SLAVE_ADDR, 0x10); // No one should ever ask for data on 0x10
-    writeDevRegister(SCMD_S1A_DRIVE, 0x81);
-    writeDevRegister(SCMD_S1B_DRIVE, 0x82);
-    writeDevRegister(SCMD_S2A_DRIVE, 0x83);
-    writeDevRegister(SCMD_S2B_DRIVE, 0x84);
+    writeDevRegister(SCMD_S1A_DRIVE, 0x80);
+    writeDevRegister(SCMD_S1B_DRIVE, 0x80);
+    writeDevRegister(SCMD_S2A_DRIVE, 0x80);
+    writeDevRegister(SCMD_S2B_DRIVE, 0x80);
+    writeDevRegister(SCMD_S3A_DRIVE, 0x80);
+    writeDevRegister(SCMD_S3B_DRIVE, 0x80);
+    writeDevRegister(SCMD_S4A_DRIVE, 0x80);
+    writeDevRegister(SCMD_S4B_DRIVE, 0x80);
+    writeDevRegister(SCMD_S5A_DRIVE, 0x80);
+    writeDevRegister(SCMD_S5B_DRIVE, 0x80);
+    writeDevRegister(SCMD_S6A_DRIVE, 0x80);
+    writeDevRegister(SCMD_S6B_DRIVE, 0x80);
+    writeDevRegister(SCMD_S7A_DRIVE, 0x80);
+    writeDevRegister(SCMD_S7B_DRIVE, 0x80);
+    writeDevRegister(SCMD_S8A_DRIVE, 0x80);
+    writeDevRegister(SCMD_S8B_DRIVE, 0x80);
+    writeDevRegister(SCMD_S9A_DRIVE, 0x80);
+    writeDevRegister(SCMD_S9B_DRIVE, 0x80);
+    writeDevRegister(SCMD_S10A_DRIVE, 0x80);
+    writeDevRegister(SCMD_S10B_DRIVE, 0x80);
+    writeDevRegister(SCMD_S11A_DRIVE, 0x80);
+    writeDevRegister(SCMD_S11B_DRIVE, 0x80);
+    writeDevRegister(SCMD_S12A_DRIVE, 0x80);
+    writeDevRegister(SCMD_S12B_DRIVE, 0x80);
+    writeDevRegister(SCMD_S13A_DRIVE, 0x80);
+    writeDevRegister(SCMD_S13B_DRIVE, 0x80);
+    writeDevRegister(SCMD_S14A_DRIVE, 0x80);
+    writeDevRegister(SCMD_S14B_DRIVE, 0x80);
+    writeDevRegister(SCMD_S15A_DRIVE, 0x80);
+    writeDevRegister(SCMD_S15B_DRIVE, 0x80);
+    writeDevRegister(SCMD_S16A_DRIVE, 0x80);
+    writeDevRegister(SCMD_S16B_DRIVE, 0x80);
+    
+    
+    
 #ifndef USE_SW_CONFIG_BITS
     CONFIG_BITS = readDevRegister(SCMD_CONFIG_BITS); //Get the bits value
 #endif
@@ -451,6 +515,9 @@ int main()
     DIAG_LED_CLK_Start();
     KHZ_CLK_Start();
     setDiagMessage(0, CONFIG_BITS);
+    
+    CONFIG_IN_Write(0); //Tell the slaves to start fresh
+    //Do a boot-up delay
     CyDelay(1500u);
     if(CONFIG_BITS != 0x02) CyDelay(1000u); //Give the slaves extra time
     
@@ -720,6 +787,12 @@ int main()
                 }
                 break;
             case SCMDSlaveDone:
+                if(CONFIG_IN_Read() == 0)
+                {
+                    //CONFIG_IN went low (it shouldn't).  wait a sec and reboot
+                    CyDelay(1000);
+                    CySoftwareReset();
+                }
                 break;
             default:
                 break;
@@ -740,25 +813,50 @@ int main()
                 writeDevRegister(SCMD_REM_ADDR, 0x4A);
                 writeDevRegister(SCMD_REM_OFFSET, SCMD_SLAVE_ADDR);
                 writeDevRegister(SCMD_REM_DATA_RD, 0);
+                //Flag read op
+                writeDevRegister(SCMD_REM_READ, 1);
                 masterNextState = SCMDMasterPollDefault;
                 break;
             case SCMDMasterPollDefault:
                 //Poll address 0x4A
                 incrementDevRegister(SCMD_SLV_POLL_CNT);
+                writeDevRegister(SCMD_REM_ADDR, 0x4A);  //Target device 0x4A
+                writeDevRegister(SCMD_REM_OFFSET, SCMD_SLAVE_ADDR);  //Get contents of self address register       
+                writeDevRegister(SCMD_REM_DATA_RD, 0); //Clear the returned data slot
+                //Flag read op
+                writeDevRegister(SCMD_REM_READ, 1);
+                
+                masterNextState = SCMDMasterSendAddr;
+                break;
+            case SCMDMasterSendAddr:
                 if( readDevRegister(SCMD_REM_DATA_RD) == 0x4A )//if the address came back reflected
                 {
                     writeDevRegister(SCMD_REM_DATA_WR, slaveAddrEnumerator);
                     writeDevRegister(SCMD_REM_WRITE, 1);//flag the transfer
-                    slaveAddrEnumerator++;
+                    writeDevRegister(SCMD_SLV_TOP_ADDR, slaveAddrEnumerator);//Save to local reg
+                    
                     writeDevRegister(SCMD_SLV_POLL_CNT, 0);
-                    masterNextState = SCMDMasterPollDefault; //go back to this state
+                    if(slaveAddrEnumerator < MAX_SLAVE_ADDR)
+                    {
+                        slaveAddrEnumerator++;
+                        masterNextState = SCMDMasterPollDefault; //go look for another
+                    }
+                    else
+                    {
+                        masterNextState = SCMDMasterDone; //go back to this state
+                    }
+                }
+                else
+                {
+                    masterNextState = SCMDMasterPollDefault; //poll again
                 }
                 if( readDevRegister(SCMD_SLV_POLL_CNT) > 200 )
                 {
                     //Must be done
                     masterNextState = SCMDMasterDone;
                 }
-                CyDelay(10);
+
+                CyDelay(5);
                 break;
             case SCMDMasterDone:
                 break;
@@ -771,22 +869,22 @@ int main()
             if( masterState != SCMDMasterDone )//Needs to get data for state machine
             {
                 writeDevRegister(SCMD_SLAVE_ID, ReadSlaveData(readDevRegister(SCMD_REM_ADDR), SCMD_ID));
-                writeDevRegister(SCMD_REM_DATA_RD, ReadSlaveData(readDevRegister(SCMD_REM_ADDR), readDevRegister(SCMD_REM_OFFSET)));
+                //writeDevRegister(SCMD_REM_DATA_RD, ReadSlaveData(readDevRegister(SCMD_REM_ADDR), readDevRegister(SCMD_REM_OFFSET)));
             }
             if( masterState == SCMDMasterDone )//If the init is complete
             {
                 int slaveAddri;
-                for (slaveAddri = 0x50; slaveAddri < (slaveAddrEnumerator - 1); slaveAddri++)
+                for (slaveAddri = 0x50; slaveAddri <= readDevRegister(SCMD_SLV_TOP_ADDR); slaveAddri++)
                 {
                     //Write drive states out to slaves
                     WriteSlaveData( slaveAddri, SCMD_MA_DRIVE, readDevRegister(SCMD_S1A_DRIVE + ((slaveAddri - 0x50) << 1 )) );
                     //WriteSlaveData( slaveAddri, SCMD_MA_DRIVE, 0x8A );
-                    CyDelay(1);
+                    CyDelayUs(100);
                     WriteSlaveData( slaveAddri, SCMD_MB_DRIVE, readDevRegister(SCMD_S1B_DRIVE + ((slaveAddri - 0x50) << 1 )) );
-                    CyDelay(1);
+                    CyDelayUs(100);
                 }
             }
-            CyDelay(10);
+            CyDelay(1);
         }
 
         //Get changes -- Here, check if any registers have a changed flag that need to be serviced
@@ -817,6 +915,16 @@ int main()
             }
             writeDevRegister( SCMD_REM_WRITE, 0 );
             clearChangedStatus(SCMD_REM_WRITE);
+        }
+        //Do writes before reads if both present
+        if(getChangedStatus(SCMD_REM_READ))
+        {
+            if( CONFIG_BITS != 0x02 )
+            {
+                writeDevRegister(SCMD_REM_DATA_RD, ReadSlaveData(readDevRegister(SCMD_REM_ADDR), readDevRegister(SCMD_REM_OFFSET)));
+            }
+            writeDevRegister( SCMD_REM_READ, 0 );
+            clearChangedStatus(SCMD_REM_READ);
         } 
         if(getChangedStatus(SCMD_SLAVE_ADDR))
         {
