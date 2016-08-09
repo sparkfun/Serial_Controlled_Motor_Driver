@@ -23670,7 +23670,7 @@ only when using expansion port</text>
 <pinref part="U1" gate="G1" pin="P0.3"/>
 </segment>
 </net>
-<net name="CONFIG_OUT" class="0">
+<net name="CONFIG_IN" class="0">
 <segment>
 <wire x1="55.88" y1="81.28" x2="63.5" y2="81.28" width="0.1524" layer="91"/>
 <label x="63.5" y="81.28" size="1.27" layer="95" xref="yes"/>
@@ -23682,7 +23682,7 @@ only when using expansion port</text>
 <pinref part="U1" gate="G4" pin="P3.1"/>
 </segment>
 </net>
-<net name="CONFIG_IN" class="0">
+<net name="CONFIG_OUT" class="0">
 <segment>
 <wire x1="55.88" y1="83.82" x2="78.74" y2="83.82" width="0.1524" layer="91"/>
 <wire x1="78.74" y1="83.82" x2="78.74" y2="86.36" width="0.1524" layer="91"/>
