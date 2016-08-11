@@ -22976,6 +22976,7 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <part name="JP5" library="SparkFun-Jumpers" deviceset="JUMPER-PAD-2-NC_BY_PASTE" device="" value="JUMPER-PAD-2"/>
 <part name="J7" library="SparkFun-Connectors" deviceset="CONN_01" device="PTH" value="DNP"/>
 <part name="JP7" library="SparkFun-Passives" deviceset="JUMPER-PAD-3-NO" device="YES_SILK"/>
+<part name="SUPPLY7" library="SparkFun-Aesthetics" deviceset="VCC" device=""/>
 </parts>
 <sheets>
 <sheet>
@@ -23003,8 +23004,8 @@ Motor Driver</text>
 <wire x1="83.82" y1="58.42" x2="83.82" y2="114.3" width="0.1524" layer="97" style="longdash"/>
 <wire x1="83.82" y1="114.3" x2="187.96" y2="114.3" width="0.1524" layer="97" style="longdash"/>
 <text x="149.86" y="78.74" size="2.54" layer="97" font="vector" ratio="15">3.3V Regulator</text>
-<text x="237.49" y="7.62" size="2.54" layer="94" font="vector">1.6.1</text>
-<text x="114.3" y="172.72" size="1.27" layer="97" rot="MR180">P3.2 swd_io[0]
+<text x="237.49" y="7.62" size="2.54" layer="94" font="vector">2.0</text>
+<text x="114.3" y="172.72" size="1.27" layer="97" font="vector" rot="MR180">P3.2 swd_io[0]
 P3.3 swd_clk[0]
 XRES SRES
 VDDD Vtarget
@@ -23037,9 +23038,10 @@ the jumper is bridged.</text>
 Port</text>
 <text x="29.718" y="65.278" size="1.778" layer="97" font="vector" ratio="15">User
 Port</text>
-<text x="151.638" y="77.724" size="1.778" layer="97" font="vector" align="top-left">When using externally supplied VCC, open JP5 and
-supply a regulated 3.3 or 5.0V to J7.  Do not
-exceed the range of 2.0 to 5.5V.</text>
+<text x="151.638" y="77.724" size="1.778" layer="97" font="vector" align="top-left">Open JP5 to disconnect 3.3V regulated supply.
+In this configuration, a regulated voltage must
+be attached to the VCC pin, and must be in the
+range of 2.0 to 5.5V.</text>
 <text x="17.018" y="109.22" size="1.524" layer="97" font="vector" align="top-left">Bridge JP6 to enable pullups on user
 port for I2C.  Bridge JP7 to on master
 only when using expansion port</text>
@@ -23078,8 +23080,8 @@ only when using expansion port</text>
 <instance part="SUPPLY4" gate="G$1" x="88.9" y="101.6"/>
 <instance part="GND11" gate="1" x="132.08" y="157.48"/>
 <instance part="J2" gate="G$1" x="33.02" y="78.74" smashed="yes" rot="R180">
-<attribute name="VALUE" x="30.48" y="88.9" size="1.778" layer="96"/>
-<attribute name="NAME" x="34.036" y="91.44" size="1.778" layer="95" rot="R180" align="top-center"/>
+<attribute name="VALUE" x="30.48" y="88.9" size="1.778" layer="96" font="vector"/>
+<attribute name="NAME" x="34.036" y="91.44" size="1.778" layer="95" font="vector" rot="R180" align="top-center"/>
 </instance>
 <instance part="GND12" gate="1" x="7.62" y="66.04"/>
 <instance part="GND13" gate="1" x="63.5" y="66.04"/>
@@ -23088,13 +23090,15 @@ only when using expansion port</text>
 <instance part="GND16" gate="1" x="213.36" y="93.98"/>
 <instance part="GND17" gate="1" x="220.98" y="93.98"/>
 <instance part="J4" gate="G$1" x="48.26" y="78.74" smashed="yes">
-<attribute name="VALUE" x="45.72" y="88.9" size="1.778" layer="96"/>
-<attribute name="NAME" x="46.736" y="91.186" size="1.778" layer="95" rot="R180" align="top-center"/>
+<attribute name="VALUE" x="45.72" y="88.9" size="1.778" layer="96" font="vector"/>
+<attribute name="NAME" x="46.736" y="91.186" size="1.778" layer="95" font="vector" rot="R180" align="top-center"/>
 </instance>
 <instance part="GND18" gate="1" x="187.96" y="43.18"/>
 <instance part="GND19" gate="1" x="213.36" y="43.18"/>
 <instance part="SUPPLY9" gate="G$1" x="238.76" y="63.5"/>
-<instance part="SUPPLY10" gate="G$1" x="177.8" y="63.5"/>
+<instance part="SUPPLY10" gate="G$1" x="177.8" y="63.5" smashed="yes">
+<attribute name="VALUE" x="171.704" y="64.516" size="1.778" layer="96" font="vector"/>
+</instance>
 <instance part="C8" gate="G$1" x="213.36" y="53.34"/>
 <instance part="C9" gate="G$1" x="162.56" y="53.34"/>
 <instance part="GND20" gate="1" x="162.56" y="43.18"/>
@@ -23115,16 +23119,16 @@ only when using expansion port</text>
 <instance part="C11" gate="G$1" x="96.52" y="81.28"/>
 <instance part="GND23" gate="1" x="96.52" y="71.12"/>
 <instance part="JP1" gate="G$1" x="198.12" y="104.14" smashed="yes" rot="R90">
-<attribute name="NAME" x="195.58" y="101.6" size="1.778" layer="95" rot="R90"/>
+<attribute name="NAME" x="195.58" y="101.6" size="1.778" layer="95" font="vector" rot="R90"/>
 </instance>
 <instance part="JP2" gate="G$1" x="205.74" y="104.14" smashed="yes" rot="R90">
-<attribute name="NAME" x="203.2" y="101.6" size="1.778" layer="95" rot="R90"/>
+<attribute name="NAME" x="203.2" y="101.6" size="1.778" layer="95" font="vector" rot="R90"/>
 </instance>
 <instance part="JP3" gate="G$1" x="213.36" y="104.14" smashed="yes" rot="R90">
-<attribute name="NAME" x="210.82" y="101.6" size="1.778" layer="95" rot="R90"/>
+<attribute name="NAME" x="210.82" y="101.6" size="1.778" layer="95" font="vector" rot="R90"/>
 </instance>
 <instance part="JP4" gate="G$1" x="220.98" y="104.14" smashed="yes" rot="R90">
-<attribute name="NAME" x="218.44" y="101.6" size="1.778" layer="95" rot="R90"/>
+<attribute name="NAME" x="218.44" y="101.6" size="1.778" layer="95" font="vector" rot="R90"/>
 </instance>
 <instance part="R3" gate="G$1" x="78.74" y="76.2" rot="R270"/>
 <instance part="GND24" gate="1" x="78.74" y="66.04"/>
@@ -23143,18 +23147,21 @@ only when using expansion port</text>
 <instance part="R7" gate="G$1" x="10.16" y="91.44"/>
 <instance part="R8" gate="G$1" x="22.86" y="96.52"/>
 <instance part="JP6" gate="G$1" x="10.16" y="96.52" smashed="yes" rot="R270">
-<attribute name="NAME" x="12.7" y="99.441" size="1.778" layer="95"/>
+<attribute name="NAME" x="12.7" y="99.441" size="1.778" layer="95" font="vector"/>
 </instance>
 <instance part="SUPPLY6" gate="G$1" x="10.16" y="104.14"/>
 <instance part="J8" gate="G$1" x="149.86" y="167.64"/>
 <instance part="J1" gate="G$1" x="170.18" y="106.68" rot="R180"/>
 <instance part="J3" gate="G$1" x="170.18" y="93.98" rot="R180"/>
 <instance part="JP5" gate="G$1" x="220.98" y="60.96" smashed="yes">
-<attribute name="NAME" x="218.44" y="63.5" size="1.778" layer="95"/>
+<attribute name="NAME" x="218.44" y="63.5" size="1.778" layer="95" font="vector"/>
 </instance>
 <instance part="J7" gate="G$1" x="231.14" y="71.12" rot="R270"/>
 <instance part="JP7" gate="G$1" x="71.12" y="96.52" smashed="yes" rot="MR270">
-<attribute name="NAME" x="68.58" y="99.441" size="1.778" layer="95" rot="MR0"/>
+<attribute name="NAME" x="68.58" y="99.441" size="1.778" layer="95" font="vector" rot="MR0"/>
+</instance>
+<instance part="SUPPLY7" gate="G$1" x="132.08" y="175.26" smashed="yes">
+<attribute name="VALUE" x="125.984" y="176.276" size="1.778" layer="96" font="vector"/>
 </instance>
 </instances>
 <busses>
@@ -23342,7 +23349,7 @@ only when using expansion port</text>
 <junction x="22.86" y="38.1"/>
 <wire x1="48.26" y1="38.1" x2="48.26" y2="35.56" width="0.1524" layer="91"/>
 <wire x1="48.26" y1="35.56" x2="45.72" y2="35.56" width="0.1524" layer="91"/>
-<label x="45.72" y="35.56" size="1.27" layer="95" rot="R180" xref="yes"/>
+<label x="45.72" y="35.56" size="1.27" layer="95" font="vector" rot="R180" xref="yes"/>
 <junction x="48.26" y="38.1"/>
 </segment>
 </net>
@@ -23401,8 +23408,9 @@ only when using expansion port</text>
 </segment>
 <segment>
 <wire x1="134.62" y1="172.72" x2="132.08" y2="172.72" width="0.1524" layer="91"/>
-<label x="132.08" y="172.72" size="1.27" layer="95" rot="R180" xref="yes"/>
 <pinref part="J8" gate="G$1" pin="VCC"/>
+<pinref part="SUPPLY7" gate="G$1" pin="VCC"/>
+<wire x1="132.08" y1="172.72" x2="132.08" y2="175.26" width="0.1524" layer="91"/>
 </segment>
 <segment>
 <pinref part="SUPPLY6" gate="G$1" pin="VCC"/>
@@ -23421,7 +23429,7 @@ only when using expansion port</text>
 <pinref part="U1" gate="G6" pin="XRES"/>
 <wire x1="93.98" y1="20.32" x2="93.98" y2="30.48" width="0.1524" layer="91"/>
 <wire x1="93.98" y1="30.48" x2="109.22" y2="30.48" width="0.1524" layer="91"/>
-<label x="104.14" y="27.94" size="1.27" layer="95" rot="R180" xref="yes"/>
+<label x="104.14" y="27.94" size="1.27" layer="95" font="vector" rot="R180" xref="yes"/>
 <wire x1="109.22" y1="30.48" x2="114.3" y2="30.48" width="0.1524" layer="91"/>
 <wire x1="109.22" y1="30.48" x2="109.22" y2="27.94" width="0.1524" layer="91" style="longdash"/>
 <wire x1="109.22" y1="27.94" x2="104.14" y2="27.94" width="0.1524" layer="91" style="longdash"/>
@@ -23429,55 +23437,55 @@ only when using expansion port</text>
 </segment>
 <segment>
 <wire x1="167.64" y1="162.56" x2="170.18" y2="162.56" width="0.1524" layer="91"/>
-<label x="170.18" y="162.56" size="1.27" layer="95" xref="yes"/>
+<label x="170.18" y="162.56" size="1.27" layer="95" font="vector" xref="yes"/>
 <pinref part="J8" gate="G$1" pin="NRESET"/>
 </segment>
 </net>
 <net name="P2.1" class="0">
 <segment>
 <wire x1="81.28" y1="137.16" x2="78.74" y2="137.16" width="0.1524" layer="91"/>
-<label x="78.74" y="137.16" size="1.27" layer="95" rot="R180" xref="yes"/>
+<label x="78.74" y="137.16" size="1.27" layer="95" font="vector" rot="R180" xref="yes"/>
 <pinref part="U1" gate="G3" pin="P2.1"/>
 </segment>
 <segment>
 <wire x1="114.3" y1="88.9" x2="111.76" y2="88.9" width="0.1524" layer="91"/>
-<label x="111.76" y="88.9" size="1.27" layer="95" rot="R180" xref="yes"/>
+<label x="111.76" y="88.9" size="1.27" layer="95" font="vector" rot="R180" xref="yes"/>
 <pinref part="U2" gate="G$1" pin="AIN1/PH"/>
 </segment>
 </net>
 <net name="P2.2" class="0">
 <segment>
 <wire x1="81.28" y1="134.62" x2="78.74" y2="134.62" width="0.1524" layer="91"/>
-<label x="78.74" y="134.62" size="1.27" layer="95" rot="R180" xref="yes"/>
+<label x="78.74" y="134.62" size="1.27" layer="95" font="vector" rot="R180" xref="yes"/>
 <pinref part="U1" gate="G3" pin="P2.2"/>
 </segment>
 <segment>
 <wire x1="114.3" y1="86.36" x2="111.76" y2="86.36" width="0.1524" layer="91"/>
-<label x="111.76" y="86.36" size="1.27" layer="95" rot="R180" xref="yes"/>
+<label x="111.76" y="86.36" size="1.27" layer="95" font="vector" rot="R180" xref="yes"/>
 <pinref part="U2" gate="G$1" pin="AIN2/EN"/>
 </segment>
 </net>
 <net name="P2.3" class="0">
 <segment>
 <wire x1="81.28" y1="132.08" x2="78.74" y2="132.08" width="0.1524" layer="91"/>
-<label x="78.74" y="132.08" size="1.27" layer="95" rot="R180" xref="yes"/>
+<label x="78.74" y="132.08" size="1.27" layer="95" font="vector" rot="R180" xref="yes"/>
 <pinref part="U1" gate="G3" pin="P2.3"/>
 </segment>
 <segment>
 <wire x1="114.3" y1="83.82" x2="111.76" y2="83.82" width="0.1524" layer="91"/>
-<label x="111.76" y="83.82" size="1.27" layer="95" rot="R180" xref="yes"/>
+<label x="111.76" y="83.82" size="1.27" layer="95" font="vector" rot="R180" xref="yes"/>
 <pinref part="U2" gate="G$1" pin="BIN1/PH"/>
 </segment>
 </net>
 <net name="P2.4" class="0">
 <segment>
 <wire x1="81.28" y1="129.54" x2="78.74" y2="129.54" width="0.1524" layer="91"/>
-<label x="78.74" y="129.54" size="1.27" layer="95" rot="R180" xref="yes"/>
+<label x="78.74" y="129.54" size="1.27" layer="95" font="vector" rot="R180" xref="yes"/>
 <pinref part="U1" gate="G3" pin="P2.4"/>
 </segment>
 <segment>
 <wire x1="114.3" y1="81.28" x2="111.76" y2="81.28" width="0.1524" layer="91"/>
-<label x="111.76" y="81.28" size="1.27" layer="95" rot="R180" xref="yes"/>
+<label x="111.76" y="81.28" size="1.27" layer="95" font="vector" rot="R180" xref="yes"/>
 <pinref part="U2" gate="G$1" pin="BIN2/EN"/>
 </segment>
 </net>
@@ -23530,7 +23538,7 @@ only when using expansion port</text>
 <segment>
 <pinref part="J2" gate="G$1" pin="1"/>
 <wire x1="25.4" y1="83.82" x2="22.86" y2="83.82" width="0.1524" layer="91"/>
-<label x="17.78" y="83.82" size="1.27" layer="95" rot="R180" xref="yes"/>
+<label x="17.78" y="83.82" size="1.27" layer="95" font="vector" rot="R180" xref="yes"/>
 <pinref part="R8" gate="G$1" pin="2"/>
 <wire x1="22.86" y1="83.82" x2="17.78" y2="83.82" width="0.1524" layer="91"/>
 <wire x1="27.94" y1="96.52" x2="30.48" y2="96.52" width="0.1524" layer="91"/>
@@ -23541,7 +23549,7 @@ only when using expansion port</text>
 </segment>
 <segment>
 <wire x1="25.4" y1="129.54" x2="22.86" y2="129.54" width="0.1524" layer="91"/>
-<label x="22.86" y="129.54" size="1.27" layer="95" rot="R180" xref="yes"/>
+<label x="22.86" y="129.54" size="1.27" layer="95" font="vector" rot="R180" xref="yes"/>
 <pinref part="U1" gate="G1" pin="P0.4"/>
 </segment>
 </net>
@@ -23549,7 +23557,7 @@ only when using expansion port</text>
 <segment>
 <pinref part="J2" gate="G$1" pin="2"/>
 <wire x1="25.4" y1="81.28" x2="20.32" y2="81.28" width="0.1524" layer="91"/>
-<label x="17.78" y="81.28" size="1.27" layer="95" rot="R180" xref="yes"/>
+<label x="17.78" y="81.28" size="1.27" layer="95" font="vector" rot="R180" xref="yes"/>
 <pinref part="R7" gate="G$1" pin="2"/>
 <wire x1="20.32" y1="81.28" x2="17.78" y2="81.28" width="0.1524" layer="91"/>
 <wire x1="15.24" y1="91.44" x2="20.32" y2="91.44" width="0.1524" layer="91"/>
@@ -23558,7 +23566,7 @@ only when using expansion port</text>
 </segment>
 <segment>
 <wire x1="25.4" y1="127" x2="22.86" y2="127" width="0.1524" layer="91"/>
-<label x="22.86" y="127" size="1.27" layer="95" rot="R180" xref="yes"/>
+<label x="22.86" y="127" size="1.27" layer="95" font="vector" rot="R180" xref="yes"/>
 <pinref part="U1" gate="G1" pin="P0.5"/>
 </segment>
 </net>
@@ -23566,11 +23574,11 @@ only when using expansion port</text>
 <segment>
 <pinref part="J2" gate="G$1" pin="4"/>
 <wire x1="25.4" y1="76.2" x2="22.86" y2="76.2" width="0.1524" layer="91"/>
-<label x="22.86" y="76.2" size="1.27" layer="95" rot="R180" xref="yes"/>
+<label x="22.86" y="76.2" size="1.27" layer="95" font="vector" rot="R180" xref="yes"/>
 </segment>
 <segment>
 <wire x1="25.4" y1="124.46" x2="22.86" y2="124.46" width="0.1524" layer="91"/>
-<label x="22.86" y="124.46" size="1.27" layer="95" rot="R180" xref="yes"/>
+<label x="22.86" y="124.46" size="1.27" layer="95" font="vector" rot="R180" xref="yes"/>
 <pinref part="U1" gate="G1" pin="P0.6"/>
 </segment>
 </net>
@@ -23578,18 +23586,18 @@ only when using expansion port</text>
 <segment>
 <pinref part="J2" gate="G$1" pin="5"/>
 <wire x1="25.4" y1="73.66" x2="22.86" y2="73.66" width="0.1524" layer="91"/>
-<label x="22.86" y="73.66" size="1.27" layer="95" rot="R180" xref="yes"/>
+<label x="22.86" y="73.66" size="1.27" layer="95" font="vector" rot="R180" xref="yes"/>
 </segment>
 <segment>
 <wire x1="25.4" y1="121.92" x2="22.86" y2="121.92" width="0.1524" layer="91"/>
-<label x="22.86" y="121.92" size="1.27" layer="95" rot="R180" xref="yes"/>
+<label x="22.86" y="121.92" size="1.27" layer="95" font="vector" rot="R180" xref="yes"/>
 <pinref part="U1" gate="G1" pin="P0.7"/>
 </segment>
 </net>
 <net name="SCL_OUT" class="0">
 <segment>
 <wire x1="55.88" y1="78.74" x2="60.96" y2="78.74" width="0.1524" layer="91"/>
-<label x="63.5" y="78.74" size="1.27" layer="95" xref="yes"/>
+<label x="63.5" y="78.74" size="1.27" layer="95" font="vector" xref="yes"/>
 <pinref part="J4" gate="G$1" pin="3"/>
 <pinref part="R5" gate="G$1" pin="2"/>
 <wire x1="60.96" y1="78.74" x2="63.5" y2="78.74" width="0.1524" layer="91"/>
@@ -23599,14 +23607,14 @@ only when using expansion port</text>
 </segment>
 <segment>
 <wire x1="154.94" y1="139.7" x2="152.4" y2="139.7" width="0.1524" layer="91"/>
-<label x="152.4" y="139.7" size="1.27" layer="95" rot="MR0" xref="yes"/>
+<label x="152.4" y="139.7" size="1.27" layer="95" font="vector" rot="MR0" xref="yes"/>
 <pinref part="U1" gate="G5" pin="P4.0"/>
 </segment>
 </net>
 <net name="SDA_OUT" class="0">
 <segment>
 <wire x1="55.88" y1="76.2" x2="58.42" y2="76.2" width="0.1524" layer="91"/>
-<label x="63.5" y="76.2" size="1.27" layer="95" xref="yes"/>
+<label x="63.5" y="76.2" size="1.27" layer="95" font="vector" xref="yes"/>
 <pinref part="J4" gate="G$1" pin="2"/>
 <pinref part="R4" gate="G$1" pin="2"/>
 <wire x1="58.42" y1="76.2" x2="63.5" y2="76.2" width="0.1524" layer="91"/>
@@ -23618,67 +23626,67 @@ only when using expansion port</text>
 </segment>
 <segment>
 <wire x1="154.94" y1="137.16" x2="152.4" y2="137.16" width="0.1524" layer="91"/>
-<label x="152.4" y="137.16" size="1.27" layer="95" rot="MR0" xref="yes"/>
+<label x="152.4" y="137.16" size="1.27" layer="95" font="vector" rot="MR0" xref="yes"/>
 <pinref part="U1" gate="G5" pin="P4.1"/>
 </segment>
 </net>
 <net name="MODEB0" class="0">
 <segment>
 <wire x1="220.98" y1="109.22" x2="220.98" y2="111.76" width="0.1524" layer="91"/>
-<label x="220.98" y="111.76" size="1.27" layer="95" rot="R90" xref="yes"/>
+<label x="220.98" y="111.76" size="1.27" layer="95" font="vector" rot="R90" xref="yes"/>
 <pinref part="JP4" gate="G$1" pin="2"/>
 </segment>
 <segment>
 <wire x1="25.4" y1="139.7" x2="22.86" y2="139.7" width="0.1524" layer="91"/>
-<label x="22.86" y="139.7" size="1.27" layer="95" rot="MR0" xref="yes"/>
+<label x="22.86" y="139.7" size="1.27" layer="95" font="vector" rot="MR0" xref="yes"/>
 <pinref part="U1" gate="G1" pin="P0.0"/>
 </segment>
 </net>
 <net name="MODEB1" class="0">
 <segment>
 <wire x1="213.36" y1="109.22" x2="213.36" y2="111.76" width="0.1524" layer="91"/>
-<label x="213.36" y="111.76" size="1.27" layer="95" rot="R90" xref="yes"/>
+<label x="213.36" y="111.76" size="1.27" layer="95" font="vector" rot="R90" xref="yes"/>
 <pinref part="JP3" gate="G$1" pin="2"/>
 </segment>
 <segment>
 <wire x1="25.4" y1="137.16" x2="22.86" y2="137.16" width="0.1524" layer="91"/>
-<label x="22.86" y="137.16" size="1.27" layer="95" rot="MR0" xref="yes"/>
+<label x="22.86" y="137.16" size="1.27" layer="95" font="vector" rot="MR0" xref="yes"/>
 <pinref part="U1" gate="G1" pin="P0.1"/>
 </segment>
 </net>
 <net name="MODEB2" class="0">
 <segment>
 <wire x1="205.74" y1="109.22" x2="205.74" y2="111.76" width="0.1524" layer="91"/>
-<label x="205.74" y="111.76" size="1.27" layer="95" rot="R90" xref="yes"/>
+<label x="205.74" y="111.76" size="1.27" layer="95" font="vector" rot="R90" xref="yes"/>
 <pinref part="JP2" gate="G$1" pin="2"/>
 </segment>
 <segment>
 <wire x1="25.4" y1="134.62" x2="22.86" y2="134.62" width="0.1524" layer="91"/>
-<label x="22.86" y="134.62" size="1.27" layer="95" rot="MR0" xref="yes"/>
+<label x="22.86" y="134.62" size="1.27" layer="95" font="vector" rot="MR0" xref="yes"/>
 <pinref part="U1" gate="G1" pin="P0.2"/>
 </segment>
 </net>
 <net name="MODEB3" class="0">
 <segment>
 <wire x1="198.12" y1="109.22" x2="198.12" y2="111.76" width="0.1524" layer="91"/>
-<label x="198.12" y="111.76" size="1.27" layer="95" rot="R90" xref="yes"/>
+<label x="198.12" y="111.76" size="1.27" layer="95" font="vector" rot="R90" xref="yes"/>
 <pinref part="JP1" gate="G$1" pin="2"/>
 </segment>
 <segment>
 <wire x1="25.4" y1="132.08" x2="22.86" y2="132.08" width="0.1524" layer="91"/>
-<label x="22.86" y="132.08" size="1.27" layer="95" rot="MR0" xref="yes"/>
+<label x="22.86" y="132.08" size="1.27" layer="95" font="vector" rot="MR0" xref="yes"/>
 <pinref part="U1" gate="G1" pin="P0.3"/>
 </segment>
 </net>
 <net name="CONFIG_IN" class="0">
 <segment>
 <wire x1="55.88" y1="81.28" x2="63.5" y2="81.28" width="0.1524" layer="91"/>
-<label x="63.5" y="81.28" size="1.27" layer="95" xref="yes"/>
+<label x="63.5" y="81.28" size="1.27" layer="95" font="vector" xref="yes"/>
 <pinref part="J4" gate="G$1" pin="4"/>
 </segment>
 <segment>
 <wire x1="119.38" y1="137.16" x2="116.84" y2="137.16" width="0.1524" layer="91"/>
-<label x="116.84" y="137.16" size="1.27" layer="95" rot="R180" xref="yes"/>
+<label x="116.84" y="137.16" size="1.27" layer="95" font="vector" rot="R180" xref="yes"/>
 <pinref part="U1" gate="G4" pin="P3.1"/>
 </segment>
 </net>
@@ -23687,7 +23695,7 @@ only when using expansion port</text>
 <wire x1="55.88" y1="83.82" x2="78.74" y2="83.82" width="0.1524" layer="91"/>
 <wire x1="78.74" y1="83.82" x2="78.74" y2="86.36" width="0.1524" layer="91"/>
 <wire x1="78.74" y1="86.36" x2="76.2" y2="86.36" width="0.1524" layer="91"/>
-<label x="76.2" y="86.36" size="1.27" layer="95" rot="R180" xref="yes"/>
+<label x="76.2" y="86.36" size="1.27" layer="95" font="vector" rot="R180" xref="yes"/>
 <pinref part="J4" gate="G$1" pin="5"/>
 <pinref part="R3" gate="G$1" pin="1"/>
 <wire x1="78.74" y1="81.28" x2="78.74" y2="83.82" width="0.1524" layer="91"/>
@@ -23695,7 +23703,7 @@ only when using expansion port</text>
 </segment>
 <segment>
 <wire x1="119.38" y1="139.7" x2="116.84" y2="139.7" width="0.1524" layer="91"/>
-<label x="116.84" y="139.7" size="1.27" layer="95" rot="R180" xref="yes"/>
+<label x="116.84" y="139.7" size="1.27" layer="95" font="vector" rot="R180" xref="yes"/>
 <pinref part="U1" gate="G4" pin="P3.0"/>
 </segment>
 </net>
@@ -23703,11 +23711,11 @@ only when using expansion port</text>
 <segment>
 <pinref part="U1" gate="G4" pin="P3.2"/>
 <wire x1="119.38" y1="134.62" x2="116.84" y2="134.62" width="0.1524" layer="91"/>
-<label x="116.84" y="134.62" size="1.27" layer="95" rot="R180" xref="yes"/>
+<label x="116.84" y="134.62" size="1.27" layer="95" font="vector" rot="R180" xref="yes"/>
 </segment>
 <segment>
 <wire x1="167.64" y1="172.72" x2="170.18" y2="172.72" width="0.1524" layer="91"/>
-<label x="170.18" y="172.72" size="1.27" layer="95" xref="yes"/>
+<label x="170.18" y="172.72" size="1.27" layer="95" font="vector" xref="yes"/>
 <pinref part="J8" gate="G$1" pin="SWDIO/TMS"/>
 </segment>
 </net>
@@ -23715,24 +23723,24 @@ only when using expansion port</text>
 <segment>
 <pinref part="U1" gate="G4" pin="P3.3"/>
 <wire x1="119.38" y1="132.08" x2="116.84" y2="132.08" width="0.1524" layer="91"/>
-<label x="116.84" y="132.08" size="1.27" layer="95" rot="R180" xref="yes"/>
+<label x="116.84" y="132.08" size="1.27" layer="95" font="vector" rot="R180" xref="yes"/>
 </segment>
 <segment>
 <wire x1="167.64" y1="170.18" x2="170.18" y2="170.18" width="0.1524" layer="91"/>
-<label x="170.18" y="170.18" size="1.27" layer="95" xref="yes"/>
+<label x="170.18" y="170.18" size="1.27" layer="95" font="vector" xref="yes"/>
 <pinref part="J8" gate="G$1" pin="SWDCLK/TCK"/>
 </segment>
 </net>
 <net name="P2.0" class="0">
 <segment>
 <wire x1="81.28" y1="139.7" x2="78.74" y2="139.7" width="0.1524" layer="91"/>
-<label x="78.74" y="139.7" size="1.27" layer="95" rot="R180" xref="yes"/>
+<label x="78.74" y="139.7" size="1.27" layer="95" font="vector" rot="R180" xref="yes"/>
 <pinref part="U1" gate="G3" pin="P2.0"/>
 </segment>
 <segment>
 <pinref part="U2" gate="G$1" pin="MODE"/>
 <wire x1="114.3" y1="91.44" x2="111.76" y2="91.44" width="0.1524" layer="91"/>
-<label x="111.76" y="91.44" size="1.27" layer="95" rot="R180" xref="yes"/>
+<label x="111.76" y="91.44" size="1.27" layer="95" font="vector" rot="R180" xref="yes"/>
 </segment>
 </net>
 <net name="N$10" class="0">
@@ -23796,46 +23804,46 @@ only when using expansion port</text>
 <segment>
 <pinref part="U1" gate="G3" pin="P2.5"/>
 <wire x1="81.28" y1="127" x2="78.74" y2="127" width="0.1524" layer="91"/>
-<label x="78.74" y="127" size="1.27" layer="95" rot="R180" xref="yes"/>
+<label x="78.74" y="127" size="1.27" layer="95" font="vector" rot="R180" xref="yes"/>
 </segment>
 </net>
 <net name="U2.6" class="0">
 <segment>
 <pinref part="U1" gate="G3" pin="P2.6"/>
 <wire x1="81.28" y1="124.46" x2="78.74" y2="124.46" width="0.1524" layer="91"/>
-<label x="78.74" y="124.46" size="1.27" layer="95" rot="R180" xref="yes"/>
+<label x="78.74" y="124.46" size="1.27" layer="95" font="vector" rot="R180" xref="yes"/>
 </segment>
 </net>
 <net name="U2.7" class="0">
 <segment>
 <pinref part="U1" gate="G3" pin="P2.7"/>
 <wire x1="81.28" y1="121.92" x2="78.74" y2="121.92" width="0.1524" layer="91"/>
-<label x="78.74" y="121.92" size="1.27" layer="95" rot="R180" xref="yes"/>
+<label x="78.74" y="121.92" size="1.27" layer="95" font="vector" rot="R180" xref="yes"/>
 </segment>
 </net>
 <net name="U3.5" class="0">
 <segment>
 <pinref part="U1" gate="G4" pin="P3.5"/>
 <wire x1="119.38" y1="127" x2="116.84" y2="127" width="0.1524" layer="91"/>
-<label x="116.84" y="127" size="1.27" layer="95" rot="R180" xref="yes"/>
+<label x="116.84" y="127" size="1.27" layer="95" font="vector" rot="R180" xref="yes"/>
 </segment>
 </net>
 <net name="U3.6" class="0">
 <segment>
 <pinref part="U1" gate="G4" pin="P3.6"/>
 <wire x1="119.38" y1="124.46" x2="116.84" y2="124.46" width="0.1524" layer="91"/>
-<label x="116.84" y="124.46" size="1.27" layer="95" rot="R180" xref="yes"/>
+<label x="116.84" y="124.46" size="1.27" layer="95" font="vector" rot="R180" xref="yes"/>
 </segment>
 </net>
 <net name="SLED" class="0">
 <segment>
 <wire x1="119.38" y1="129.54" x2="116.84" y2="129.54" width="0.1524" layer="91"/>
-<label x="116.84" y="129.54" size="1.27" layer="95" rot="R180" xref="yes"/>
+<label x="116.84" y="129.54" size="1.27" layer="95" font="vector" rot="R180" xref="yes"/>
 <pinref part="U1" gate="G4" pin="P3.4"/>
 </segment>
 <segment>
 <wire x1="17.78" y1="154.94" x2="15.24" y2="154.94" width="0.1524" layer="91"/>
-<label x="15.24" y="154.94" size="1.27" layer="95" rot="R180" xref="yes"/>
+<label x="15.24" y="154.94" size="1.27" layer="95" font="vector" rot="R180" xref="yes"/>
 <pinref part="R6" gate="G$1" pin="1"/>
 </segment>
 </net>
