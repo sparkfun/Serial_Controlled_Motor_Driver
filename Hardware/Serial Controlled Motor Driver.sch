@@ -23878,12 +23878,12 @@ only when using expansion port</text>
 </sheet>
 </sheets>
 <errors>
-<approved hash="202,1,215.9,50.8,U$3,BP,,,,"/>
-<approved hash="106,1,78.74,127,U2.5,,,,,"/>
-<approved hash="106,1,78.74,124.46,U2.6,,,,,"/>
-<approved hash="106,1,78.74,121.92,U2.7,,,,,"/>
-<approved hash="106,1,116.84,127,U3.5,,,,,"/>
-<approved hash="106,1,116.84,124.46,U3.6,,,,,"/>
+<approved hash="202,1,208.28,50.8,U$3,BP,,,,"/>
+<approved hash="106,1,81.28,127,U2.5,,,,,"/>
+<approved hash="106,1,81.28,124.46,U2.6,,,,,"/>
+<approved hash="106,1,81.28,121.92,U2.7,,,,,"/>
+<approved hash="106,1,119.38,127,U3.5,,,,,"/>
+<approved hash="106,1,119.38,124.46,U3.6,,,,,"/>
 </errors>
 </schematic>
 </drawing>

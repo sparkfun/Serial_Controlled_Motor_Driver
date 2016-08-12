@@ -8,7 +8,7 @@
 </settings>
 <grid distance="0.005" unitdist="inch" unit="inch" style="lines" multiple="1" display="yes" altdistance="0.001" altunitdist="inch" altunit="inch"/>
 <layers>
-<layer number="1" name="Top" color="4" fill="1" visible="no" active="yes"/>
+<layer number="1" name="Top" color="4" fill="1" visible="yes" active="yes"/>
 <layer number="2" name="Route2" color="1" fill="3" visible="no" active="no"/>
 <layer number="3" name="Route3" color="4" fill="3" visible="no" active="no"/>
 <layer number="4" name="Route4" color="1" fill="4" visible="no" active="no"/>
@@ -28,10 +28,10 @@
 <layer number="18" name="Vias" color="2" fill="1" visible="yes" active="yes"/>
 <layer number="19" name="Unrouted" color="6" fill="1" visible="yes" active="yes"/>
 <layer number="20" name="Dimension" color="15" fill="1" visible="yes" active="yes"/>
-<layer number="21" name="tPlace" color="16" fill="1" visible="no" active="yes"/>
+<layer number="21" name="tPlace" color="16" fill="1" visible="yes" active="yes"/>
 <layer number="22" name="bPlace" color="14" fill="1" visible="yes" active="yes"/>
-<layer number="23" name="tOrigins" color="15" fill="1" visible="yes" active="yes"/>
-<layer number="24" name="bOrigins" color="15" fill="1" visible="yes" active="yes"/>
+<layer number="23" name="tOrigins" color="15" fill="1" visible="no" active="yes"/>
+<layer number="24" name="bOrigins" color="15" fill="1" visible="no" active="yes"/>
 <layer number="25" name="tNames" color="7" fill="1" visible="no" active="yes"/>
 <layer number="26" name="bNames" color="7" fill="1" visible="no" active="yes"/>
 <layer number="27" name="tValues" color="7" fill="1" visible="no" active="yes"/>
@@ -39,20 +39,20 @@
 <layer number="29" name="tStop" color="7" fill="3" visible="no" active="yes"/>
 <layer number="30" name="bStop" color="7" fill="6" visible="no" active="yes"/>
 <layer number="31" name="tCream" color="7" fill="4" visible="no" active="yes"/>
-<layer number="32" name="bCream" color="7" fill="5" visible="yes" active="yes"/>
+<layer number="32" name="bCream" color="7" fill="5" visible="no" active="yes"/>
 <layer number="33" name="tFinish" color="6" fill="3" visible="no" active="yes"/>
 <layer number="34" name="bFinish" color="6" fill="6" visible="no" active="yes"/>
 <layer number="35" name="tGlue" color="7" fill="4" visible="no" active="yes"/>
 <layer number="36" name="bGlue" color="7" fill="5" visible="no" active="yes"/>
 <layer number="37" name="tTest" color="7" fill="1" visible="no" active="yes"/>
 <layer number="38" name="bTest" color="7" fill="1" visible="no" active="yes"/>
-<layer number="39" name="tKeepout" color="4" fill="11" visible="no" active="yes"/>
-<layer number="40" name="bKeepout" color="1" fill="11" visible="no" active="yes"/>
+<layer number="39" name="tKeepout" color="4" fill="11" visible="yes" active="yes"/>
+<layer number="40" name="bKeepout" color="1" fill="11" visible="yes" active="yes"/>
 <layer number="41" name="tRestrict" color="4" fill="10" visible="no" active="yes"/>
 <layer number="42" name="bRestrict" color="1" fill="10" visible="no" active="yes"/>
 <layer number="43" name="vRestrict" color="2" fill="10" visible="no" active="yes"/>
 <layer number="44" name="Drills" color="7" fill="1" visible="no" active="yes"/>
-<layer number="45" name="Holes" color="7" fill="1" visible="yes" active="yes"/>
+<layer number="45" name="Holes" color="7" fill="1" visible="no" active="yes"/>
 <layer number="46" name="Milling" color="3" fill="1" visible="no" active="yes"/>
 <layer number="47" name="Measures" color="7" fill="1" visible="no" active="yes"/>
 <layer number="48" name="Document" color="7" fill="1" visible="no" active="yes"/>
@@ -213,7 +213,6 @@ PU</text>
 <wire x1="-5.04825" y1="26.67" x2="33.02" y2="26.67" width="0.254" layer="51"/>
 <wire x1="-5.04825" y1="36.195" x2="43.18" y2="36.195" width="0.254" layer="51"/>
 <wire x1="-5.04825" y1="17.224375" x2="43.18" y2="17.224375" width="0.254" layer="51"/>
-<rectangle x1="10.033" y1="35.56" x2="10.287" y2="39.37" layer="51"/>
 <wire x1="15.24" y1="35.56" x2="5.08" y2="35.56" width="0.2032" layer="22"/>
 <wire x1="19.05" y1="17.78" x2="1.27" y2="17.78" width="0.2032" layer="22"/>
 <polygon width="0.0254" layer="30">
@@ -241,8 +240,6 @@ PU</text>
 </polygon>
 <text x="43.18" y="25.4" size="1.778" layer="51" font="vector" ratio="15">These lines depict the width of
 typical TO-220 heatsinks.</text>
-<rectangle x1="12.40155" y1="35.56" x2="12.65555" y2="39.37" layer="51"/>
-<rectangle x1="7.6708" y1="35.56" x2="7.9248" y2="39.37" layer="51"/>
 <dimension x1="-1.27" y1="26.67" x2="-1.27" y2="0" x3="-10.16" y3="13.335" textsize="1.778" textratio="15" layer="47" dtype="vertical" unit="inch"/>
 <dimension x1="-1.27" y1="2.54" x2="-1.27" y2="0" x3="-6.35" y3="1.27" textsize="1.778" textratio="15" layer="47" dtype="vertical" unit="inch"/>
 <dimension x1="2.54" y1="-1.3096875" x2="0" y2="-1.27" x3="1.27" y3="-5.08" textsize="1.778" textratio="15" layer="47" dtype="horizontal" unit="inch"/>
@@ -288,13 +285,17 @@ typical TO-220 heatsinks.</text>
 <vertex x="8.9296875" y="26.67" curve="-90"/>
 <vertex x="6.35" y="24.0903125" curve="-90"/>
 </polygon>
-<text x="1.27" y="-32.1071875" size="1.778" layer="51" font="vector" align="center-left">Version 1.6.1</text>
+<text x="2.921" y="-29.6941875" size="1.778" layer="51" font="vector" align="center-left">Version 2.0</text>
 <wire x1="10.16" y1="37.973" x2="10.16" y2="34.925" width="0.254" layer="21"/>
 <wire x1="15.24" y1="37.973" x2="15.24" y2="34.925" width="0.254" layer="21"/>
 <wire x1="5.08" y1="37.973" x2="5.08" y2="34.925" width="0.254" layer="21"/>
 <wire x1="5.08" y1="37.973" x2="5.08" y2="36.195" width="0.254" layer="22"/>
 <wire x1="10.16" y1="37.973" x2="10.16" y2="36.195" width="0.254" layer="22"/>
 <wire x1="15.24" y1="37.973" x2="15.24" y2="36.195" width="0.254" layer="22"/>
+<circle x="11.8618" y="33.2486" radius="0.113590625" width="0.254" layer="21"/>
+<circle x="16.9926" y="25.1714" radius="0.113590625" width="0.254" layer="21"/>
+<text x="4.2545" y="16.637" size="0.8128" layer="21" font="vector" ratio="15" rot="R90" align="center">Out</text>
+<text x="4.2545" y="13.97" size="0.8128" layer="21" font="vector" ratio="15" rot="R270" align="center">In</text>
 </plain>
 <libraries>
 <library name="SparkFun-Capacitors">
@@ -3064,12 +3065,12 @@ These rules have been curated by SparkFuns DFM commitee. After doing much resear
 <wire x1="10.874375" y1="8.493125" x2="11.43" y2="7.9375" width="0.254" layer="1"/>
 <wire x1="11.43" y1="7.9375" x2="11.43" y2="6.429375" width="0.254" layer="1"/>
 <wire x1="3.175" y1="19.05" x2="3.413125" y2="19.288125" width="0.254" layer="16"/>
-<wire x1="14.605" y1="5.715" x2="13.890625" y2="5.715" width="0.254" layer="1"/>
+<wire x1="14.605" y1="5.715" x2="13.763625" y2="5.715" width="0.254" layer="1"/>
 <wire x1="3.413125" y1="19.288125" x2="3.4925" y2="19.3675" width="0.254" layer="1"/>
 <wire x1="3.4925" y1="19.3675" x2="4.60375" y2="19.3675" width="0.254" layer="1"/>
 <wire x1="4.60375" y1="19.3675" x2="4.94125" y2="19.03" width="0.254" layer="1"/>
 <wire x1="4.94125" y1="19.03" x2="5.89" y2="19.03" width="0.254" layer="1"/>
-<wire x1="13.890625" y1="5.715" x2="13.636625" y2="5.588" width="0.254" layer="1"/>
+<wire x1="13.763625" y1="5.715" x2="13.636625" y2="5.588" width="0.254" layer="1"/>
 <wire x1="13.636625" y1="5.588" x2="12.271375" y2="5.588" width="0.254" layer="1"/>
 <wire x1="12.271375" y1="5.588" x2="11.43" y2="6.429375" width="0.254" layer="1"/>
 </signal>
@@ -3269,6 +3270,12 @@ These rules have been curated by SparkFuns DFM commitee. After doing much resear
 </signal>
 </signals>
 <errors>
+<approved hash="3,1,9a303d023d609a52"/>
+<approved hash="3,1,70e90a1b0ae8701a"/>
+<approved hash="3,1,0d06387834730905"/>
+<approved hash="3,1,4602d4705870e202"/>
+<approved hash="3,1,82022870b4700602"/>
+<approved hash="3,1,190a14f408f73d01"/>
 <approved hash="7,39,c400580f85919185"/>
 <approved hash="7,39,c396b82718cbf9d0"/>
 <approved hash="7,39,f01ddff12300f4cb"/>
@@ -3279,18 +3286,6 @@ These rules have been curated by SparkFuns DFM commitee. After doing much resear
 <approved hash="7,39,9cc5e54103c5d23b"/>
 <approved hash="7,39,d392b029ddded033"/>
 <approved hash="7,39,b9756d5675380fb2"/>
-<approved hash="3,1,38583a5a3a5a3858"/>
-<approved hash="3,1,e1c3e3c1e3c1e1c3"/>
-<approved hash="3,1,eed8eed8ecdaecda"/>
-<approved hash="3,1,994699469b441b44"/>
-<approved hash="3,1,0b5e8b5e895c895c"/>
-<approved hash="3,1,fca0fca0fea2fea2"/>
-<approved hash="3,1,9a303d023d609a52"/>
-<approved hash="3,1,70e90a1b0ae8701a"/>
-<approved hash="3,1,0d06387834730905"/>
-<approved hash="3,1,4602d4705870e202"/>
-<approved hash="3,1,82022870b4700602"/>
-<approved hash="3,1,190a14f408f73d01"/>
 </errors>
 </board>
 </drawing>
