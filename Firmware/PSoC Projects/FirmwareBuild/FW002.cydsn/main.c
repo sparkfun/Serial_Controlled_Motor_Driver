@@ -11,7 +11,7 @@
 */
 #include <project.h>
 #include "devRegisters.h"
-
+#include "charMath.h"
 
 //To use software to define the config bits, uncomment this #define and set value below.
 //#define USE_SW_CONFIG_BITS
@@ -576,7 +576,7 @@ int main()
     
     uint8_t addressPointer = 0;
         
-    char ch;
+    //char ch;
     uint8_t rxBufferPtr = 0;
 
     char rxBuffer[20];
@@ -586,54 +586,173 @@ int main()
     {
         if(CONFIG_BITS == 0) //UART
         {
-            int8_t motorChannel = -1;
-            uint8_t motorDrive = 0;
-            ch = USER_PORT_UartGetChar();
-            
-            if(ch == 'M') //new command
+            //General:
+            //Save data (echo it) until we get a delimiter
+            //Parse data and take action
+            char ch = USER_PORT_UartGetChar();
+            if( ch )
             {
-                rxBufferPtr = 0;
-
-                USER_PORT_UartPutChar('M');
-            }
-            else if( ((ch >= '0')&&(ch <= '9'))||(ch == ' '))//valid char
-            {
-                rxBuffer[rxBufferPtr] = ch;
-                if(rxBufferPtr < 20)//contain it
+                //Save data
+                if( rxBufferPtr < 19)
                 {
+                    rxBuffer[rxBufferPtr] = ch;
                     rxBufferPtr++;
                 }
+                else
+                {
+                    //Overwrite last
+                    rxBuffer[rxBufferPtr - 1] = ch;
+                    USER_PORT_UartPutChar('o');
+                    USER_PORT_UartPutChar('v');
+                    USER_PORT_UartPutChar('f');
+                    USER_PORT_UartPutChar('\r');
+                    USER_PORT_UartPutChar('\n');
+                }
+                //Echo
                 USER_PORT_UartPutChar(ch);
             }
-            else if((ch == '\n')||(ch == '\r'))//end of command
+            //if((rxBuffer[rxBufferPtr - 1] == '\n')||(rxBuffer[rxBufferPtr - 1] == '\r'))//Delimiter found
+            if(rxBuffer[rxBufferPtr - 1] == '\n')//Delimiter found, don't delimit \r
             {
-                rxBufferPtr--;
-                USER_PORT_UartPutChar('E');
-                motorChannel = rxBuffer[0] - 48;
-                uint8_t mult = 1;
-                while(rxBuffer[rxBufferPtr] != ' ')
+                uint8_t errorFlag = 0;
+                uint8_t dirPtr = 2;
+                uint8_t valLsd = 2;
+                int16_t motorNum = 0;
+                int16_t motorDir = 0;
+                int16_t motorDrive = 0;
+                
+                //Do some action
+                //  Branch based of type of message
+                switch(rxBuffer[0])
                 {
-                    motorDrive += mult*(rxBuffer[rxBufferPtr] - 48);
-                    mult = mult * 10;
-                    rxBufferPtr--;
-                    if(rxBufferPtr < 2)
+                    case 'M':
+                    //Find direction
+                    if(( rxBuffer[dirPtr] != 'F' )&&( rxBuffer[dirPtr] != 'R' )) // not here
                     {
-                        rxBuffer[rxBufferPtr] = ' ';
+                        dirPtr++;
                     }
-                }
-                USER_PORT_UartPutChar(motorDrive);
-                switch(motorChannel)
-                {
-                    case 0:
-                    PWM_1_WriteCompare(motorDrive * 100);
+                    if(( rxBuffer[dirPtr] != 'F' )&&( rxBuffer[dirPtr] != 'R' )) // not here
+                    {
+                        //Bail, otherwise dirPtr now points to direction
+                        errorFlag = 1;
+                        break;
+                    }
+                    //Get motor number
+                    //  Get the one to the left of direction
+                    motorNum = char2hex(rxBuffer[dirPtr - 1]);
+                    //  If direction in 3 spot, get 10s place
+                    if( dirPtr == 3 )
+                    {
+                        motorNum += 10 * char2hex(rxBuffer[dirPtr - 2]);
+                    }
+                    //Parse value
+                    // First seek number of places
+                    for(valLsd = dirPtr + 1; ((( rxBuffer[valLsd + 1] != '\n' )&&( rxBuffer[valLsd + 1] != '\r' ))&&( valLsd != (dirPtr + 3))); valLsd++);
+                    // Now valLsd should be the least significant digit of the 0-100 number
+                    uint16_t driveMultiplier = 1;
+                    while(dirPtr != valLsd)
+                    {
+                        motorDrive += char2hex(rxBuffer[valLsd]) * driveMultiplier;
+                        valLsd--;
+                        driveMultiplier *= 10;
+                    }
+                    if( rxBuffer[dirPtr] == 'F' )
+                    {
+                        motorDir = 1;
+                    }
+                    else
+                    {
+                        motorDir = -1;
+                    }
+                    if(motorNum == 0)
+                    {
+                        writeDevRegister(SCMD_MA_DRIVE, motorDir * ((motorDrive * 127) / 100) + 128);
+                    }
+                    if(motorNum == 1)
+                    {
+                        writeDevRegister(SCMD_MB_DRIVE, motorDir * ((motorDrive * 127) / 100) + 128);
+                    }
                     break;
-                    case 1:
-                    PWM_2_WriteCompare(motorDrive * 100);
+                    case 'W':
+                    break;
+                    case 'R':
+                    break;
+                    case 'B':
+                    break;
+                    //In the special case of carriage controls in the first position, don't complain
+                    case '\r':
+                    break;
+                    case '\n':
                     break;
                     default:
+                    USER_PORT_UartPutChar('i');
+                    USER_PORT_UartPutChar('n');
+                    USER_PORT_UartPutChar('v');
+                    USER_PORT_UartPutChar('\r');
+                    USER_PORT_UartPutChar('\n');
                     break;
                 }
+                if( errorFlag )
+                {
+                    USER_PORT_UartPutChar('f');
+                    USER_PORT_UartPutChar('m');
+                    USER_PORT_UartPutChar('t');
+                    USER_PORT_UartPutChar('\r');
+                    USER_PORT_UartPutChar('\n');
+                }
+                //Reset the buffers
+                rxBufferPtr = 0;
+                //Clear that char (in case it is delimiter)
+                rxBuffer[rxBufferPtr] = 0;
             }
+            //int8_t motorChannel = -1;
+            //uint8_t motorDrive = 0;
+            //ch = USER_PORT_UartGetChar();
+            //
+            //if(ch == 'M') //new command
+            //{
+            //    rxBufferPtr = 0;
+            //
+            //    USER_PORT_UartPutChar('M');
+            //}
+            //else if( ((ch >= '0')&&(ch <= '9'))||(ch == ' '))//valid char
+            //{
+            //    rxBuffer[rxBufferPtr] = ch;
+            //    if(rxBufferPtr < 20)//contain it
+            //    {
+            //        rxBufferPtr++;
+            //    }
+            //    USER_PORT_UartPutChar(ch);
+            //}
+            //else if((ch == '\n')||(ch == '\r'))//end of command
+            //{
+            //    rxBufferPtr--;
+            //    USER_PORT_UartPutChar('E');
+            //    motorChannel = rxBuffer[0] - 48;
+            //    uint8_t mult = 1;
+            //    while(rxBuffer[rxBufferPtr] != ' ')
+            //    {
+            //        motorDrive += mult*(rxBuffer[rxBufferPtr] - 48);
+            //        mult = mult * 10;
+            //        rxBufferPtr--;
+            //        if(rxBufferPtr < 2)
+            //        {
+            //            rxBuffer[rxBufferPtr] = ' ';
+            //        }
+            //    }
+            //    USER_PORT_UartPutChar(motorDrive);
+            //    switch(motorChannel)
+            //    {
+            //        case 0:
+            //        PWM_1_WriteCompare(motorDrive * 100);
+            //        break;
+            //        case 1:
+            //        PWM_2_WriteCompare(motorDrive * 100);
+            //        break;
+            //        default:
+            //        break;
+            //    }
+            //}
         }
         if(CONFIG_BITS == 1) //SPI
         {
