@@ -10,9 +10,14 @@ The serial interface is easy to use and it lets the user select an individual mo
 
 Repository Contents
 -------------------
-* **/Firmware** - Firmware for driving the motor driver 
-* **/Hardware** - All Eagle design files (.brd, .sch)
-
+* **/Documentation**
+    * ConfigBits.ods - Full list of jumper configurations
+    * RegisterMap.ods - Description, and listing, of user-facing memory locations
+    * Test Plan.x, Test Record.x, TPx.x - various test documents
+* **/Firmware** - PSoC projects of embedded firmware
+* **/Hardware** - Eagle design files (.brd, .sch)
+* **/Production** - Production files
+* **/Software** - Arduino sketches showing use-of the SCMD
 Version History
 ---------------
 * [HW_1.2_FW_1.2](https://github.com/sparkfun/Serial_Controlled_Motor_Driver/tree/HW_1.2_FW_1.2) - Original product
