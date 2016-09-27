@@ -38,6 +38,8 @@ volatile uint8_t CONFIG_BITS = 0x3;
 #define SCMD_UPORT_TIME	     0x09
 #define SCMD_SLV_POLL_CNT    0x0A
 #define SCMD_SLV_TOP_ADDR    0x0B
+#define SCMD_FSAFE_TIME      0x0C
+#define SCMD_FSAFE_FAULTS    0x0D
 
 #define SCMD_SLAVE_ID        0x10
 #define SCMD_REM_ADDR        0x11
@@ -46,9 +48,6 @@ volatile uint8_t CONFIG_BITS = 0x3;
 #define SCMD_REM_DATA_RD     0x14
 #define SCMD_REM_WRITE       0x15
 #define SCMD_REM_READ        0x16
-
-#define SCMD_FSAFE_TIME      0x18
-#define SCMD_FSAFE_FAULTS    0x19
 
 #define SCMD_MA_DRIVE        0x20
 #define SCMD_MB_DRIVE        0x21
@@ -620,7 +619,8 @@ int main()
                 int16_t motorNum = 0;
                 int16_t motorDir = 0;
                 int16_t motorDrive = 0;
-                
+                uint8_t addressTemp = 0;
+                uint8_t dataTemp = 0;
                 //Do some action
                 //  Branch based of type of message
                 switch(rxBuffer[0])
@@ -674,10 +674,38 @@ int main()
                     }
                     break;
                     case 'W':
+                    //Check for hex
+                    if( ishex(rxBuffer[1])&&ishex(rxBuffer[2])&&ishex(rxBuffer[3])&&ishex(rxBuffer[4]) )
+                    {
+                        addressTemp = char2hex(rxBuffer[1]) << 4 | char2hex(rxBuffer[2]);
+                        dataTemp = char2hex(rxBuffer[3]) << 4 | char2hex(rxBuffer[4]);
+                        writeDevRegister(addressTemp, dataTemp);
+                        USER_PORT_UartPutChar('\r');
+                        USER_PORT_UartPutChar('\n');    
+                    }
+                    else
+                    {
+                        //is not all hex
+                        errorFlag = 1;
+                    }                    
                     break;
                     case 'R':
+                    //Check for hex
+                    if( ishex(rxBuffer[1])&&ishex(rxBuffer[2]) )
+                    {
+                        addressTemp = char2hex(rxBuffer[1]) << 4 | char2hex(rxBuffer[2]);
+                        dataTemp = readDevRegister(addressTemp);
+                        USER_PORT_UartPutChar(hex2char((dataTemp&0xF0) >> 4));
+                        USER_PORT_UartPutChar(hex2char(dataTemp&0x0F));
+                    }
+                    else
+                    {
+                        //is not all hex
+                        errorFlag = 1;
+                    }
                     break;
-                    case 'B':
+                    //Change baud rate
+                    case 'B': 
                     break;
                     //In the special case of carriage controls in the first position, don't complain
                     case '\r':
