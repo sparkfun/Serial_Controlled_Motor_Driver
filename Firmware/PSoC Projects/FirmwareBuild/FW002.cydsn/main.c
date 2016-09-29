@@ -26,63 +26,78 @@ volatile uint8_t CONFIG_BITS = 0x3;
 #define START_SLAVE_ADDR 0x50//Start address of slaves
 #define MAX_SLAVE_ADDR 0x5F//Max address of slaves
 
-#define SCMD_STATUS          0x00
-#define SCMD_ID              0x01
-#define SCMD_SLAVE_ADDR      0x02
-#define SCMD_CONFIG_BITS     0x03
-#define SCMD_I2C_FAULTS      0x04
-#define SCMD_I2C_RD_ERR      0x05
-#define SCMD_I2C_WR_ERR      0x06
-#define SCMD_SPI_FAULTS      0x07
-#define SCMD_UART_FAULTS     0x08
-#define SCMD_UPORT_TIME	     0x09
-#define SCMD_SLV_POLL_CNT    0x0A
-#define SCMD_SLV_TOP_ADDR    0x0B
-#define SCMD_FSAFE_TIME      0x0C
-#define SCMD_FSAFE_FAULTS    0x0D
+#define SCMD_STATUS                0x00
+#define SCMD_ID                    0x01
+#define SCMD_SLAVE_ADDR            0x02
+#define SCMD_CONFIG_BITS           0x03
+#define SCMD_I2C_FAULTS            0x04
+#define SCMD_I2C_RD_ERR            0x05
+#define SCMD_I2C_WR_ERR            0x06
+#define SCMD_SPI_FAULTS            0x07
+#define SCMD_UART_FAULTS           0x08
+#define SCMD_UPORT_TIME	           0x09
+#define SCMD_SLV_POLL_CNT          0x0A
+#define SCMD_SLV_TOP_ADDR          0x0B
+#define SCMD_FSAFE_TIME            0x0C
+#define SCMD_FSAFE_FAULTS          0x0D
+                                  
+#define SCMD_SLAVE_ID              0x10
+#define SCMD_REM_ADDR              0x11
+#define SCMD_REM_OFFSET            0x12
+#define SCMD_REM_DATA_WR           0x13
+#define SCMD_REM_DATA_RD           0x14
+#define SCMD_REM_WRITE             0x15
+#define SCMD_REM_READ              0x16
 
-#define SCMD_SLAVE_ID        0x10
-#define SCMD_REM_ADDR        0x11
-#define SCMD_REM_OFFSET      0x12
-#define SCMD_REM_DATA_WR     0x13
-#define SCMD_REM_DATA_RD     0x14
-#define SCMD_REM_WRITE       0x15
-#define SCMD_REM_READ        0x16
+#define SCMD_MOTOR_A_INVERT        0x17
+#define SCMD_MOTOR_B_INVERT        0x18
+#define SCMD_BRIDGE                0x19
 
-#define SCMD_MA_DRIVE        0x20
-#define SCMD_MB_DRIVE        0x21
-#define SCMD_S1A_DRIVE       0x22
-#define SCMD_S1B_DRIVE       0x23
-#define SCMD_S2A_DRIVE       0x24
-#define SCMD_S2B_DRIVE       0x25
-#define SCMD_S3A_DRIVE       0x26
-#define SCMD_S3B_DRIVE       0x27
-#define SCMD_S4A_DRIVE       0x28
-#define SCMD_S4B_DRIVE       0x29
-#define SCMD_S5A_DRIVE       0x2A
-#define SCMD_S5B_DRIVE       0x2B
-#define SCMD_S6A_DRIVE       0x2C
-#define SCMD_S6B_DRIVE       0x2D
-#define SCMD_S7A_DRIVE       0x2E
-#define SCMD_S7B_DRIVE       0x2F
-#define SCMD_S8A_DRIVE       0x30
-#define SCMD_S8B_DRIVE       0x31
-#define SCMD_S9A_DRIVE       0x32
-#define SCMD_S9B_DRIVE       0x33
-#define SCMD_S10A_DRIVE       0x34
-#define SCMD_S10B_DRIVE       0x35
-#define SCMD_S11A_DRIVE       0x36
-#define SCMD_S11B_DRIVE       0x37
-#define SCMD_S12A_DRIVE       0x38
-#define SCMD_S12B_DRIVE       0x39
-#define SCMD_S13A_DRIVE       0x3A
-#define SCMD_S13B_DRIVE       0x3B
-#define SCMD_S14A_DRIVE       0x3C
-#define SCMD_S14B_DRIVE       0x3D
-#define SCMD_S15A_DRIVE       0x3E
-#define SCMD_S15B_DRIVE       0x3F
-#define SCMD_S16A_DRIVE       0x40
-#define SCMD_S16B_DRIVE       0x41
+#define SCMD_BAUD_RATE             0x1E
+                                
+#define SCMD_MA_DRIVE              0x20
+#define SCMD_MB_DRIVE              0x21
+#define SCMD_S1A_DRIVE             0x22
+#define SCMD_S1B_DRIVE             0x23
+#define SCMD_S2A_DRIVE             0x24
+#define SCMD_S2B_DRIVE             0x25
+#define SCMD_S3A_DRIVE             0x26
+#define SCMD_S3B_DRIVE             0x27
+#define SCMD_S4A_DRIVE             0x28
+#define SCMD_S4B_DRIVE             0x29
+#define SCMD_S5A_DRIVE             0x2A
+#define SCMD_S5B_DRIVE             0x2B
+#define SCMD_S6A_DRIVE             0x2C
+#define SCMD_S6B_DRIVE             0x2D
+#define SCMD_S7A_DRIVE             0x2E
+#define SCMD_S7B_DRIVE             0x2F
+#define SCMD_S8A_DRIVE             0x30
+#define SCMD_S8B_DRIVE             0x31
+#define SCMD_S9A_DRIVE             0x32
+#define SCMD_S9B_DRIVE             0x33
+#define SCMD_S10A_DRIVE            0x34
+#define SCMD_S10B_DRIVE            0x35
+#define SCMD_S11A_DRIVE            0x36
+#define SCMD_S11B_DRIVE            0x37
+#define SCMD_S12A_DRIVE            0x38
+#define SCMD_S12B_DRIVE            0x39
+#define SCMD_S13A_DRIVE            0x3A
+#define SCMD_S13B_DRIVE            0x3B
+#define SCMD_S14A_DRIVE            0x3C
+#define SCMD_S14B_DRIVE            0x3D
+#define SCMD_S15A_DRIVE            0x3E
+#define SCMD_S15B_DRIVE            0x3F
+#define SCMD_S16A_DRIVE            0x40
+#define SCMD_S16B_DRIVE            0x41
+
+#define SCMD_INV_2_9               0x60
+#define SCMD_INV_10_17             0x61
+#define SCMD_INV_18_25             0x62
+#define SCMD_INV_26_33             0x63
+#define SCMD_BRIDGE_SLV_L          0x64
+#define SCMD_BRIDGE_SLV_H          0x65
+
+#define SCMD_DRIVER_ENABLE         0x70
 
 
 
@@ -211,7 +226,8 @@ const EXPANSION_PORT_I2C_INIT_STRUCT expansionConfigI2CMaster =
 /* The clock divider value written into the register has to be one less from calculated */
 #define SCBCLK_I2C_DIVIDER (14u) // I2C Slave: 100 kbps Required SCBCLK = 1.6 MHz, Div = 15  ----- good for 100kHZ
 //#define SCBCLK_I2C_DIVIDER (4u) // I2C Slave: 100 kbps Required SCBCLK = 1.6 MHz, Div = 15  ----- Kind of ok for 400kHZ
-#define SCBCLK_UART_DIVIDER (12u) // UART: 115200 kbps with OVS = 16. Required SCBCLK = 1.846 MHz, Div = 13
+//#define SCBCLK_UART_DIVIDER (12u) // UART: 115200 kbps with OVS = 16. Required SCBCLK = 1.846 MHz, Div = 13
+uint16_t SCBCLK_UART_DIVIDER = 12; // UART: 115200 kbps with OVS = 16. Required SCBCLK = 1.846 MHz, Div = 13
 #define SCBCLK_SPI_DIVIDER (1u) //Max for now -- Does this even matter?
 
 /* Operation mode: I2C slave or UART */
@@ -472,6 +488,7 @@ int main()
     writeDevRegister(SCMD_REM_ADDR, 0x4A);
     writeDevRegister(SCMD_SLV_POLL_CNT, 0);
     writeDevRegister(SCMD_SLAVE_ADDR, 0x10); // No one should ever ask for data on 0x10
+    writeDevRegister(SCMD_BAUD_RATE, 0x07);
     writeDevRegister(SCMD_S1A_DRIVE, 0x80);
     writeDevRegister(SCMD_S1B_DRIVE, 0x80);
     writeDevRegister(SCMD_S2A_DRIVE, 0x80);
@@ -522,8 +539,6 @@ int main()
     
     
     MODE_Write(1);
-    A_EN_Write(1);
-    B_EN_Write(1);
     
     //Debug timer
     DEBUG_CLK_Start();
@@ -591,6 +606,8 @@ int main()
             char ch = USER_PORT_UartGetChar();
             if( ch )
             {
+                //Show data on LED
+                LED_PULSE_Write(1);
                 //Save data
                 if( rxBufferPtr < 19)
                 {
@@ -609,29 +626,34 @@ int main()
                 }
                 //Echo
                 USER_PORT_UartPutChar(ch);
+                LED_PULSE_Write(0);
             }
             //if((rxBuffer[rxBufferPtr - 1] == '\n')||(rxBuffer[rxBufferPtr - 1] == '\r'))//Delimiter found
             if(rxBuffer[rxBufferPtr - 1] == '\n')//Delimiter found, don't delimit \r
             {
+                LED_PULSE_Write(1);
                 uint8_t errorFlag = 0;
                 uint8_t dirPtr = 2;
                 uint8_t valLsd = 2;
                 int16_t motorNum = 0;
                 int16_t motorDir = 0;
                 int16_t motorDrive = 0;
+                int16_t slaveNum = 0;
                 uint8_t addressTemp = 0;
                 uint8_t dataTemp = 0;
+                uint8_t maxMotorCount = 2;
+                uint8_t slaveAddrTemp = 0x50;
                 //Do some action
                 //  Branch based of type of message
                 switch(rxBuffer[0])
                 {
                     case 'M':
                     //Find direction
-                    if(( rxBuffer[dirPtr] != 'F' )&&( rxBuffer[dirPtr] != 'R' )) // not here
+                    if(( rxBuffer[dirPtr] != 'F' )&&( rxBuffer[dirPtr] != 'R' )&&( rxBuffer[dirPtr] != 'S' )) // not here
                     {
                         dirPtr++;
                     }
-                    if(( rxBuffer[dirPtr] != 'F' )&&( rxBuffer[dirPtr] != 'R' )) // not here
+                    if(( rxBuffer[dirPtr] != 'F' )&&( rxBuffer[dirPtr] != 'R' )&&( rxBuffer[dirPtr] != 'S' )) // not here
                     {
                         //Bail, otherwise dirPtr now points to direction
                         errorFlag = 1;
@@ -656,21 +678,76 @@ int main()
                         valLsd--;
                         driveMultiplier *= 10;
                     }
-                    if( rxBuffer[dirPtr] == 'F' )
+                    //Check for polarity switching
+                    if( rxBuffer[dirPtr] == 'S' )
                     {
-                        motorDir = 1;
+                        //Check if motor is in range
+                        maxMotorCount = (readDevRegister(SCMD_SLV_TOP_ADDR) - 0x50 + 1 ) * 2 + 2;
+                        if( motorNum < maxMotorCount )
+                        {
+                        }
+                        else
+                        {
+                            errorFlag = 2;
+                            break;
+                        }
+                        //Now write to the correct place
+                        if(motorNum == 0)
+                        {
+                            writeDevRegister(SCMD_MOTOR_A_INVERT, readDevRegister(SCMD_MOTOR_A_INVERT) ^ 0x01);
+                        }
+                        else if(motorNum == 1)
+                        {
+                            writeDevRegister(SCMD_MOTOR_B_INVERT, readDevRegister(SCMD_MOTOR_B_INVERT) ^ 0x01);
+                        }
+                        else if(motorNum < 10) //must be 2 through 9
+                        {
+                            dataTemp = readDevRegister(SCMD_INV_2_9);
+                            dataTemp ^= 0x01 << (motorNum - 2);
+                            writeDevRegister(SCMD_INV_2_9, dataTemp);
+                        }
+                        else if(motorNum < 18) //must be 10 through 17
+                        {
+                            dataTemp = readDevRegister(SCMD_INV_2_9);
+                            dataTemp ^= 0x01 << (motorNum - 10);
+                            writeDevRegister(SCMD_INV_2_9, dataTemp);
+                        }
+                        else if(motorNum < 26) //must be 18 through 25
+                        {
+                            dataTemp = readDevRegister(SCMD_INV_2_9);
+                            dataTemp ^= 0x01 << (motorNum - 18);
+                            writeDevRegister(SCMD_INV_2_9, dataTemp);
+                        }
+                        else if(motorNum < 34) //must be 26 through 33
+                        {
+                            dataTemp = readDevRegister(SCMD_INV_2_9);
+                            dataTemp ^= 0x01 << (motorNum - 26);
+                            writeDevRegister(SCMD_INV_2_9, dataTemp);
+                        }
+
                     }
                     else
                     {
-                        motorDir = -1;
-                    }
-                    if(motorNum == 0)
-                    {
-                        writeDevRegister(SCMD_MA_DRIVE, motorDir * ((motorDrive * 127) / 100) + 128);
-                    }
-                    if(motorNum == 1)
-                    {
-                        writeDevRegister(SCMD_MB_DRIVE, motorDir * ((motorDrive * 127) / 100) + 128);
+                        if( rxBuffer[dirPtr] == 'F' )
+                        {
+                            motorDir = 1;
+                        }
+                        else
+                        {
+                            motorDir = -1;
+                        }
+                        //Check if motor is in range
+                        maxMotorCount = (readDevRegister(SCMD_SLV_TOP_ADDR) - 0x50 + 1 ) * 2 + 2;
+                        if( motorNum < maxMotorCount )
+                        {
+                            //Perform remote write
+                            writeDevRegister(SCMD_MA_DRIVE + motorNum, motorDir * ((motorDrive * 127) / 100) + 128);
+                        }
+                        else
+                        {
+                            errorFlag = 2;
+                            break;
+                        }
                     }
                     break;
                     case 'W':
@@ -697,6 +774,8 @@ int main()
                         dataTemp = readDevRegister(addressTemp);
                         USER_PORT_UartPutChar(hex2char((dataTemp&0xF0) >> 4));
                         USER_PORT_UartPutChar(hex2char(dataTemp&0x0F));
+                        USER_PORT_UartPutChar('\r');
+                        USER_PORT_UartPutChar('\n');
                     }
                     else
                     {
@@ -705,7 +784,157 @@ int main()
                     }
                     break;
                     //Change baud rate
-                    case 'B': 
+                    case 'U':
+                    //Check for valid next char
+                    if( ishex(rxBuffer[1]) )
+                    {
+                        switch(rxBuffer[1])
+                        {
+                            case '1':
+                            USER_PORT_UartPutChar('2');
+                            USER_PORT_UartPutChar('4');
+                            USER_PORT_UartPutChar('0');
+                            USER_PORT_UartPutChar('0');
+                            USER_PORT_UartPutChar('\r');
+                            USER_PORT_UartPutChar('\n');
+                            CyDelay(400);
+                            SCBCLK_UART_DIVIDER = 625;
+                            SetScbConfiguration(OP_MODE_UART);
+                            break;
+                            case '2':
+                            USER_PORT_UartPutChar('4');
+                            USER_PORT_UartPutChar('8');
+                            USER_PORT_UartPutChar('0');
+                            USER_PORT_UartPutChar('0');
+                            USER_PORT_UartPutChar('\r');
+                            USER_PORT_UartPutChar('\n');
+                            CyDelay(400);
+                            SCBCLK_UART_DIVIDER = 312;
+                            SetScbConfiguration(OP_MODE_UART);
+                            break;
+                            case '3':
+                            USER_PORT_UartPutChar('9');
+                            USER_PORT_UartPutChar('6');
+                            USER_PORT_UartPutChar('0');
+                            USER_PORT_UartPutChar('0');
+                            USER_PORT_UartPutChar('\r');
+                            USER_PORT_UartPutChar('\n');
+                            CyDelay(400);
+                            SCBCLK_UART_DIVIDER = 156;
+                            SetScbConfiguration(OP_MODE_UART);
+                            break;
+                            case '4':
+                            USER_PORT_UartPutChar('1');
+                            USER_PORT_UartPutChar('4');
+                            USER_PORT_UartPutChar('4');
+                            USER_PORT_UartPutChar('0');
+                            USER_PORT_UartPutChar('0');
+                            USER_PORT_UartPutChar('\r');
+                            USER_PORT_UartPutChar('\n');
+                            CyDelay(400);
+                            SCBCLK_UART_DIVIDER = 102;
+                            SetScbConfiguration(OP_MODE_UART);
+                            break;
+                            case '5':
+                            USER_PORT_UartPutChar('1');
+                            USER_PORT_UartPutChar('9');
+                            USER_PORT_UartPutChar('2');
+                            USER_PORT_UartPutChar('0');
+                            USER_PORT_UartPutChar('0');
+                            USER_PORT_UartPutChar('\r');
+                            USER_PORT_UartPutChar('\n');
+                            CyDelay(400);
+                            SCBCLK_UART_DIVIDER = 77;
+                            SetScbConfiguration(OP_MODE_UART);
+                            break;
+                            case '6':
+                            USER_PORT_UartPutChar('3');
+                            USER_PORT_UartPutChar('8');
+                            USER_PORT_UartPutChar('4');
+                            USER_PORT_UartPutChar('0');
+                            USER_PORT_UartPutChar('0');
+                            USER_PORT_UartPutChar('\r');
+                            USER_PORT_UartPutChar('\n');
+                            CyDelay(400);
+                            SCBCLK_UART_DIVIDER = 38;
+                            SetScbConfiguration(OP_MODE_UART);
+                            break;
+                            case '7':
+                            USER_PORT_UartPutChar('5');
+                            USER_PORT_UartPutChar('7');
+                            USER_PORT_UartPutChar('6');
+                            USER_PORT_UartPutChar('0');
+                            USER_PORT_UartPutChar('0');
+                            USER_PORT_UartPutChar('\r');
+                            USER_PORT_UartPutChar('\n');
+                            CyDelay(400);
+                            SCBCLK_UART_DIVIDER = 25;
+                            SetScbConfiguration(OP_MODE_UART);
+                            break;
+                            case '8':
+                            USER_PORT_UartPutChar('1');
+                            USER_PORT_UartPutChar('1');
+                            USER_PORT_UartPutChar('5');
+                            USER_PORT_UartPutChar('2');
+                            USER_PORT_UartPutChar('0');
+                            USER_PORT_UartPutChar('0');
+                            USER_PORT_UartPutChar('\r');
+                            USER_PORT_UartPutChar('\n');
+                            CyDelay(400);
+                            SCBCLK_UART_DIVIDER = 12;
+                            SetScbConfiguration(OP_MODE_UART);
+                            break;
+                            default:
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        errorFlag = 1;
+                        break;
+                    }
+                    break;
+                    case 'E': //Handle enable
+                    writeDevRegister(SCMD_DRIVER_ENABLE, readDevRegister(SCMD_DRIVER_ENABLE) ^ 0x01);
+                    break;
+                    case 'B': //Handle bridging 
+                    if( ishex(rxBuffer[1])&&ishex(rxBuffer[2])) //2 digits
+                    {
+                        slaveNum = char2hex(rxBuffer[2]);
+                        slaveNum += 10 * char2hex(rxBuffer[1]);
+                    }
+                    else if( ishex(rxBuffer[1]) ) //1 digit
+                    {
+                        slaveNum = char2hex(rxBuffer[1]);
+                    }
+                    else // no digits
+                    {
+                        errorFlag = 1;
+                        break;
+                    }
+                    //Motor number established; set regs accordingly
+                    if( slaveNum == 0 )
+                    {
+                        //Write local
+                        writeDevRegister(SCMD_BRIDGE, readDevRegister(SCMD_BRIDGE) ^ 0x01);
+                    }
+                    if( slaveNum < 9 )
+                    {
+                        dataTemp = readDevRegister(SCMD_BRIDGE_SLV_L);
+                        dataTemp ^= 0x01 << (slaveNum - 1);
+                        writeDevRegister(SCMD_BRIDGE_SLV_L, dataTemp);
+                    }
+                    else if( slaveNum < 17 )
+                    {
+                        dataTemp = readDevRegister(SCMD_BRIDGE_SLV_H);
+                        dataTemp ^= 0x01 << (slaveNum - 9);
+                        writeDevRegister(SCMD_BRIDGE_SLV_H, dataTemp);
+                    }
+                    else
+                    {
+                        errorFlag = 1;
+                        break;
+                    }
                     break;
                     //In the special case of carriage controls in the first position, don't complain
                     case '\r':
@@ -720,7 +949,7 @@ int main()
                     USER_PORT_UartPutChar('\n');
                     break;
                 }
-                if( errorFlag )
+                if( errorFlag == 1 )
                 {
                     USER_PORT_UartPutChar('f');
                     USER_PORT_UartPutChar('m');
@@ -728,59 +957,21 @@ int main()
                     USER_PORT_UartPutChar('\r');
                     USER_PORT_UartPutChar('\n');
                 }
+                if( errorFlag == 2 )
+                {
+                    USER_PORT_UartPutChar('n');
+                    USER_PORT_UartPutChar('o');
+                    USER_PORT_UartPutChar('m');
+                    USER_PORT_UartPutChar('\r');
+                    USER_PORT_UartPutChar('\n');
+                }
                 //Reset the buffers
                 rxBufferPtr = 0;
                 //Clear that char (in case it is delimiter)
                 rxBuffer[rxBufferPtr] = 0;
+                LED_PULSE_Write(0);
             }
-            //int8_t motorChannel = -1;
-            //uint8_t motorDrive = 0;
-            //ch = USER_PORT_UartGetChar();
-            //
-            //if(ch == 'M') //new command
-            //{
-            //    rxBufferPtr = 0;
-            //
-            //    USER_PORT_UartPutChar('M');
-            //}
-            //else if( ((ch >= '0')&&(ch <= '9'))||(ch == ' '))//valid char
-            //{
-            //    rxBuffer[rxBufferPtr] = ch;
-            //    if(rxBufferPtr < 20)//contain it
-            //    {
-            //        rxBufferPtr++;
-            //    }
-            //    USER_PORT_UartPutChar(ch);
-            //}
-            //else if((ch == '\n')||(ch == '\r'))//end of command
-            //{
-            //    rxBufferPtr--;
-            //    USER_PORT_UartPutChar('E');
-            //    motorChannel = rxBuffer[0] - 48;
-            //    uint8_t mult = 1;
-            //    while(rxBuffer[rxBufferPtr] != ' ')
-            //    {
-            //        motorDrive += mult*(rxBuffer[rxBufferPtr] - 48);
-            //        mult = mult * 10;
-            //        rxBufferPtr--;
-            //        if(rxBufferPtr < 2)
-            //        {
-            //            rxBuffer[rxBufferPtr] = ' ';
-            //        }
-            //    }
-            //    USER_PORT_UartPutChar(motorDrive);
-            //    switch(motorChannel)
-            //    {
-            //        case 0:
-            //        PWM_1_WriteCompare(motorDrive * 100);
-            //        break;
-            //        case 1:
-            //        PWM_2_WriteCompare(motorDrive * 100);
-            //        break;
-            //        default:
-            //        break;
-            //    }
-            //}
+
         }
         if(CONFIG_BITS == 1) //SPI
         {
@@ -895,8 +1086,8 @@ int main()
                     //for now, limit address
                     addressPointer = expansionBufferRx[0];
                 }
-            EXPANSION_PORT_I2CSlaveClearWriteStatus();
-            EXPANSION_PORT_I2CSlaveClearWriteBuf();
+                EXPANSION_PORT_I2CSlaveClearWriteStatus();
+                EXPANSION_PORT_I2CSlaveClearWriteBuf();
                 LED_PULSE_Write(0);
             }
             //always expose buffer?
@@ -1081,8 +1272,239 @@ int main()
             }
             clearChangedStatus(SCMD_SLAVE_ADDR);
         } 
-        //Set outputs
-        
+        if(getChangedStatus(SCMD_MOTOR_A_INVERT))
+        {
+            if(readDevRegister(SCMD_BRIDGE) == 1)
+            {
+                //write both A and B bits
+                if(readDevRegister(SCMD_MOTOR_A_INVERT) == 1)
+                {
+                    OUTPUT_MUX_CTRL_Write(0x07);
+                }
+                else
+                {
+                    OUTPUT_MUX_CTRL_Write(0x04);
+                }
+            }
+            else
+            {
+                //Just config motor A
+                if(readDevRegister(SCMD_MOTOR_A_INVERT) == 1)
+                {
+                    OUTPUT_MUX_CTRL_Write(OUTPUT_MUX_CTRL_Read() | 0x01); //set bit 0
+                }
+                else
+                {
+                    OUTPUT_MUX_CTRL_Write(OUTPUT_MUX_CTRL_Read() & 0x06); //clear bit 0
+                }
+            }
+            clearChangedStatus(SCMD_MOTOR_A_INVERT);
+        } 
+        if(getChangedStatus(SCMD_MOTOR_B_INVERT))
+        {
+            if(readDevRegister(SCMD_BRIDGE) == 1)
+            {
+                //do nothing
+            }
+            else
+            {
+                //Just config motor B
+                if(readDevRegister(SCMD_MOTOR_B_INVERT) == 1)
+                {
+                    OUTPUT_MUX_CTRL_Write(OUTPUT_MUX_CTRL_Read() | 0x02); //set bit 1
+                }
+                else
+                {
+                    OUTPUT_MUX_CTRL_Write(OUTPUT_MUX_CTRL_Read() & 0x05); //clear bit 1
+                }
+            }
+            clearChangedStatus(SCMD_MOTOR_B_INVERT);
+        } 
+        if(getChangedStatus(SCMD_BRIDGE))
+        {
+            if(readDevRegister(SCMD_BRIDGE) == 1)
+            {
+                //Use A for inversion
+                if(readDevRegister(SCMD_MOTOR_A_INVERT) == 1)
+                {
+                    OUTPUT_MUX_CTRL_Write(0x07);
+                }
+                else
+                {
+                    OUTPUT_MUX_CTRL_Write(0x04);
+                }
+            }
+            else
+            {
+                //set both A and B based on register
+                OUTPUT_MUX_CTRL_Write((readDevRegister(SCMD_MOTOR_A_INVERT) & 0x01) | ((readDevRegister(SCMD_MOTOR_B_INVERT) & 0x01) << 1));
+            }
+            
+            clearChangedStatus(SCMD_BRIDGE);
+        }
+        //Do slave inversion and bridging
+        //Don't do this stuff if you are a slave!
+        if( CONFIG_BITS != 0x02 )
+        {
+            //Count number of motors on slaves (0 == no motors)
+            int16_t motorTemp = readDevRegister(SCMD_SLV_TOP_ADDR);
+            uint8_t motorAddrTemp = 0;
+            uint8_t offsetTemp = 0;
+            if(motorTemp == 0)
+            {
+                //no motors
+            }
+            else
+            {
+                motorTemp = (motorTemp - 0x50 + 1) * 2; //single slave at 0x50 results in 2, 16 slaves (0x5F) results in 32
+            }
+            if(getChangedStatus(SCMD_INV_2_9))
+            {
+                int i;
+                for(i = 0; i < 8; i++)
+                {
+                    //Does slave exist?
+                    if( i < motorTemp )
+                    {
+                        motorAddrTemp = 0x50 + (i / 2);
+                        //Send bit
+                        if( i % 2 )
+                        {
+                            //remainder exists
+                            offsetTemp = SCMD_MOTOR_B_INVERT;
+                        }
+                        else
+                        {
+                            offsetTemp = SCMD_MOTOR_A_INVERT;
+                        }
+                        WriteSlaveData(motorAddrTemp, offsetTemp, (readDevRegister(SCMD_INV_2_9) >> i) & 0x01);
+                    }
+                }
+                clearChangedStatus(SCMD_INV_2_9);
+            } 
+            if(getChangedStatus(SCMD_INV_10_17))
+            {
+                int i;
+                for(i = 0; i < 8; i++)
+                {
+                    //Does slave exist?
+                    if( i < motorTemp - 8 )
+                    {
+                        motorAddrTemp = 0x54 + (i / 2);
+                        //Send bit
+                        if( i % 2 )
+                        {
+                            //remainder exists
+                            offsetTemp = SCMD_MOTOR_B_INVERT;
+                        }
+                        else
+                        {
+                            offsetTemp = SCMD_MOTOR_A_INVERT;
+                        }
+                        WriteSlaveData(motorAddrTemp, offsetTemp, (readDevRegister(SCMD_INV_10_17) >> i) & 0x01);
+                    }
+                }
+                clearChangedStatus(SCMD_INV_10_17);
+            }
+            if(getChangedStatus(SCMD_INV_18_25))
+            {
+                int i;
+                for(i = 0; i < 8; i++)
+                {
+                    //Does slave exist?
+                    if( i < motorTemp - 16 )
+                    {
+                        motorAddrTemp = 0x58 + (i / 2);
+                        //Send bit
+                        if( i % 2 )
+                        {
+                            //remainder exists
+                            offsetTemp = SCMD_MOTOR_B_INVERT;
+                        }
+                        else
+                        {
+                            offsetTemp = SCMD_MOTOR_A_INVERT;
+                        }
+                        WriteSlaveData(motorAddrTemp, offsetTemp, (readDevRegister(SCMD_INV_18_25) >> i) & 0x01);
+                    }
+                }
+                clearChangedStatus(SCMD_INV_18_25);
+            }
+            if(getChangedStatus(SCMD_INV_26_33))
+            {
+                int i;
+                for(i = 0; i < 8; i++)
+                {
+                    //Does slave exist?
+                    if( i < motorTemp - 24 )
+                    {
+                        motorAddrTemp = 0x5C + (i / 2);
+                        //Send bit
+                        if( i % 2 )
+                        {
+                            //remainder exists
+                            offsetTemp = SCMD_MOTOR_B_INVERT;
+                        }
+                        else
+                        {
+                            offsetTemp = SCMD_MOTOR_A_INVERT;
+                        }
+                        WriteSlaveData(motorAddrTemp, offsetTemp, (readDevRegister(SCMD_INV_26_33) >> i) & 0x01);
+                    }
+                }
+                clearChangedStatus(SCMD_INV_26_33);
+            }
+            if(getChangedStatus(SCMD_BRIDGE_SLV_L))
+            {
+                int i;
+                uint8_t motorAddrTemp = 0x50;
+                if((readDevRegister(SCMD_SLV_TOP_ADDR) >= 0x50)&&(readDevRegister(SCMD_SLV_TOP_ADDR) <= 0x57))
+                {
+                    //Slave exists in range -- send all bits
+                    for(i = 0; (i <= 8) && (motorAddrTemp <= readDevRegister(SCMD_SLV_TOP_ADDR)); i++)
+                    {
+                        WriteSlaveData(motorAddrTemp, SCMD_BRIDGE, (readDevRegister(SCMD_BRIDGE_SLV_L) >> i) & 0x01);
+                        motorAddrTemp++;
+                    }
+                }
+                clearChangedStatus(SCMD_BRIDGE_SLV_L);
+            } 
+            if(getChangedStatus(SCMD_BRIDGE_SLV_H))
+            {
+                int i;
+                uint8_t motorAddrTemp = 0x58;
+                if((readDevRegister(SCMD_SLV_TOP_ADDR) >= 0x50)&&(readDevRegister(SCMD_SLV_TOP_ADDR) <= 0x5F))
+                {
+                    //Slave exists in range -- send all bits
+                    for(i = 0; (i <= 8) && (motorAddrTemp <= readDevRegister(SCMD_SLV_TOP_ADDR)); i++)
+                    {
+                        WriteSlaveData(motorAddrTemp, SCMD_BRIDGE, (readDevRegister(SCMD_BRIDGE_SLV_H) >> i) & 0x01);
+                        motorAddrTemp++;
+                    }
+                }
+                clearChangedStatus(SCMD_BRIDGE_SLV_H);
+            }
+        }
+        //Do this one partially if you are a slave
+        if(getChangedStatus(SCMD_DRIVER_ENABLE))
+        {
+            
+            A_EN_Write(readDevRegister(SCMD_DRIVER_ENABLE) & 0x01);
+            B_EN_Write(readDevRegister(SCMD_DRIVER_ENABLE) & 0x01);
+            {
+                if(( CONFIG_BITS != 2 )&&(readDevRegister(SCMD_SLV_TOP_ADDR) >= 0x50)) //if you are master, and there are slaves
+                {
+                    //send out to slaves here
+                    int i;
+                    for( i = 0x50; i <= readDevRegister(SCMD_SLV_TOP_ADDR); i++)
+                    {
+                        WriteSlaveData(i, SCMD_DRIVER_ENABLE, readDevRegister(SCMD_DRIVER_ENABLE) & 0x01 );
+                    }
+                }
+            }
+            clearChangedStatus(SCMD_DRIVER_ENABLE);
+        }
+        //Set outputs (always, especially if you are slave)
         PWM_1_WriteCompare(readDevRegister(SCMD_MA_DRIVE));
         PWM_2_WriteCompare(readDevRegister(SCMD_MB_DRIVE));  
         
