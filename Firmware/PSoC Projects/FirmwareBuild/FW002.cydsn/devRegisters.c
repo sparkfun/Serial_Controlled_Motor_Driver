@@ -1,11 +1,12 @@
 #include <project.h>
 #include "devRegisters.h"
 #include "stdint.h"
+#include "config.h"
 
 // Configuration constants from main
-extern const uint8_t ID_WORD; //Device ID to be programmed into memory for reads
-extern const uint8_t START_SLAVE_ADDR;//Start address of slaves
-extern const uint8_t MAX_SLAVE_ADDR;//Max address of slaves
+//extern const uint8_t ID_WORD; //Device ID to be programmed into memory for reads
+//extern const uint8_t START_SLAVE_ADDR;//Start address of slaves
+//extern const uint8_t MAX_SLAVE_ADDR;//Max address of slaves
 
 #define REGISTER_TABLE_LENGTH 128
 

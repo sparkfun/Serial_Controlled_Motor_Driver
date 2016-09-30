@@ -12,288 +12,26 @@
 #include <project.h>
 #include "devRegisters.h"
 #include "charMath.h"
+#include "config.h"
+#include "serial.h"
+#include "diagLEDS.h"
+
+extern uint16_t SCBCLK_UART_DIVIDER;
 
 //To use software to define the config bits, uncomment this #define and set value below.
 //#define USE_SW_CONFIG_BITS
 
+//Otherwise, this global is used to get the bits from the hardware jumpers
 volatile uint8_t CONFIG_BITS = 0x3;
     //0 -- UART
     //1 -- SPI
     //2 -- I2C slave on slave port
     //3 -- I2C @ 0x58
 
-// Configuration constants
-const uint8_t ID_WORD            = 0xA9;//Device ID to be programmed into memory for reads
-const uint8_t START_SLAVE_ADDR   = 0x50;//Start address of slaves
-const uint8_t MAX_SLAVE_ADDR     = 0x5F;//Max address of slaves
 
 uint8_t slaveAddrEnumerator;
 
-#define USER_PORT_BUFFER_SIZE (10u)
 
-/* Common buffers or I2C and UART */
-uint8 bufferRx[USER_PORT_BUFFER_SIZE + 1u];/* RX software buffer requires one extra entry for correct operation in UART mode */
-uint8 bufferTx[USER_PORT_BUFFER_SIZE]; /* TX software buffer */
-
-const USER_PORT_I2C_INIT_STRUCT configI2C =
-{
-    USER_PORT_I2C_MODE_SLAVE, /* mode: slave */
-    0u, /* oversampleLow: N/A for slave, SCBCLK determines maximum data rate*/
-    0u, /* oversampleHigh: N/A for slave, SCBCLK determines maximum data rate*/
-    0u, /* enableMedianFilter: N/A since SCB v2.0 */
-    0x58u, /* slaveAddr: slave address */
-    //0x2Cu,
-    0xFEu, /* slaveAddrMask: signle slave address */
-    0u, /* acceptAddr: disable */
-    0u, /* enableWake: disable */
-    0u, /* enableByteMode: disable */
-    100u /* dataRate: 100 kbps */
-};
-
-const USER_PORT_UART_INIT_STRUCT configUart =
-{
-    USER_PORT_UART_MODE_STD, /* mode: Standard */
-    USER_PORT_UART_TX_RX, /* direction: RX + TX */
-    8u, /* dataBits: 8 bits */
-    USER_PORT_UART_PARITY_NONE, /* parity: None */
-    USER_PORT_UART_STOP_BITS_1, /* stopBits: 1 bit */
-    16u, /* oversample: 16u */
-    0u, /* enableIrdaLowPower: disable */
-    1u, /* enableMedianFilter: enable */
-    0u, /* enableRetryNack: disable */
-    0u, /* enableInvertedRx: disable */
-    0u, /* dropOnParityErr: disable */
-    0u, /* dropOnFrameErr: disable */
-    0u, /* enableWake: disable */
-    USER_PORT_BUFFER_SIZE, /* rxBufferSize: software buffer 10 bytes */
-    bufferRx, /* rxBuffer: RX software buffer enable */
-    USER_PORT_BUFFER_SIZE, /* txBufferSize: software buffer 10 bytes */
-    bufferTx, /* txBuffer: TX software buffer enable */
-    0u, /* enableMultiproc: disable */
-    0u, /* multiprocAcceptAddr: disable */
-    0u, /* multiprocAddr: N/A for this configuration */
-    0u, /* multiprocAddrMask: N/A for this configuration */
-    1u, /* enableInterrupt: enable to process software buffer */
-    USER_PORT_INTR_RX_NOT_EMPTY, /* rxInterruptMask: enable NOT_EMPTY for RX software buffer operations */
-    0u, /* rxTriggerLevel: N/A for this configuration */
-    0u, /* txInterruptMask: NOT_FULL is enabled when there is data to transmit */
-    0u, /* txTriggerLevel: N/A for this configuration */
-    0u, /* enableByteMode: N/A for this configuration */
-    0u, /* enableCts: N/A for this configuration */
-    0u, /* ctsPolarity: N/A for this configuration */
-    0u, /* rtsRxTriggerLevel: N/A for this configuration */
-    0u /* rtsPolarity: N/A for this configuration */
-};
-
-const USER_PORT_SPI_INIT_STRUCT configSPI =
-{
-    USER_PORT_SPI_SLAVE, //USER_PORT_SPI_MODE,
-    USER_PORT_SPI_MODE_MOTOROLA, //USER_PORT_SPI_SUB_MODE,
-    USER_PORT_SPI_SCLK_CPHA0_CPOL0, //USER_PORT_SPI_CLOCK_MODE,
-    0u, //USER_PORT_SPI_OVS_FACTOR, -- Ignored for Slave Mode
-    0u, //USER_PORT_SPI_MEDIAN_FILTER_ENABLE,
-    0u, //USER_PORT_SPI_LATE_MISO_SAMPLE_ENABLE, -- Ignored for Slave Mode
-    0u, //USER_PORT_SPI_WAKE_ENABLE, -- Ignored for Slave Mode
-    8u, //USER_PORT_SPI_RX_DATA_BITS_NUM,
-    8u, //USER_PORT_SPI_TX_DATA_BITS_NUM,
-    USER_PORT_BITS_ORDER_MSB_FIRST, //USER_PORT_SPI_BITS_ORDER,
-    USER_PORT_SPI_TRANSFER_CONTINUOUS, //USER_PORT_SPI_TRANSFER_SEPARATION, -- Ignored for Slave Mode
-    USER_PORT_BUFFER_SIZE, /* rxBufferSize: software buffer 10 bytes */
-    bufferRx, /* rxBuffer: RX software buffer enable */
-    USER_PORT_BUFFER_SIZE, /* txBufferSize: software buffer 10 bytes */
-    bufferTx, /* txBuffer: TX software buffer enable */
-    1u, //(uint32) USER_PORT_SCB_IRQ_INTERNAL,
-    USER_PORT_INTR_RX_NOT_EMPTY, //USER_PORT_SPI_INTR_RX_MASK,
-    0u, //USER_PORT_SPI_RX_TRIGGER_LEVEL,
-    0u, //USER_PORT_SPI_INTR_TX_MASK,
-    0u, //USER_PORT_SPI_TX_TRIGGER_LEVEL,
-    0u, //(uint8) USER_PORT_SPI_BYTE_MODE_ENABLE, -- Ignore for non- BLE
-    0u, //(uint8) USER_PORT_SPI_FREE_RUN_SCLK_ENABLE, -- Ignore for non- BLE
-    USER_PORT_SPI_SS_ACTIVE_LOW//(uint8) USER_PORT_SPI_SS_POLARITY -- Ignore for non- BLE
-    
-};
-
-/* Buffers for expansion port */
-uint8 expansionBufferRx[USER_PORT_BUFFER_SIZE + 1u];/* RX software buffer requires one extra entry for correct operation in UART mode */
-uint8 expansionBufferTx[USER_PORT_BUFFER_SIZE]; /* TX software buffer */
-
-//Config for slave
-const EXPANSION_PORT_I2C_INIT_STRUCT expansionConfigI2CSlave =
-{
-    USER_PORT_I2C_MODE_SLAVE, /* mode: slave */
-    0u, /* oversampleLow: N/A for slave, SCBCLK determines maximum data rate*/
-    0u, /* oversampleHigh: N/A for slave, SCBCLK determines maximum data rate*/
-    0u, /* enableMedianFilter: N/A since SCB v2.0 */
-    0x4Au, /* slaveAddr: slave address */
-    //0x2Cu,
-    0xFEu, /* slaveAddrMask: signle slave address */
-    0u, /* acceptAddr: disable */
-    0u, /* enableWake: disable */
-    0u, /* enableByteMode: disable */
-    100u /* dataRate: 100 kbps */
-};
-
-//Config for master
-const EXPANSION_PORT_I2C_INIT_STRUCT expansionConfigI2CMaster =
-{
-    USER_PORT_I2C_MODE_MASTER, /* mode: master */
-    0u, /* oversampleLow: N/A for slave, SCBCLK determines maximum data rate*/
-    0u, /* oversampleHigh: N/A for slave, SCBCLK determines maximum data rate*/
-    0u, /* enableMedianFilter: N/A since SCB v2.0 */
-    0x4Au, /* slaveAddr: slave address */
-    //0x2Cu,
-    0xFEu, /* slaveAddrMask: signle slave address */
-    0u, /* acceptAddr: disable */
-    0u, /* enableWake: disable */
-    0u, /* enableByteMode: disable */
-    100u /* dataRate: 100 kbps */
-};
-
-
-/* The clock divider value written into the register has to be one less from calculated */
-#define SCBCLK_I2C_DIVIDER (14u) // I2C Slave: 100 kbps Required SCBCLK = 1.6 MHz, Div = 15  ----- good for 100kHZ
-//#define SCBCLK_I2C_DIVIDER (4u) // I2C Slave: 100 kbps Required SCBCLK = 1.6 MHz, Div = 15  ----- Kind of ok for 400kHZ
-//#define SCBCLK_UART_DIVIDER (12u) // UART: 115200 kbps with OVS = 16. Required SCBCLK = 1.846 MHz, Div = 13
-uint16_t SCBCLK_UART_DIVIDER = 12; // UART: 115200 kbps with OVS = 16. Required SCBCLK = 1.846 MHz, Div = 13
-#define SCBCLK_SPI_DIVIDER (1u) //Max for now -- Does this even matter?
-
-/* Operation mode: I2C slave or UART */
-#define OP_MODE_UART (1u)
-#define OP_MODE_I2C (2u)
-#define OP_MODE_SPI (3u)
-
-cystatus SetScbConfiguration(uint32 opMode)
-{
-    cystatus status = CYRET_SUCCESS;
-    if (OP_MODE_I2C == opMode)
-    {
-        USER_PORT_Stop(); /* Disable component before configuration change */
-        /* Change clock divider */
-        SCBCLK_Stop();
-        SCBCLK_SetFractionalDividerRegister(SCBCLK_I2C_DIVIDER, 0u);
-        SCBCLK_Start();
-        /* Configure to I2C slave operation */
-        USER_PORT_I2CSlaveInitReadBuf (bufferTx, USER_PORT_BUFFER_SIZE);
-        USER_PORT_I2CSlaveInitWriteBuf(bufferRx, USER_PORT_BUFFER_SIZE);
-        USER_PORT_I2CInit(&configI2C);
-        USER_PORT_I2CSlaveSetAddress(0x58 + CONFIG_BITS - 0x3);
-        USER_PORT_Start(); /* Enable component after configuration change */
-    }
-    else if (OP_MODE_UART == opMode)
-    {
-        USER_PORT_Stop(); /* Disable component before configuration change */
-        /* Change clock divider */
-        SCBCLK_Stop();
-        SCBCLK_SetFractionalDividerRegister(SCBCLK_UART_DIVIDER, 0u);
-        SCBCLK_Start();
-        /* Configure to UART operation */
-        USER_PORT_UartInit(&configUart);
-        USER_PORT_Start(); /* Enable component after configuration change */
-    }
-    else if (OP_MODE_SPI == opMode)
-    {
-        USER_PORT_Stop(); /* Disable component before configuration change */
-        /* Change clock divider */
-        SCBCLK_Stop();
-        SCBCLK_SetFractionalDividerRegister(SCBCLK_SPI_DIVIDER, 0u);
-        SCBCLK_Start();
-        
-        /* Configure to SPI operation */
-        USER_PORT_SpiInit(&configSPI);
-        
-        USER_PORT_Start(); /* Enable component after configuration change */
-        USER_PORT_EnableInt();
-        CyGlobalIntEnable; 
-        
-    }
-    else
-    {
-        status = CYRET_BAD_PARAM; /* Uknowns operation mode - no actions */
-    }
-    return (status);
-}
-
-// ***Known good config for slave*** //
-cystatus SetExpansionScbConfigurationSlave(void)
-{
-    cystatus status = CYRET_SUCCESS;
-    EXPANSION_PORT_Stop(); /* Disable component before configuration change */
-    /* Change clock divider */
-    EXPANSION_SCBCLK_Stop();
-    EXPANSION_SCBCLK_SetFractionalDividerRegister(SCBCLK_I2C_DIVIDER, 0u);
-    EXPANSION_SCBCLK_Start();
-    /* Configure to I2C slave operation */
-    EXPANSION_PORT_I2CSlaveInitReadBuf (expansionBufferTx, USER_PORT_BUFFER_SIZE);
-    EXPANSION_PORT_I2CSlaveInitWriteBuf(expansionBufferRx, USER_PORT_BUFFER_SIZE);
-    EXPANSION_PORT_I2CInit(&expansionConfigI2CSlave);
-    USER_PORT_I2CSlaveSetAddress(0x4A);
-    writeDevRegister(SCMD_SLAVE_ADDR, 0x4A);
-    EXPANSION_PORT_Start(); /* Enable component after configuration change */
-    return (status);
-}
-
-//Expansion port config
-cystatus SetExpansionScbConfigurationMaster(void)
-{
-    cystatus status = CYRET_SUCCESS;
-    EXPANSION_PORT_Stop(); /* Disable component before configuration change */
-    /* Change clock divider */
-    EXPANSION_SCBCLK_Stop();
-    EXPANSION_SCBCLK_SetFractionalDividerRegister(SCBCLK_I2C_DIVIDER, 0u);
-    EXPANSION_SCBCLK_Start();
-    /* Configure to I2C slave operation */
-    EXPANSION_PORT_I2CSlaveInitReadBuf (expansionBufferTx, USER_PORT_BUFFER_SIZE);
-    EXPANSION_PORT_I2CSlaveInitWriteBuf(expansionBufferRx, USER_PORT_BUFFER_SIZE);
-    EXPANSION_PORT_I2CInit(&expansionConfigI2CMaster);
-    EXPANSION_PORT_Start(); /* Enable component after configuration change */
-    return (status);
-}
-
-
-uint8_t lastDiagLeds = 0;
-void setDiagLeds(uint8_t input)
-{
-    if(input == lastDiagLeds) return;
-    lastDiagLeds = input;
-    int i;
-    uint32_t outputPattern = 0;
-    for(i = 0; i < input; i++)
-    {
-        outputPattern = outputPattern << 2;
-        outputPattern |= 1;
-    }
-    ShiftReg_1_Stop();
-    ShiftReg_1_WriteRegValue(outputPattern);
-    ShiftReg_1_Start();
-
-}
-
-uint8_t errorLevelMemory[8] = {0,0,0,0,0,0,0,0}; //put flash codes within
-
-void sendDiagMessage( void ) //send error level
-{
-    int i;
-    for(i = 7; i >= 0; i--)
-    {
-        if(errorLevelMemory[i])//message persists
-        {
-            setDiagLeds(errorLevelMemory[i]);
-            return;
-        }
-    }
-}
-
-void setDiagMessage( uint8_t errorLevel, uint8_t message ) //send error level
-{
-    errorLevelMemory[errorLevel] = message;
-    sendDiagMessage();
-}
-
-void clearDiagMessage( uint8_t errorLevel ) //send error level
-{
-    errorLevelMemory[errorLevel] = 0;
-    sendDiagMessage();
-}
 
 #define SCMDSlaveIdle 0
 #define SCMDSlaveWaitForSync 1
@@ -337,68 +75,6 @@ CY_ISR(FSAFE_TIMER_Interrupt)
     FSAFE_TIMER_Stop();
     FSAFE_TIMER_WriteCounter(0);
     FSAFE_TIMER_Start();
-}
-
-uint8 ReadSlaveData( uint8_t address, uint8_t offset )
-{
-    uint8  buffer[10];
-    uint8_t offsetPointer[1];
-    offsetPointer[0] = offset;
-    uint8_t returnVar = 0;
-    
-    //Write an offset
-    (void) EXPANSION_PORT_I2CMasterWriteBuf(address, offsetPointer, 1, EXPANSION_PORT_I2C_MODE_COMPLETE_XFER);
-
-    /* Waits until master completes write transfer */
-    while (0u == (EXPANSION_PORT_I2CMasterStatus() & EXPANSION_PORT_I2C_MSTAT_WR_CMPLT))
-    {
-    }
-
-    //Get a byte
-    (void) EXPANSION_PORT_I2CMasterReadBuf(address, buffer, 1, EXPANSION_PORT_I2C_MODE_COMPLETE_XFER);
-
-    /* Waits until master complete read transfer */
-    while (0u == (EXPANSION_PORT_I2CMasterStatus() & EXPANSION_PORT_I2C_MSTAT_RD_CMPLT))
-    {
-    }
-
-    /* Displays transfer status */
-    if (0u == (EXPANSION_PORT_I2C_MSTAT_ERR_XFER & EXPANSION_PORT_I2CMasterStatus()))
-    {
-        /* Check packet structure */
-        if ((EXPANSION_PORT_I2CMasterGetReadBufSize() >= 1 ))
-        {
-            returnVar = buffer[0];
-        }
-    }
-
-    EXPANSION_PORT_I2CMasterClearStatus();
-    EXPANSION_PORT_I2CMasterClearReadBuf();
-    EXPANSION_PORT_I2CMasterClearWriteBuf();
-
-    return returnVar;
-}
-
-uint8 WriteSlaveData( uint8_t address, uint8_t offset, uint8_t data )
-{
-    uint8  buffer[10];
-    buffer[0] = offset;
-    buffer[1] = data;
-    uint8_t returnVar = 0;
-    
-    //Write an offset
-    (void) EXPANSION_PORT_I2CMasterWriteBuf(address, buffer, 2, EXPANSION_PORT_I2C_MODE_COMPLETE_XFER);
-
-    /* Waits until master completes write transfer */
-    while (0u == (EXPANSION_PORT_I2CMasterStatus() & EXPANSION_PORT_I2C_MSTAT_WR_CMPLT))
-    {
-    }
-
-    EXPANSION_PORT_I2CMasterClearStatus();
-    EXPANSION_PORT_I2CMasterClearReadBuf();
-    EXPANSION_PORT_I2CMasterClearWriteBuf();
-
-    return returnVar;
 }
 
 int main()
@@ -1392,10 +1068,6 @@ int main()
     }//End of while loop
 
 }
-
-
-
-
 
 
 /* [] END OF FILE */
