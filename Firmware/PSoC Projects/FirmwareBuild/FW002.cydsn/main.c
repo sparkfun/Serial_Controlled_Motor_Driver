@@ -28,10 +28,7 @@ volatile uint8_t CONFIG_BITS = 0x3;
     //2 -- I2C slave on slave port
     //3 -- I2C @ 0x58
 
-
 uint8_t slaveAddrEnumerator;
-
-
 
 #define SCMDSlaveIdle 0
 #define SCMDSlaveWaitForSync 1
@@ -175,11 +172,7 @@ int main()
                 {
                     //Overwrite last
                     rxBuffer[rxBufferPtr - 1] = ch;
-                    USER_PORT_UartPutChar('o');
-                    USER_PORT_UartPutChar('v');
-                    USER_PORT_UartPutChar('f');
-                    USER_PORT_UartPutChar('\r');
-                    USER_PORT_UartPutChar('\n');
+                    USER_PORT_UartPutString("ovf\r\n");
                 }
                 //Echo
                 USER_PORT_UartPutChar(ch);
@@ -348,6 +341,7 @@ int main()
                         switch(rxBuffer[1])
                         {
                             case '1':
+                            USER_PORT_UartPutString("2400\r\n");
                             USER_PORT_UartPutChar('2');
                             USER_PORT_UartPutChar('4');
                             USER_PORT_UartPutChar('0');
@@ -499,28 +493,16 @@ int main()
                     case '\n':
                     break;
                     default:
-                    USER_PORT_UartPutChar('i');
-                    USER_PORT_UartPutChar('n');
-                    USER_PORT_UartPutChar('v');
-                    USER_PORT_UartPutChar('\r');
-                    USER_PORT_UartPutChar('\n');
+                    USER_PORT_UartPutString("inv\r\n");
                     break;
                 }
                 if( errorFlag == 1 )
                 {
-                    USER_PORT_UartPutChar('f');
-                    USER_PORT_UartPutChar('m');
-                    USER_PORT_UartPutChar('t');
-                    USER_PORT_UartPutChar('\r');
-                    USER_PORT_UartPutChar('\n');
+                    USER_PORT_UartPutString("fmt\r\n");
                 }
                 if( errorFlag == 2 )
                 {
-                    USER_PORT_UartPutChar('n');
-                    USER_PORT_UartPutChar('o');
-                    USER_PORT_UartPutChar('m');
-                    USER_PORT_UartPutChar('\r');
-                    USER_PORT_UartPutChar('\n');
+                    USER_PORT_UartPutString("nom\r\n");
                 }
                 //Reset the buffers
                 rxBufferPtr = 0;
