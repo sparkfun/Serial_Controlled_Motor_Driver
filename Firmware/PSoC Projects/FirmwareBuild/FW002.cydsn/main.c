@@ -307,8 +307,7 @@ int main()
                         addressTemp = char2hex(rxBuffer[1]) << 4 | char2hex(rxBuffer[2]);
                         dataTemp = char2hex(rxBuffer[3]) << 4 | char2hex(rxBuffer[4]);
                         writeDevRegister(addressTemp, dataTemp);
-                        USER_PORT_UartPutChar('\r');
-                        USER_PORT_UartPutChar('\n');    
+                        USER_PORT_UartPutString("\r\n");
                     }
                     else
                     {
@@ -324,8 +323,7 @@ int main()
                         dataTemp = readDevRegister(addressTemp);
                         USER_PORT_UartPutChar(hex2char((dataTemp&0xF0) >> 4));
                         USER_PORT_UartPutChar(hex2char(dataTemp&0x0F));
-                        USER_PORT_UartPutChar('\r');
-                        USER_PORT_UartPutChar('\n');
+                        USER_PORT_UartPutString("\r\n");
                     }
                     else
                     {
@@ -342,95 +340,48 @@ int main()
                         {
                             case '1':
                             USER_PORT_UartPutString("2400\r\n");
-                            USER_PORT_UartPutChar('2');
-                            USER_PORT_UartPutChar('4');
-                            USER_PORT_UartPutChar('0');
-                            USER_PORT_UartPutChar('0');
-                            USER_PORT_UartPutChar('\r');
-                            USER_PORT_UartPutChar('\n');
                             CyDelay(400);
                             SCBCLK_UART_DIVIDER = 625;
                             SetScbConfiguration(OP_MODE_UART);
                             break;
                             case '2':
-                            USER_PORT_UartPutChar('4');
-                            USER_PORT_UartPutChar('8');
-                            USER_PORT_UartPutChar('0');
-                            USER_PORT_UartPutChar('0');
-                            USER_PORT_UartPutChar('\r');
-                            USER_PORT_UartPutChar('\n');
+                            USER_PORT_UartPutString("4800\r\n");
                             CyDelay(400);
                             SCBCLK_UART_DIVIDER = 312;
                             SetScbConfiguration(OP_MODE_UART);
                             break;
                             case '3':
-                            USER_PORT_UartPutChar('9');
-                            USER_PORT_UartPutChar('6');
-                            USER_PORT_UartPutChar('0');
-                            USER_PORT_UartPutChar('0');
-                            USER_PORT_UartPutChar('\r');
-                            USER_PORT_UartPutChar('\n');
+                            USER_PORT_UartPutString("9600\r\n");
                             CyDelay(400);
                             SCBCLK_UART_DIVIDER = 156;
                             SetScbConfiguration(OP_MODE_UART);
                             break;
                             case '4':
-                            USER_PORT_UartPutChar('1');
-                            USER_PORT_UartPutChar('4');
-                            USER_PORT_UartPutChar('4');
-                            USER_PORT_UartPutChar('0');
-                            USER_PORT_UartPutChar('0');
-                            USER_PORT_UartPutChar('\r');
-                            USER_PORT_UartPutChar('\n');
+                            USER_PORT_UartPutString("14400\r\n");
                             CyDelay(400);
                             SCBCLK_UART_DIVIDER = 102;
                             SetScbConfiguration(OP_MODE_UART);
                             break;
                             case '5':
-                            USER_PORT_UartPutChar('1');
-                            USER_PORT_UartPutChar('9');
-                            USER_PORT_UartPutChar('2');
-                            USER_PORT_UartPutChar('0');
-                            USER_PORT_UartPutChar('0');
-                            USER_PORT_UartPutChar('\r');
-                            USER_PORT_UartPutChar('\n');
+                            USER_PORT_UartPutString("19200\r\n");
                             CyDelay(400);
                             SCBCLK_UART_DIVIDER = 77;
                             SetScbConfiguration(OP_MODE_UART);
                             break;
                             case '6':
-                            USER_PORT_UartPutChar('3');
-                            USER_PORT_UartPutChar('8');
-                            USER_PORT_UartPutChar('4');
-                            USER_PORT_UartPutChar('0');
-                            USER_PORT_UartPutChar('0');
-                            USER_PORT_UartPutChar('\r');
-                            USER_PORT_UartPutChar('\n');
+                            USER_PORT_UartPutString("38400\r\n");
                             CyDelay(400);
                             SCBCLK_UART_DIVIDER = 38;
                             SetScbConfiguration(OP_MODE_UART);
                             break;
                             case '7':
-                            USER_PORT_UartPutChar('5');
-                            USER_PORT_UartPutChar('7');
-                            USER_PORT_UartPutChar('6');
-                            USER_PORT_UartPutChar('0');
-                            USER_PORT_UartPutChar('0');
-                            USER_PORT_UartPutChar('\r');
-                            USER_PORT_UartPutChar('\n');
+                            USER_PORT_UartPutString("57600\r\n");
                             CyDelay(400);
                             SCBCLK_UART_DIVIDER = 25;
                             SetScbConfiguration(OP_MODE_UART);
                             break;
                             case '8':
-                            USER_PORT_UartPutChar('1');
-                            USER_PORT_UartPutChar('1');
-                            USER_PORT_UartPutChar('5');
-                            USER_PORT_UartPutChar('2');
-                            USER_PORT_UartPutChar('0');
-                            USER_PORT_UartPutChar('0');
-                            USER_PORT_UartPutChar('\r');
-                            USER_PORT_UartPutChar('\n');
+                            USER_PORT_UartPutString("115200\r\n");
                             CyDelay(400);
                             SCBCLK_UART_DIVIDER = 12;
                             SetScbConfiguration(OP_MODE_UART);
@@ -602,8 +553,6 @@ int main()
             if(tempValue > 0xFF) tempValue = 0xFF;
             //do 'peak hold' on SCMD_UPORT_TIME -- write 0 to reset
             if(tempValue > readDevRegister(SCMD_UPORT_TIME)) writeDevRegister(SCMD_UPORT_TIME, tempValue);
-            
-            
         }
         if(CONFIG_BITS == 2) //Slave
         {
@@ -676,10 +625,9 @@ int main()
             }
             slaveState = slaveNextState;
         }
-        else
+        else //Do master operations
         {
-            //Not slave, do master operations
-            //Now do the states.
+            //Do master state machine
             uint8_t masterNextState = masterState;
             switch( masterState )
             {
