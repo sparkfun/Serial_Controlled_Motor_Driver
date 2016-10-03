@@ -1,14 +1,17 @@
-/* ========================================
- *
- * Copyright YOUR COMPANY, THE YEAR
- * All Rights Reserved
- * UNPUBLISHED, LICENSED SOFTWARE.
- *
- * CONFIDENTIAL AND PROPRIETARY INFORMATION
- * WHICH IS THE PROPERTY OF your company.
- *
- * ========================================
-*/
+/******************************************************************************
+main.c
+Serial controlled motor driver firmware
+marshall.taylor@sparkfun.com
+7-8-2016
+https://github.com/sparkfun/Serial_Controlled_Motor_Driver/tree/RevisionRepaired
+
+See github readme for mor information.
+
+This code is released under the [MIT License](http://opensource.org/licenses/MIT).
+Please review the LICENSE.md file included with this example. If you have any questions 
+or concerns with licensing, please contact techsupport@sparkfun.com.
+Distributed as-is; no warranty is given.
+******************************************************************************/
 #include <project.h>
 #include "devRegisters.h"
 #include "charMath.h"
@@ -137,16 +140,11 @@ int main()
     Clock_1_Start();
         
     CyGlobalIntEnable; 
-
-//    isr_1_Start();      /* Initializing the ISR */
-//    USER_PORT_Start();     /* Enabling the UART */
-
     
     uint8_t addressPointer = 0;
         
-    //char ch;
+    //rxBuffer for serial input storage
     uint8_t rxBufferPtr = 0;
-
     char rxBuffer[20];
 
     setDiagMessage(1, 1);    
@@ -192,7 +190,6 @@ int main()
                 uint8_t addressTemp = 0;
                 uint8_t dataTemp = 0;
                 uint8_t maxMotorCount = 2;
-                uint8_t slaveAddrTemp = 0x50;
                 //Do some action
                 //  Branch based of type of message
                 switch(rxBuffer[0])
@@ -274,7 +271,6 @@ int main()
                             dataTemp ^= 0x01 << (motorNum - 26);
                             writeDevRegister(SCMD_INV_2_9, dataTemp);
                         }
-
                     }
                     else
                     {
@@ -994,10 +990,6 @@ int main()
         //Set outputs (always, especially if you are slave)
         PWM_1_WriteCompare(readDevRegister(SCMD_MA_DRIVE));
         PWM_2_WriteCompare(readDevRegister(SCMD_MB_DRIVE));  
-        
     }//End of while loop
-
 }
-
-
 /* [] END OF FILE */
