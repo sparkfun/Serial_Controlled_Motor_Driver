@@ -11,7 +11,8 @@
 //  Set maxTimer to the max foreseen interval of any timer.
 //  maxTimer + maxInterval = max countable value.
 #include "HOS_char.h"
-#include "SparkFun_PSoCMotorDriverAPI.h"
+#include "SerialControlledMotorDriverAPI.h"
+#include "config.h"
 
 //Globals
 uint16_t maxTimer = 60000;
@@ -42,7 +43,7 @@ TimerClass outputTimer( 50 );  //Read knobs and drive motors
 uint16_t msTicks = 0;
 uint8_t msTicksLocked = 1; //start locked out
 
-PSoCMD myMotorDriver;
+SCMD myMotorDriver;
 
 //Diagnostic
 uint16_t durationRecord[1] = {0};
@@ -51,14 +52,18 @@ void setup()
 {
 	Serial.begin(115200);
 	pinMode(LEDPIN, OUTPUT);
-	delay(1500);
-	Serial.println("Starting sketch.");
 
 	pinMode(A0, INPUT);
 	pinMode(A1, INPUT);
 	pinMode(A2, INPUT);
 	pinMode(A3, INPUT);
 	
+	pinMode(4, OUTPUT);
+	digitalWrite(4, 0);
+	
+	delay(1500);
+	Serial.println("Starting sketch.");
+
 	//Specify configuration for the driver
 	myMotorDriver.settings.commInterface = I2C_MODE;
 	myMotorDriver.settings.I2CAddress = 0x5A;
@@ -98,8 +103,12 @@ void setup()
 	
 	Serial.print("Starting driver... ID = 0x");
 	delay(500);
+	digitalWrite(4, 1);
+	digitalWrite(4, 0);
+	digitalWrite(4, 1);
 	Serial.println(myMotorDriver.begin(), HEX);
-
+	myMotorDriver.bridgingMode(0,1);
+	myMotorDriver.inversionMode(2,1);
 }
 
 void loop()
@@ -123,27 +132,37 @@ void loop()
 		digitalWrite( LEDPIN, digitalRead( LEDPIN ) ^ 0x01 );
 		Serial.println("\nOOoo..   Debug Interval Timer   ..ooOO");
 		Serial.print("ID: 0x");
-		Serial.println(myMotorDriver.readRegister(0x01), HEX);
+		Serial.println(myMotorDriver.readRegister(SCMD_ID), HEX);
 		
-		//Serial.println("MEMORY DUMP:");
-		//for( int i = 0x0; i < 0x28; i++)
-		//{
-		//	Serial.print("0x");
-		//	Serial.print(myMotorDriver.readRegister(i), HEX);
-		//	Serial.print(": 0x");
-		//	Serial.println(myMotorDriver.readRegister(i), HEX);
-		//}		
+		Serial.println("MEMORY DUMP:");
+		for( int i = 0x17; i < 0x1A; i++)
+		{
+			Serial.print("0x");
+			Serial.print(i, HEX);
+			Serial.print(": 0x");
+			Serial.println(myMotorDriver.readRegister(i), HEX);
+		}		
+		Serial.println("MEMORY DUMP:");
+		for( int i = 0x60; i < 0x68; i++)
+		{
+			Serial.print("0x");
+			Serial.print(i, HEX);
+			Serial.print(": 0x");
+			Serial.println(myMotorDriver.readRegister(i), HEX);
+		}		
 		Serial.print("outputTimer Fn Duration Peak: ");
 		Serial.print(durationRecord[0]);
 		Serial.println("ms");
 		durationRecord[0] = 0;
 		Serial.print("I2C routine duration: ");
-		Serial.print(myMotorDriver.readRegister(0x0A));
+		Serial.print(myMotorDriver.readRegister(SCMD_UPORT_TIME));
 		Serial.println("us");
 		Serial.print("I2C RX error cnt: ");
-		Serial.println(myMotorDriver.readRegister(0x05));
+		Serial.println(myMotorDriver.readRegister(SCMD_I2C_RD_ERR));
 		Serial.print("I2C WR error cnt: ");
-		Serial.println(myMotorDriver.readRegister(0x06));
+		Serial.println(myMotorDriver.readRegister(SCMD_I2C_WR_ERR));
+		//Serial.print("debug out: ");
+		//Serial.println(myMotorDriver.readRegister(SCMD_MA_DRIVE));
 		}
 	//**Script timer******************//  
 	if(outputTimer.flagStatus() == PENDING)
