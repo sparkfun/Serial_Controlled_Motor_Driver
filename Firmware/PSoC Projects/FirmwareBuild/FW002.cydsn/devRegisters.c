@@ -13,28 +13,31 @@ or concerns with licensing, please contact techsupport@sparkfun.com.
 Distributed as-is; no warranty is given.
 ******************************************************************************/
 #include <project.h>
+#include <stdint.h>
+#include <stdbool.h>
 #include "devRegisters.h"
-#include "stdint.h"
 #include "config.h"
 
-// Configuration constants from main
-//extern const uint8_t ID_WORD; //Device ID to be programmed into memory for reads
-//extern const uint8_t START_SLAVE_ADDR;//Start address of slaves
-//extern const uint8_t MAX_SLAVE_ADDR;//Max address of slaves
-
+//Set accessable table size here:
 #define REGISTER_TABLE_LENGTH 128
 
-uint8_t registerTable[REGISTER_TABLE_LENGTH];
-uint8_t registerChangedTable[REGISTER_TABLE_LENGTH];
+static uint8_t registerTable[REGISTER_TABLE_LENGTH];
+static bool registerChangedTable[REGISTER_TABLE_LENGTH];
+//This counts accesses beyond REGISTER_TABLE_LENGTH.  Using #defined names, getOutOfRangeCount(); should always return 0;
+static uint16_t outOfRangeCount = 0;
 
 void initDevRegisters( void )
 {
+    //Explicitly set all values in the table
     int i = 0;
     for( i = 0; i < REGISTER_TABLE_LENGTH; i++ )
     {
         registerTable[i] = 0x00;
         registerChangedTable[i] = 0x00;
     }
+    
+    //Set hardcoded initial values --
+    //ID_WORD, START_SLAVE_ADDR, MAX_SLAVE_ADDR are defined within the included files
     writeDevRegister(SCMD_STATUS, 0x1A);
     writeDevRegister(SCMD_ID, ID_WORD);
     writeDevRegister(SCMD_CONFIG_BITS, CONFIG_BITS_REG_Read() ^ 0x0F);    // Read HW config bits
@@ -78,35 +81,79 @@ void initDevRegisters( void )
     writeDevRegister(SCMD_S15B_DRIVE, 0x80);
     writeDevRegister(SCMD_S16A_DRIVE, 0x80);
     writeDevRegister(SCMD_S16B_DRIVE, 0x80);
+    writeDevRegister(SCMD_UPDATE_RATE, 0x0A);
 
 }
 
 uint8_t readDevRegister( uint8_t regNumberIn )
 {
-    return registerTable[regNumberIn];
+    if( regNumberIn >= REGISTER_TABLE_LENGTH )
+    {
+        if(outOfRangeCount < 0xFFFF)outOfRangeCount++;
+        return 0;
+    }
+    else
+    {
+        return registerTable[regNumberIn];
+    }
 }
 
 void writeDevRegister( uint8_t regNumberIn, uint8_t dataToWrite )
 {
-    registerTable[regNumberIn] = dataToWrite;
-    registerChangedTable[regNumberIn] = 1;
-}
-
-void incrementDevRegister( uint8_t regNumberIn )
-{
-    if( registerTable[regNumberIn] < 0xFF )
+    if( regNumberIn >= REGISTER_TABLE_LENGTH )
     {
-        registerTable[regNumberIn]++;
+        if(outOfRangeCount < 0xFFFF)outOfRangeCount++;
+    }
+    else
+    {
+        registerTable[regNumberIn] = dataToWrite;
         registerChangedTable[regNumberIn] = 1;
     }
 }
 
-uint8_t getChangedStatus( uint8_t regNumberIn )
+void incrementDevRegister( uint8_t regNumberIn )
 {
-    return registerChangedTable[regNumberIn];
+    if( regNumberIn >= REGISTER_TABLE_LENGTH )
+    {
+        if(outOfRangeCount < 0xFFFF)outOfRangeCount++;
+    }
+    else
+    {
+        if( registerTable[regNumberIn] < 0xFF )
+        {
+            registerTable[regNumberIn]++;
+            registerChangedTable[regNumberIn] = true;
+        }
+    }
+
+}
+
+bool getChangedStatus( uint8_t regNumberIn )
+{
+    if( regNumberIn >= REGISTER_TABLE_LENGTH )
+    {
+        if(outOfRangeCount < 0xFFFF)outOfRangeCount++;
+        return false;
+    }
+    else
+    {
+        return registerChangedTable[regNumberIn];
+    }
 }
 
 void clearChangedStatus( uint8_t regNumberIn )
 {
-    registerChangedTable[regNumberIn] = 0;
+    if( regNumberIn >= REGISTER_TABLE_LENGTH )
+    {
+        if(outOfRangeCount < 0xFFFF)outOfRangeCount++;
+    }
+    else
+    {
+        registerChangedTable[regNumberIn] = false;
+    }
+}
+
+uint16_t getOutOfRangeCount( void )
+{
+    return outOfRangeCount;
 }

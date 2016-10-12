@@ -278,3 +278,26 @@ uint8 WriteSlaveData( uint8_t address, uint8_t offset, uint8_t data )
 
     return returnVar;
 }
+
+uint8 WriteSlave2Data( uint8_t address, uint8_t offset, uint8_t data0, uint8_t data1 )
+{
+    uint8  buffer[10];
+    buffer[0] = offset;
+    buffer[1] = data0;
+    buffer[2] = data1;
+    uint8_t returnVar = 0;
+    
+    //Write an offset
+    (void) EXPANSION_PORT_I2CMasterWriteBuf(address, buffer, 3, EXPANSION_PORT_I2C_MODE_COMPLETE_XFER);
+
+    /* Waits until master completes write transfer */
+    while (0u == (EXPANSION_PORT_I2CMasterStatus() & EXPANSION_PORT_I2C_MSTAT_WR_CMPLT))
+    {
+    }
+
+    EXPANSION_PORT_I2CMasterClearStatus();
+    EXPANSION_PORT_I2CMasterClearReadBuf();
+    EXPANSION_PORT_I2CMasterClearWriteBuf();
+
+    return returnVar;
+}

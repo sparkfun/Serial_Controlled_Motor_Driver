@@ -23,8 +23,8 @@ Distributed as-is; no warranty is given.
 #ifndef __SERIALCONTROLLEDMOTORDRIVERAPI_H__
 #define __SERIALCONTROLLEDMOTORDRIVERAPI_H__
 
-#include "stdint.h"
-#include "config.h"
+#include <stdint.h>
+#include "SCMD_config.h"
 
 #define I2C_MODE 0
 #define SPI_MODE 1
@@ -47,10 +47,20 @@ struct SCMDSettings
     uint8_t commInterface;
     uint8_t I2CAddress;
     uint8_t chipSelectPin;
-	uint8_t invertA;
-	uint8_t invertB;
+
 };
 
+struct SCMDDiagnostics
+{
+	public:
+	//Attainable metrics from SCMD
+	uint8_t numberOfSlaves = 0;
+	uint8_t userPortI2CTime = 0;
+	uint8_t rxErrorCount = 0;
+	uint8_t txErrorCount = 0;
+	
+
+};
 
 //This is the man operational class of the driver.
 
@@ -63,28 +73,19 @@ class SCMD
 	//Constructor generates default SCMDSettings.
     SCMD( void );
 	
-	//Call to apply SCMDSettings.
-    uint8_t begin( void );
-
-	//Software reset routine
-	void reset( void );
 	
-    //Operate the device
-    void setDrive( uint8_t, uint8_t, uint8_t );
-	void inversionMode( uint8_t motorNum, uint8_t polarity );
-	void bridgingMode( uint8_t driverNum, uint8_t bridged );
-	void getDiagnostics( char * );
+    uint8_t begin( void );  //Call to apply SCMDSettings and enable drivers.
+	void reset( void );  //Software reset routine
+    void setDrive( uint8_t channel, uint8_t direction, uint8_t level );//apply drive levels to motors
+	void inversionMode( uint8_t motorNum, uint8_t polarity );//Set inversion states for motors
+	void bridgingMode( uint8_t driverNum, uint8_t bridged );//Enable bridging ('B' channel will have no effect in bridged mode)
+	void getDiagnostics( SCMDDiagnostics & );//Gets and formats the diagnostic information.  Make sure the passed char array is big enough (size not determined y et)
+	
+	
 	
     //The following utilities read and write
-
-	//ReadRegisterRegion takes a uint8 array address as input and reads
-	//a chunk of memory into that array.
-    void readRegisterRegion(uint8_t*, uint8_t, uint8_t );
-	//readRegister reads one register
+	//readRegister reads one byte
     uint8_t readRegister(uint8_t);
-    //Reads two regs, LSByte then MSByte order, and concatenates them
-	//Used for two-byte reads
-	int16_t readRegisterInt16( uint8_t offset );
 	//Writes a byte;
     void writeRegister(uint8_t, uint8_t);
     

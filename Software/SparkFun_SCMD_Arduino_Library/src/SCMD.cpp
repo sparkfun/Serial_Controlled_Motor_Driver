@@ -28,10 +28,10 @@ Distributed as-is; no warranty is given.
 
 //See _____ for additional topology notes.
 
-#include "SerialControlledMotorDriverAPI.h"
-#include "stdint.h"
+#include <stdint.h>
 #include <math.h>
-#include "config.h"
+#include "SCMD.h"
+#include "SCMD_config.h"
 
 #ifdef USE_ALT_I2C
 #include <i2c_t3.h>
@@ -59,8 +59,6 @@ SCMD::SCMD( void )
 	settings.I2CAddress = 0x58; //Ignored for SPI_MODE
 	//Select CS pin for SPI.  Does nothing for I2C
 	settings.chipSelectPin = 10;
-	settings.invertA = 0;
-	settings.invertB = 0;
 	
 
 }
@@ -98,7 +96,7 @@ uint8_t SCMD::begin()
 		// Base value of the clock is HIGH (CPOL = 1)
 		// This was SPI_MODE3 for RedBoard, but I had to change to
 		// MODE0 for Teensy 3.1 operation
-		SPI.setDataMode(SPI_MODE3);
+		SPI.setDataMode(SPI_MODE0);
 		// initalize the  data ready and chip select pins:
 		pinMode(settings.chipSelectPin, OUTPUT);
 		digitalWrite(settings.chipSelectPin, HIGH);
@@ -111,7 +109,7 @@ uint8_t SCMD::begin()
 	//dummy read
 	readRegister(SCMD_ID);
 	writeRegister(SCMD_DRIVER_ENABLE, 0x01);
-	delay(10);
+//	delay(10);
 
 	return readRegister(SCMD_ID);
 }
@@ -142,22 +140,26 @@ void SCMD::setDrive( uint8_t channel, uint8_t direction, uint8_t level )
 	level = level >> 1;
 	int16_t driveValue; //use to build value to actually write to register
 	
-	switch(channel)
+	//switch(channel)
+	//{
+	//	case 0:  //master
+	//		driveValue = (level * direction) + ((int8_t)level * ((int8_t)direction - 1)); //set to 1/2 drive if direction = 1 or -1/2 drive if direction = 0; (level * direction);
+	//		driveValue += 128;
+	//		writeRegister(SCMD_MA_DRIVE, driveValue);
+	//		break;
+	//	case 1:  //master
+	//		driveValue = (level * direction) + ((int8_t)level * ((int8_t)direction - 1)); //set to 1/2 drive if direction = 1 or -1/2 drive if direction = 0; (level * direction);
+	//		driveValue += 128;
+	//		writeRegister(SCMD_MB_DRIVE, driveValue);
+	//		break;
+	//	default:
+	//	break;
+	//}
+	if(channel < 34)
 	{
-		case 0:  //master
-			direction ^= settings.invertA;
-			driveValue = (level * direction) + ((int8_t)level * ((int8_t)direction - 1)); //set to 1/2 drive if direction = 1 or -1/2 drive if direction = 0; (level * direction);
-			driveValue += 128;
-			writeRegister(SCMD_MA_DRIVE, driveValue);
-			break;
-		case 1:  //master
-			direction ^= settings.invertB;
-			driveValue = (level * direction) + ((int8_t)level * ((int8_t)direction - 1)); //set to 1/2 drive if direction = 1 or -1/2 drive if direction = 0; (level * direction);
-			driveValue += 128;
-			writeRegister(SCMD_MB_DRIVE, driveValue);
-			break;
-		default:
-		break;
+		driveValue = (level * direction) + ((int8_t)level * ((int8_t)direction - 1)); //set to 1/2 drive if direction = 1 or -1/2 drive if direction = 0; (level * direction);
+		driveValue += 128;
+		writeRegister(SCMD_MA_DRIVE + channel, driveValue);
 	}
 }
 
@@ -204,11 +206,8 @@ void SCMD::inversionMode( uint8_t motorNum, uint8_t polarity )
 			return;
 		}
 		//convert motorNum to one-hot mask
-		motorNum = 1 << motorNum;
-		uint8_t data = readRegister( regTemp );
-		//clear bit
-		data &= ~motorNum;
-		writeRegister( regTemp, data | (polarity & 0x01) );
+		uint8_t data = readRegister( regTemp ) & ~( 1 << motorNum );
+		writeRegister( regTemp, data | ((polarity & 0x01) << motorNum) );
 	}
 
 }
@@ -243,65 +242,30 @@ void SCMD::bridgingMode( uint8_t driverNum, uint8_t bridged )
 			return;
 		}
 		//convert driverNum to one-hot mask
-		driverNum = 1 << driverNum;
-		uint8_t data = readRegister( regTemp );
-		//clear bit
-		data &= ~driverNum;
-		writeRegister( regTemp, data | (bridged & 0x01) );
+		uint8_t data = readRegister( regTemp ) & ~( 1 << driverNum );
+		writeRegister( regTemp, data | ((bridged & 0x01) << driverNum) );
 	}
 	
 }
-	
+
 //****************************************************************************//
 //
-//  Utility
+//  Diagnostics
 //
 //****************************************************************************//
-void SCMD::readRegisterRegion(uint8_t *outputPointer , uint8_t offset, uint8_t length)
+void SCMD::getDiagnostics( SCMDDiagnostics &diagObjectReference )
 {
-//	//define pointer that will point to the external space
-//	uint8_t i = 0;
-//	char c = 0;
-//
-//	switch (settings.commInterface)
-//	{
-//
-//	case I2C_MODE:
-//		Wire.beginTransmission(settings.I2CAddress);
-//		Wire.write(offset);
-//		Wire.endTransmission();
-//
-//		// request bytes from slave device
-//		Wire.requestFrom(settings.I2CAddress, length);
-//		while ( (Wire.available()) && (i < length))  // slave may send less than requested
-//		{
-//			c = Wire.read(); // receive a byte as character
-//			*outputPointer = c;
-//			outputPointer++;
-//			i++;
-//		}
-//		break;
-//
-//	case SPI_MODE:
-//		// take the chip select low to select the device:
-//		digitalWrite(settings.chipSelectPin, LOW);
-//		// send the device the register you want to read:
-//		SPI.transfer(offset | 0x80);  //Ored with "read request" bit
-//		while ( i < length ) // slave may send less than requested
-//		{
-//			c = SPI.transfer(0x00); // receive a byte as character
-//			*outputPointer = c;
-//			outputPointer++;
-//			i++;
-//		}
-//		// take the chip select high to de-select:
-//		digitalWrite(settings.chipSelectPin, HIGH);
-//		break;
-//
-//	default:
-//		break;
-//	}
-//
+	diagObjectReference.userPortI2CTime = readRegister(SCMD_UPORT_TIME);
+	//Clear uport time
+	writeRegister(SCMD_UPORT_TIME, 0);
+	diagObjectReference.rxErrorCount = readRegister(SCMD_U_I2C_RD_ERR);
+	diagObjectReference.txErrorCount = readRegister(SCMD_U_I2C_WR_ERR);
+	uint8_t topAddr = readRegister(SCMD_SLV_TOP_ADDR);
+	if( (topAddr >= START_SLAVE_ADDR) && (topAddr < (START_SLAVE_ADDR + 16)))
+	{
+		//in valid range
+		diagObjectReference.numberOfSlaves = topAddr - START_SLAVE_ADDR + 1;
+	}
 }
 
 uint8_t SCMD::readRegister(uint8_t offset)
@@ -312,7 +276,6 @@ uint8_t SCMD::readRegister(uint8_t offset)
 	switch (settings.commInterface) {
 
 	case I2C_MODE:
-		//delay(1);
 		Wire.beginTransmission(settings.I2CAddress);
 		Wire.write(offset);
 #ifdef USE_ALT_I2C
@@ -320,18 +283,15 @@ uint8_t SCMD::readRegister(uint8_t offset)
 #else
 		Wire.endTransmission();
 #endif
-		delay(15);
 #ifdef USE_ALT_I2C
 		if( Wire.requestFrom(settings.I2CAddress, numBytes, I2C_STOP, I2C_FAULT_TIMEOUT) == 0 )i2cFaults++;
 #else
 		Wire.requestFrom(settings.I2CAddress, numBytes);
 #endif
-		delay(15);
 		while ( Wire.available() ) // slave may send less than requested
 		{
 			result = Wire.read(); // receive a byte as a proper uint8_t
 		}
-		delay(15);
 		break;
 
 	case SPI_MODE:
@@ -339,25 +299,27 @@ uint8_t SCMD::readRegister(uint8_t offset)
 		digitalWrite(settings.chipSelectPin, LOW);
 		// send the device the register you want to read:
 		SPI.transfer(offset | 0x80);  //Ored with "read request" bit
-		// send a value of 0 to read the first byte returned:
-		result = SPI.transfer(0x00);
 		// take the chip select high to de-select:
 		digitalWrite(settings.chipSelectPin, HIGH);
+		
+		
+		for(volatile int i = 0; i < 25; i++);
+		
+		//do a dummy read
+		digitalWrite(settings.chipSelectPin, LOW);
+		// send a value of 80 to read the first byte returned:
+		result = SPI.transfer(0x80);
+		// take the chip select high to de-select:
+		digitalWrite(settings.chipSelectPin, HIGH);
+		
+		for(volatile int i = 0; i < 25; i++);
+		
 		break;
 
 	default:
 		break;
 	}
 	return result;
-}
-
-int16_t SCMD::readRegisterInt16( uint8_t offset )
-{
-	uint8_t myBuffer[2];
-	readRegisterRegion(myBuffer, offset, 2);  //Does memory transfer
-	int16_t output = (int16_t)myBuffer[0] | int16_t(myBuffer[1] << 8);
-	
-	return output;
 }
 
 void SCMD::writeRegister(uint8_t offset, uint8_t dataToWrite)
@@ -374,7 +336,7 @@ void SCMD::writeRegister(uint8_t offset, uint8_t dataToWrite)
 #else
 		Wire.endTransmission();
 #endif
-		delay(1);
+//		delay(1);
 		break;
 
 	case SPI_MODE:
@@ -387,6 +349,9 @@ void SCMD::writeRegister(uint8_t offset, uint8_t dataToWrite)
 		// decrement the number of bytes left to read:
 		// take the chip select high to de-select:
 		digitalWrite(settings.chipSelectPin, HIGH);
+		
+		for(volatile int i = 0; i < 25; i++);
+		
 		break;
 
 	default:

@@ -15,9 +15,15 @@ Distributed as-is; no warranty is given.
 #include <project.h>
 #include "diagLEDS.h"
 
+//Prototypes
+static void setDiagLeds(uint8_t input);
 
+//Variables
 uint8_t lastDiagLeds = 0;
-void setDiagLeds(uint8_t input)
+uint8_t errorLevelMemory[8] = {0,0,0,0,0,0,0,0}; //variable to hold flash numbers.  High index prioritized
+
+//Functions
+static void setDiagLeds(uint8_t input)
 {
     if(input == lastDiagLeds) return;
     lastDiagLeds = input;
@@ -34,9 +40,8 @@ void setDiagLeds(uint8_t input)
 
 }
 
-uint8_t errorLevelMemory[8] = {0,0,0,0,0,0,0,0}; //put flash codes within
-
-void sendDiagMessage( void ) //send error level
+//put the appropriate layer on the physical LEDs
+void displayDiagMessage( void ) //send error level
 {
     int i;
     for(i = 7; i >= 0; i--)
@@ -49,14 +54,16 @@ void sendDiagMessage( void ) //send error level
     }
 }
 
+//put 'number of blinks' in message layers
 void setDiagMessage( uint8_t errorLevel, uint8_t message ) //send error level
 {
     errorLevelMemory[errorLevel] = message;
-    sendDiagMessage();
+    displayDiagMessage();
 }
 
+//remove a message from the layers
 void clearDiagMessage( uint8_t errorLevel ) //send error level
 {
     errorLevelMemory[errorLevel] = 0;
-    sendDiagMessage();
+    displayDiagMessage();
 }

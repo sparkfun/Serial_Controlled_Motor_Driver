@@ -11,11 +11,9 @@
 #define SCMD_ID                    0x01
 #define SCMD_SLAVE_ADDR            0x02
 #define SCMD_CONFIG_BITS           0x03
-#define SCMD_I2C_FAULTS            0x04
-#define SCMD_I2C_RD_ERR            0x05
-#define SCMD_I2C_WR_ERR            0x06
-#define SCMD_SPI_FAULTS            0x07
-#define SCMD_UART_FAULTS           0x08
+#define SCMD_U_I2C_RD_ERR          0x04
+#define SCMD_U_I2C_WR_ERR          0x05
+
 #define SCMD_UPORT_TIME	           0x09
 #define SCMD_SLV_POLL_CNT          0x0A
 #define SCMD_SLV_TOP_ADDR          0x0B
@@ -79,7 +77,7 @@
 #define SCMD_BRIDGE_SLV_H          0x65
 
 #define SCMD_DRIVER_ENABLE         0x70
-
-    
+#define SCMD_UPDATE_RATE           0x71
+#define SCMD_FORCE_UPDATE          0x72
 
 #endif

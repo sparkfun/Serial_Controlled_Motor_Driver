@@ -10,9 +10,9 @@
 //  Set maxInterval to rollover rate
 //  Set maxTimer to the max foreseen interval of any timer.
 //  maxTimer + maxInterval = max countable value.
-#include "HOS_char.h"
-#include "SerialControlledMotorDriverAPI.h"
-#include "config.h"
+//#include "HOS_char.h"
+#include "SCMD.h"
+#include "SCMD_config.h"
 
 //Globals
 uint16_t maxTimer = 60000;
@@ -37,11 +37,14 @@ IntervalTimer myTimer;
 
 //Globals
 TimerClass debugTimer( 3000 ); //milliseconds between calls
-TimerClass outputTimer( 50 );  //Read knobs and drive motors
+TimerClass outputTimer( 10 );  //Read knobs and drive motors
 
 //Required for timers:
 uint16_t msTicks = 0;
 uint8_t msTicksLocked = 1; //start locked out
+
+uint8_t lastSwitchValues[5] = {1,1,1,1,1};
+uint8_t currentSwitchValues[5] = {0,0,0,0,0};
 
 SCMD myMotorDriver;
 
@@ -57,6 +60,12 @@ void setup()
 	pinMode(A1, INPUT);
 	pinMode(A2, INPUT);
 	pinMode(A3, INPUT);
+
+	pinMode(8, INPUT_PULLUP);
+	pinMode(9, INPUT_PULLUP);
+    pinMode(10, INPUT_PULLUP);
+	pinMode(11, INPUT_PULLUP);
+    pinMode(12, INPUT_PULLUP);
 	
 	pinMode(4, OUTPUT);
 	digitalWrite(4, 0);
@@ -65,11 +74,11 @@ void setup()
 	Serial.println("Starting sketch.");
 
 	//Specify configuration for the driver
+	//  Can be I2C_MODE, SPI_MODE
 	myMotorDriver.settings.commInterface = I2C_MODE;
+	//myMotorDriver.settings.commInterface = SPI_MODE;
 	myMotorDriver.settings.I2CAddress = 0x5A;
 	//myMotorDriver.settings.chipSelectPin = 10;
-	//myMotorDriver.settings.invertA = 1;
-	//myMotorDriver.settings.invertB = 1;
 
 	Serial.println("Starting timer.");
 	//If 328p based, do this -- Creates interrupt based timer
@@ -107,6 +116,7 @@ void setup()
 	digitalWrite(4, 0);
 	digitalWrite(4, 1);
 	Serial.println(myMotorDriver.begin(), HEX);
+//	while(1);
 	myMotorDriver.bridgingMode(0,1);
 	myMotorDriver.inversionMode(2,1);
 }
@@ -149,24 +159,66 @@ void loop()
 			Serial.print(i, HEX);
 			Serial.print(": 0x");
 			Serial.println(myMotorDriver.readRegister(i), HEX);
-		}		
-		Serial.print("outputTimer Fn Duration Peak: ");
-		Serial.print(durationRecord[0]);
-		Serial.println("ms");
-		durationRecord[0] = 0;
-		Serial.print("I2C routine duration: ");
-		Serial.print(myMotorDriver.readRegister(SCMD_UPORT_TIME));
-		Serial.println("us");
-		Serial.print("I2C RX error cnt: ");
-		Serial.println(myMotorDriver.readRegister(SCMD_I2C_RD_ERR));
-		Serial.print("I2C WR error cnt: ");
-		Serial.println(myMotorDriver.readRegister(SCMD_I2C_WR_ERR));
-		//Serial.print("debug out: ");
-		//Serial.println(myMotorDriver.readRegister(SCMD_MA_DRIVE));
 		}
+		//Retreive diagnostics and store in SCMDDiagnostics struct
+		SCMDDiagnostics myDiagnostics;
+		myMotorDriver.getDiagnostics(myDiagnostics);
+		//Do something with the data
+		Serial.println("DIAGNSOTICS:");
+		Serial.print("outputTimer Fn Duration Peak: ");
+			Serial.print(durationRecord[0]);
+			Serial.println("ms");
+			durationRecord[0] = 0;
+		Serial.print("I2C routine duration: ");
+			Serial.print(myDiagnostics.userPortI2CTime);
+			Serial.println("us");
+		Serial.print("I2C RX error cnt: ");
+			Serial.println(myDiagnostics.rxErrorCount);
+		Serial.print("I2C WR error cnt: ");
+			Serial.println(myDiagnostics.txErrorCount);
+		Serial.print("Number of slaves: ");
+			Serial.println(myDiagnostics.numberOfSlaves);
+		//Serial.print("debug out: ");
+		//	Serial.println(myMotorDriver.readRegister(SCMD_MA_DRIVE));
+	}
+		
 	//**Script timer******************//  
 	if(outputTimer.flagStatus() == PENDING)
 	{
+		currentSwitchValues[0] = digitalRead(8) ^ 0x01;
+		currentSwitchValues[1] = digitalRead(9) ^ 0x01;
+		currentSwitchValues[2] = digitalRead(10) ^ 0x01;
+		currentSwitchValues[3] = digitalRead(11) ^ 0x01;
+		currentSwitchValues[4] = digitalRead(12) ^ 0x01;
+		
+		for( int i = 0; i < 5; i++ )
+		{
+			if( lastSwitchValues[i] != currentSwitchValues[i] )
+			{
+				lastSwitchValues[i] = currentSwitchValues[i];
+				Serial.println(currentSwitchValues[i]);
+				switch(i)
+				{
+					case 0:
+					//myMotorDriver.inversionMode(0 + (2*currentSwitchValues[3]), currentSwitchValues[i]);
+					
+					break;
+					case 1:
+					myMotorDriver.inversionMode(1 + (2*currentSwitchValues[3]), currentSwitchValues[i]);
+					break;
+					case 2:
+					myMotorDriver.bridgingMode(0 + currentSwitchValues[3], currentSwitchValues[i]);
+					break;
+					case 3:
+					break;
+					case 4:
+					myMotorDriver.writeRegister(SCMD_DRIVER_ENABLE, currentSwitchValues[i]);
+					break;
+					default:
+					break;
+				}
+			}
+		}
 		uint16_t timeVariable = msTicks;
 		//Read inputs
 		int8_t inputAnalog[4];
@@ -178,7 +230,7 @@ void loop()
 		}
 			
 		//Send outputs
-		for( int i = 0; i < 4; i++)
+		for( int i = 1; i < 4; i++)
 		{
 			if(inputAnalog[i] >= 0)
 			{
@@ -188,13 +240,13 @@ void loop()
 			{
 				myMotorDriver.setDrive(i,0,inputAnalog[i] * -1); //Drive motor i backward
 			}
-			delay(1);
 		}
 		timeVariable = msTicks - timeVariable;
 		if( timeVariable > durationRecord[0] )
 		{
 			durationRecord[0] = timeVariable;
 		}
+		myMotorDriver.writeRegister(SCMD_UPDATE_RATE, (inputAnalog[0] + 128) );
 	}
 }
 
