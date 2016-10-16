@@ -1,4 +1,5 @@
 //#include "project.h"
+#include "SCMD_config.h"
 #include "devRegisters.h"
 #include "customSpiInt.h"
 #include "USER_PORT_PVT.h"
@@ -138,69 +139,31 @@ static void parseSPI( void )
         else
         {
             //Command is WRITE
-            //Ok, if packet has more than 1 byte
-            if(rxTempPtr > 1)
+            switch( rxTempPtr )
             {
-                masterAddressPointer = rxTemp[0] & 0x7F;
-                writeDevRegister(masterAddressPointer, rxTemp[1]); //Write the next byte
-                //We should check that the buffer doesn't have unused data and count!
-                //But we won't...
-                USER_PORT_SpiUartClearRxBuffer();
-                rxTempPtr = 0;
+                case 2: //Buffer has command and data
+                    masterAddressPointer = rxTemp[0] & 0x7F;
+                    writeDevRegister(masterAddressPointer, rxTemp[1]); //Write the next byte
+                    USER_PORT_SpiUartClearRxBuffer();
+                    rxTempPtr = 0;
+                break;
+                case 1:
+                    //Not enough data, do nothing and wait for next loop.
+                break;
+                case 0:
+                default:
+                    //Too much data.  Dump data, reset, and keep a count
+                    incrementDevRegister( SCMD_U_BUF_DUMPED );
+                    USER_PORT_SpiUartClearRxBuffer();
+                    rxTempPtr = 0;                    
+                break;
             }
-            //If not enough data, do nothing and wait for next loop.
         }
         
-        
-        //USER_PORT_SpiUartWriteTxData(0xA1);
         LED_R_Write(LED_R_Read()^0x01);
     }
 
 }
 
-
-//static void parseSPI( void )
-//{
-//   
-//    uint8_t rxTemp[10];
-//    uint8_t rxTempPtr = 0;
-//    //rxTempPtr = 
-//    //check for interrupt, if so, toggle LED
-//    if(USER_PORT_SpiUartGetRxBufferSize())
-//    {
-//        rxTempPtr = 0;
-//        while(USER_PORT_SpiUartGetRxBufferSize())  //This reads out all rx data
-//        {
-//            rxTemp[rxTempPtr] = USER_PORT_SpiUartReadRxData();
-//            if(rxTempPtr < 9) rxTempPtr++;
-//        }
-//        USER_PORT_SpiUartClearRxBuffer();
-//
-//        //check first bit
-//        if(rxTemp[0] & 0x80)
-//        {
-//            //Command is READ, NOT WRITE
-//            masterAddressPointer = rxTemp[0] & 0x7F;
-//            USER_PORT_SpiUartClearTxBuffer();
-//            volatile uint8_t reg = readDevRegister(masterAddressPointer);
-//            USER_PORT_SpiUartWriteTxData(reg); //This will be available on next read, during command bits
-//        }
-//        else
-//        {
-//            //Command is WRITE
-//            //Ok, if packet has more than 1 byte
-//            if(rxTempPtr > 1)
-//            {
-//                masterAddressPointer = rxTemp[0] & 0x7F;
-//                writeDevRegister(masterAddressPointer, rxTemp[1]); //Write the next byte
-//            }
-//        }
-//        
-//        
-//        //USER_PORT_SpiUartWriteTxData(0xA1);
-//        LED_R_Write(LED_R_Read()^0x01);
-//    }
-//
-//}
 
 /* [] END OF FILE */

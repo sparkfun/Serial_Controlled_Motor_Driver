@@ -16,7 +16,7 @@ Distributed as-is; no warranty is given.
 #include <project.h>
 #include "devRegisters.h"
 #include "charMath.h"
-#include "config.h"
+#include "SCMD_config.h"
 #include "serial.h"
 #include "diagLEDS.h"
 

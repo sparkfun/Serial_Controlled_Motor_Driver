@@ -13,14 +13,16 @@
 #define SCMD_CONFIG_BITS           0x03
 #define SCMD_U_I2C_RD_ERR          0x04
 #define SCMD_U_I2C_WR_ERR          0x05
-
+#define SCMD_U_BUF_DUMPED          0x06
+#define SCMD_E_I2C_RD_ERR          0x07
+#define SCMD_E_I2C_WR_ERR          0x08    
 #define SCMD_UPORT_TIME	           0x09
 #define SCMD_SLV_POLL_CNT          0x0A
 #define SCMD_SLV_TOP_ADDR          0x0B
-#define SCMD_FSAFE_TIME            0x0C
-#define SCMD_FSAFE_FAULTS          0x0D
+#define SCMD_MST_E_ERR             0x0C
+    
+#define SCMD_FSAFE_FAULTS          0x0E
                                   
-#define SCMD_SLAVE_ID              0x10
 #define SCMD_REM_ADDR              0x11
 #define SCMD_REM_OFFSET            0x12
 #define SCMD_REM_DATA_WR           0x13
@@ -75,6 +77,7 @@
 #define SCMD_INV_26_33             0x63
 #define SCMD_BRIDGE_SLV_L          0x64
 #define SCMD_BRIDGE_SLV_H          0x65
+#define SCMD_FSAFE_TIME            0x67
 
 #define SCMD_DRIVER_ENABLE         0x70
 #define SCMD_UPDATE_RATE           0x71

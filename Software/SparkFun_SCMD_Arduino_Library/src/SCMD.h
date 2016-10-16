@@ -55,12 +55,17 @@ struct SCMDDiagnostics
 	public:
 	//Attainable metrics from SCMD
 	uint8_t numberOfSlaves = 0;
-	uint8_t userPortI2CTime = 0;
-	uint8_t rxErrorCount = 0;
-	uint8_t txErrorCount = 0;
-	
+	uint8_t U_I2C_RD_ERR = 0;
+	uint8_t U_I2C_WR_ERR = 0;
+	uint8_t U_BUF_DUMPED = 0;
+	uint8_t E_I2C_RD_ERR = 0;
+	uint8_t E_I2C_WR_ERR = 0;
+	uint8_t UPORT_TIME = 0;
+	uint8_t SLV_POLL_CNT = 0;
+	uint8_t MST_E_ERR = 0;
+	uint8_t FSAFE_FAULTS = 0;
 
-};
+ };
 
 //This is the man operational class of the driver.
 
@@ -79,16 +84,18 @@ class SCMD
     void setDrive( uint8_t channel, uint8_t direction, uint8_t level );//apply drive levels to motors
 	void inversionMode( uint8_t motorNum, uint8_t polarity );//Set inversion states for motors
 	void bridgingMode( uint8_t driverNum, uint8_t bridged );//Enable bridging ('B' channel will have no effect in bridged mode)
-	void getDiagnostics( SCMDDiagnostics & );//Gets and formats the diagnostic information.  Make sure the passed char array is big enough (size not determined y et)
-	
+	void getDiagnostics( SCMDDiagnostics &diagObjectReference );//Gets and formats the diagnostic information.  Make sure the passed char array is big enough (size not determined yet)
+	void getRemoteDiagnostics( uint8_t address, SCMDDiagnostics &diagObjectReference );//send remote address
+	void resetDiagnosticCounts( void );
+	void resetRemoteDiagnosticCounts( uint8_t address );
 	
 	
     //The following utilities read and write
-	//readRegister reads one byte
-    uint8_t readRegister(uint8_t);
-	//Writes a byte;
-    void writeRegister(uint8_t, uint8_t);
-    
+    uint8_t readRegister(uint8_t offset);//reads a byte
+    void writeRegister(uint8_t offset, uint8_t dataToWrite);//Writes a byte;
+    uint8_t readRemoteRegister(uint8_t address, uint8_t offset);//Reads a slave through the slave access registers
+    void writeRemoteRegister(uint8_t address, uint8_t offset, uint8_t dataToWrite);//Writes a slave through the slave access registers
+	
 	//Diagnostic
 	uint16_t i2cFaults; //Location to hold i2c faults for alternate driver
 	

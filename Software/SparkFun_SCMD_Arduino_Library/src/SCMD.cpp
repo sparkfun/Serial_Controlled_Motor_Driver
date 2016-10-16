@@ -255,17 +255,72 @@ void SCMD::bridgingMode( uint8_t driverNum, uint8_t bridged )
 //****************************************************************************//
 void SCMD::getDiagnostics( SCMDDiagnostics &diagObjectReference )
 {
-	diagObjectReference.userPortI2CTime = readRegister(SCMD_UPORT_TIME);
-	//Clear uport time
-	writeRegister(SCMD_UPORT_TIME, 0);
-	diagObjectReference.rxErrorCount = readRegister(SCMD_U_I2C_RD_ERR);
-	diagObjectReference.txErrorCount = readRegister(SCMD_U_I2C_WR_ERR);
-	uint8_t topAddr = readRegister(SCMD_SLV_TOP_ADDR);
+	diagObjectReference.U_I2C_RD_ERR = readRegister( SCMD_U_I2C_RD_ERR );
+	diagObjectReference.U_I2C_WR_ERR = readRegister( SCMD_U_I2C_WR_ERR );
+	diagObjectReference.U_BUF_DUMPED = readRegister( SCMD_U_BUF_DUMPED );
+	diagObjectReference.E_I2C_RD_ERR = readRegister( SCMD_E_I2C_RD_ERR );
+	diagObjectReference.E_I2C_WR_ERR = readRegister( SCMD_E_I2C_WR_ERR );
+	diagObjectReference.UPORT_TIME = readRegister( SCMD_UPORT_TIME );
+	diagObjectReference.SLV_POLL_CNT = readRegister( SCMD_SLV_POLL_CNT );
+	//Count slaves
+	uint8_t topAddr = readRegister( SCMD_SLV_TOP_ADDR );
 	if( (topAddr >= START_SLAVE_ADDR) && (topAddr < (START_SLAVE_ADDR + 16)))
 	{
 		//in valid range
 		diagObjectReference.numberOfSlaves = topAddr - START_SLAVE_ADDR + 1;
 	}
+	diagObjectReference.MST_E_ERR = readRegister( SCMD_MST_E_ERR );
+	diagObjectReference.FSAFE_FAULTS = readRegister( SCMD_FSAFE_FAULTS );
+	
+}
+
+void SCMD::getRemoteDiagnostics( uint8_t address, SCMDDiagnostics &diagObjectReference )
+{
+	diagObjectReference.U_I2C_RD_ERR = readRemoteRegister( address, SCMD_U_I2C_RD_ERR );
+	diagObjectReference.U_I2C_WR_ERR = readRemoteRegister( address, SCMD_U_I2C_WR_ERR );
+	diagObjectReference.U_BUF_DUMPED = readRemoteRegister( address, SCMD_U_BUF_DUMPED );
+	diagObjectReference.E_I2C_RD_ERR = readRemoteRegister( address, SCMD_E_I2C_RD_ERR );
+	diagObjectReference.E_I2C_WR_ERR = readRemoteRegister( address, SCMD_E_I2C_WR_ERR );
+	diagObjectReference.UPORT_TIME = readRemoteRegister( address, SCMD_UPORT_TIME );
+	diagObjectReference.SLV_POLL_CNT = readRemoteRegister( address, SCMD_SLV_POLL_CNT );
+	//Count slaves
+	uint8_t topAddr = readRemoteRegister( address, SCMD_SLV_TOP_ADDR );
+	if( (topAddr >= START_SLAVE_ADDR) && (topAddr < (START_SLAVE_ADDR + 16)))
+	{
+		//in valid range
+		diagObjectReference.numberOfSlaves = topAddr - START_SLAVE_ADDR + 1;
+	}
+	diagObjectReference.MST_E_ERR = readRemoteRegister( address, SCMD_MST_E_ERR );
+	diagObjectReference.FSAFE_FAULTS = readRemoteRegister( address, SCMD_FSAFE_FAULTS );
+	
+}
+
+void SCMD::resetDiagnosticCounts( void )
+{
+	writeRegister( SCMD_U_I2C_RD_ERR, 0 );
+	writeRegister( SCMD_U_I2C_WR_ERR, 0 );
+	writeRegister( SCMD_U_BUF_DUMPED, 0 );
+	writeRegister( SCMD_E_I2C_RD_ERR, 0 );
+	writeRegister( SCMD_E_I2C_WR_ERR, 0 );
+	//Clear uport time
+	writeRegister( SCMD_UPORT_TIME, 0 );
+	writeRegister( SCMD_MST_E_ERR, 0 );
+	writeRegister( SCMD_FSAFE_FAULTS, 0 );
+	
+}
+
+void SCMD::resetRemoteDiagnosticCounts( uint8_t address )
+{
+	writeRemoteRegister( address, SCMD_U_I2C_RD_ERR, 0 );
+	writeRemoteRegister( address, SCMD_U_I2C_WR_ERR, 0 );
+	writeRemoteRegister( address, SCMD_U_BUF_DUMPED, 0 );
+	writeRemoteRegister( address, SCMD_E_I2C_RD_ERR, 0 );
+	writeRemoteRegister( address, SCMD_E_I2C_WR_ERR, 0 );
+	//Clear uport time
+	writeRemoteRegister( address, SCMD_UPORT_TIME, 0 );
+	writeRemoteRegister( address, SCMD_ID, 0 );
+	writeRemoteRegister( address, SCMD_FSAFE_FAULTS, 0 );
+	
 }
 
 uint8_t SCMD::readRegister(uint8_t offset)
@@ -357,4 +412,22 @@ void SCMD::writeRegister(uint8_t offset, uint8_t dataToWrite)
 	default:
 		break;
 	}
+}
+uint8_t SCMD::readRemoteRegister(uint8_t address, uint8_t offset)
+{
+	writeRegister(SCMD_REM_ADDR, address);
+	writeRegister(SCMD_REM_OFFSET, offset);
+	writeRegister(SCMD_REM_READ, 1);
+	delay(5);
+	return readRegister(SCMD_REM_DATA_RD);
+	
+}
+
+void SCMD::writeRemoteRegister(uint8_t address, uint8_t offset, uint8_t dataToWrite)
+{
+	writeRegister(SCMD_REM_ADDR, address);
+	writeRegister(SCMD_REM_OFFSET, offset);
+	writeRegister(SCMD_REM_DATA_WR, dataToWrite);
+	writeRegister(SCMD_REM_WRITE, 1);
+	
 }

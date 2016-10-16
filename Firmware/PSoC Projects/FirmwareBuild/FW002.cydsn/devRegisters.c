@@ -16,7 +16,7 @@ Distributed as-is; no warranty is given.
 #include <stdint.h>
 #include <stdbool.h>
 #include "devRegisters.h"
-#include "config.h"
+#include "SCMD_config.h"
 
 //Set accessable table size here:
 #define REGISTER_TABLE_LENGTH 128

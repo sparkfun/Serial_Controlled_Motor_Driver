@@ -15,7 +15,7 @@ Distributed as-is; no warranty is given.
 #include <project.h>
 #include "devRegisters.h"
 #include "charMath.h"
-#include "config.h"
+#include "SCMD_config.h"
 #include "serial.h"
 #include "diagLEDS.h"
 #include "slaveEnumeration.h"
@@ -83,7 +83,7 @@ int main()
         if(CONFIG_BITS == 2) //Slave
         {
             //parseSlaveI2C is also called before interrupts occur on the bus, but check here too to catch residual buffers
-            parseSlaveI2C();
+            //parseSlaveI2C();
             tickSlaveSM();
         }
         else //Do master operations
@@ -120,6 +120,23 @@ CY_ISR(FSAFE_TIMER_Interrupt)
     writeDevRegister( SCMD_MA_DRIVE, 0x80 );
     writeDevRegister( SCMD_MB_DRIVE, 0x80 );
     //  Reconfigure?  Try and recover the bus?
+
+    
+    if(CONFIG_BITS == 2) //Slave
+    {
+        ResetExpansionScbConfigurationSlave();
+        EXPANSION_PORT_SetCustomInterruptHandler(parseSlaveI2C);
+        ////writeDevRegister(SCMD_SLAVE_ADDR, readDevRegister(SCMD_SLAVE_ADDR)); //Set address to self to activate configuration
+        //EXPANSION_PORT_I2CSlaveSetAddress(readDevRegister(SCMD_SLAVE_ADDR));
+        Clock_1_Stop();
+        Clock_1_Start();
+        CyIntEnable(EXPANSION_PORT_ISR_NUMBER);
+        CyGlobalIntEnable;
+        }
+    else
+    {
+        //SetExpansionScbConfigurationMaster();
+    }    
     
     //  Tell someone
     setDiagMessage(7,8);
@@ -547,48 +564,6 @@ static void parseUART( void )
 
 }
 
-//static void parseSPI( void )
-//{
-//   
-//    uint8_t rxTemp[10];
-//    uint8_t rxTempPtr = 0;
-//    //rxTempPtr = 
-//    //check for interrupt, if so, toggle LED
-//    if(USER_PORT_SpiUartGetRxBufferSize())
-//    {
-//        rxTempPtr = 0;
-//        while(USER_PORT_SpiUartGetRxBufferSize())  //This reads out all rx data
-//        {
-//            rxTemp[rxTempPtr] = USER_PORT_SpiUartReadRxData();
-//            if(rxTempPtr < 9) rxTempPtr++;
-//            USER_PORT_SpiUartClearRxBuffer();
-//        }
-//        
-//        //check first bit
-//        if(rxTemp[0] & 0x80)
-//        {
-//            //Command is READ, NOT WRITE
-//            addressPointer = rxTemp[0] & 0x7F;
-//            USER_PORT_SpiUartWriteTxData(readDevRegister(addressPointer)); //This will be available on next read, during command bits
-//        }
-//        else
-//        {
-//            //Command is WRITE
-//            //Ok, if packet has more than 1 byte
-//            if(rxTempPtr > 0)
-//            {
-//                addressPointer = rxTemp[0] & 0x7F;
-//                writeDevRegister(addressPointer, rxTemp[1]); //Write the next byte
-//            }
-//        }
-//        
-//        
-//        //USER_PORT_SpiUartWriteTxData(0xA1);
-//        LED_R_Write(LED_R_Read()^0x01);
-//    }
-//
-//}
-
 void parseI2C( void )
 {
     DEBUG_TIMER_Stop();
@@ -615,11 +590,16 @@ void parseI2C( void )
             addressPointer = bufferRx[0];
             writeDevRegister(addressPointer, bufferRx[1]);
         }
-        if (USER_PORT_I2CSlaveGetWriteBufSize() == 1)
+        else if (USER_PORT_I2CSlaveGetWriteBufSize() == 1)
         {
             //we have a address only, expose
             //for now, limit address
             addressPointer = bufferRx[0];
+        }
+        else if (USER_PORT_I2CSlaveGetWriteBufSize() > 2)
+        {
+            //Something was wrong with the ammount of data in the buffer.  It will be dumped, but keep a count
+            incrementDevRegister( SCMD_U_BUF_DUMPED );
         }
         //Count errors while clearing the status
         if( USER_PORT_I2CSlaveClearWriteStatus() & USER_PORT_I2C_SSTAT_WR_ERR ) incrementDevRegister( SCMD_U_I2C_WR_ERR );
@@ -628,9 +608,7 @@ void parseI2C( void )
         bufferTx[0] = readDevRegister(addressPointer);
         LED_PULSE_Write(0);
     }
-    //always expose buffer?
-    /*expose buffer to master */
-    //bufferTx[0] = readDevRegister(addressPointer);
+    //expose data
     if (0u != (USER_PORT_I2CSlaveStatus() & USER_PORT_I2C_SSTAT_RD_CMPLT))
     {
         /* Clear slave read buffer and status */
@@ -646,12 +624,23 @@ void parseI2C( void )
 
 static void parseSlaveI2C( void )
 {
- 
+    //DEBUG_TIMER_Stop();
+    //DEBUG_TIMER_WriteCounter(0);
+    //DEBUG_TIMER_Start(); 
     /* Write complete: parse command packet */
     if ((0u != (EXPANSION_PORT_I2CSlaveStatus() & EXPANSION_PORT_I2C_SSTAT_WR_CMPLT))&&(0u == (EXPANSION_PORT_I2CSlaveStatus() & EXPANSION_PORT_I2C_SSTAT_WR_BUSY)))
     {
         LED_PULSE_Write(1);
-        /* Check packet length */
+        if(readDevRegister(SCMD_FSAFE_TIME)) //Active, clear watchdog
+        {
+            //reset the counter
+            FSAFE_TIMER_Stop();
+            FSAFE_TIMER_WriteCounter(0);
+            FSAFE_TIMER_Start();
+            //Clear error message
+            clearDiagMessage(7);
+        }
+         /* Check packet length */
         switch( EXPANSION_PORT_I2CSlaveGetWriteBufSize() )
         {
             case 3:
@@ -673,7 +662,8 @@ static void parseSlaveI2C( void )
             default:
             break;
         }
-        EXPANSION_PORT_I2CSlaveClearWriteStatus();
+        //Count errors while clearing the status
+        if( EXPANSION_PORT_I2CSlaveClearWriteStatus() & EXPANSION_PORT_I2C_SSTAT_WR_ERR ) incrementDevRegister( SCMD_E_I2C_WR_ERR );
         EXPANSION_PORT_I2CSlaveClearWriteBuf();
         LED_PULSE_Write(0);
 
@@ -687,7 +677,8 @@ static void parseSlaveI2C( void )
         LED_R_Write(LED_R_Read()^0x01);
         /* Clear slave read buffer and status */
         EXPANSION_PORT_I2CSlaveClearReadBuf();
-        (void) EXPANSION_PORT_I2CSlaveClearReadStatus();
+        //Count errors while clearing the status
+        if( EXPANSION_PORT_I2CSlaveClearReadStatus() & EXPANSION_PORT_I2C_SSTAT_RD_ERR ) incrementDevRegister( SCMD_E_I2C_RD_ERR );
     }
 }
 
@@ -939,6 +930,17 @@ static void processRegChanges( void )
     if(getChangedStatus(SCMD_FSAFE_TIME))
     {
         uint8_t tempValue = readDevRegister( SCMD_FSAFE_TIME );
+        if(( CONFIG_BITS != 2 )&&(readDevRegister(SCMD_SLV_TOP_ADDR) >= 0x50)) //if you are master, and there are slaves
+        {
+            //send out to slaves here
+            int i;
+            for( i = 0x50; i <= readDevRegister(SCMD_SLV_TOP_ADDR); i++)
+            {
+                WriteSlaveData(i, SCMD_FSAFE_TIME, tempValue );
+                CyDelayUs(100);
+            }
+        }
+
         if( tempValue )
         {
             //Set new time and restart

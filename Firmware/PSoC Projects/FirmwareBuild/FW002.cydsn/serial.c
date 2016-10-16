@@ -14,11 +14,13 @@ Distributed as-is; no warranty is given.
 ******************************************************************************/
 #include <project.h>
 #include "devRegisters.h"
-#include "config.h"
+#include "SCMD_config.h"
 #include "serial.h"
 
 extern volatile uint8_t CONFIG_BITS;
 uint16_t SCBCLK_UART_DIVIDER = 12; // UART: 115200 kbps with OVS = 16. Required SCBCLK = 1.846 MHz, Div = 13
+
+#define TIMEOUTCOUNTLIMIT 50000 //roughly 100ms
 
 const USER_PORT_I2C_INIT_STRUCT configI2C =
 {
@@ -200,6 +202,27 @@ cystatus SetExpansionScbConfigurationSlave(void)
     return (status);
 }
 
+cystatus ResetExpansionScbConfigurationSlave(void)
+{
+    cystatus status = CYRET_SUCCESS;
+    EXPANSION_PORT_Stop(); /* Disable component before configuration change */
+    /* Change clock divider */
+    EXPANSION_SCBCLK_Stop();
+    EXPANSION_SCBCLK_SetFractionalDividerRegister(SCBCLK_I2C_DIVIDER, 0u);
+    EXPANSION_SCBCLK_Start();
+    /* Configure to I2C slave operation */
+    EXPANSION_PORT_I2CSlaveInitReadBuf (expansionBufferTx, USER_PORT_BUFFER_SIZE);
+    EXPANSION_PORT_I2CSlaveInitWriteBuf(expansionBufferRx, USER_PORT_BUFFER_SIZE);
+    EXPANSION_PORT_I2CInit(&expansionConfigI2CSlave);
+    EXPANSION_PORT_I2CSlaveClearReadBuf();
+    EXPANSION_PORT_I2CSlaveClearWriteBuf();
+    EXPANSION_PORT_I2CSlaveClearReadStatus();
+    EXPANSION_PORT_I2CSlaveClearWriteStatus();
+    USER_PORT_I2CSlaveSetAddress(readDevRegister(SCMD_SLAVE_ADDR));
+    EXPANSION_PORT_Start(); /* Enable component after configuration change */
+    return (status);
+}
+
 //Expansion port config
 cystatus SetExpansionScbConfigurationMaster(void)
 {
@@ -228,8 +251,18 @@ uint8 ReadSlaveData( uint8_t address, uint8_t offset )
     (void) EXPANSION_PORT_I2CMasterWriteBuf(address, offsetPointer, 1, EXPANSION_PORT_I2C_MODE_COMPLETE_XFER);
 
     /* Waits until master completes write transfer */
-    while (0u == (EXPANSION_PORT_I2CMasterStatus() & EXPANSION_PORT_I2C_MSTAT_WR_CMPLT))
+    uint16_t timeoutCount = 0;
+    while ((0u == (EXPANSION_PORT_I2CMasterStatus() & EXPANSION_PORT_I2C_MSTAT_WR_CMPLT)) && ( timeoutCount < TIMEOUTCOUNTLIMIT ))
     {
+        timeoutCount++;
+    }
+    if( timeoutCount >= TIMEOUTCOUNTLIMIT )
+    {
+        //EXPANSION_PORT_slStatus = 0u;
+        incrementDevRegister( SCMD_MST_E_ERR );
+        //EXPANSION_PORT_I2C_MASTER_CLEAR_START;
+        //EXPANSION_PORT_I2CMasterSendStop();
+        SetExpansionScbConfigurationMaster();
     }
 
     //Get a byte
@@ -268,11 +301,21 @@ uint8 WriteSlaveData( uint8_t address, uint8_t offset, uint8_t data )
     (void) EXPANSION_PORT_I2CMasterWriteBuf(address, buffer, 2, EXPANSION_PORT_I2C_MODE_COMPLETE_XFER);
 
     /* Waits until master completes write transfer */
-    while (0u == (EXPANSION_PORT_I2CMasterStatus() & EXPANSION_PORT_I2C_MSTAT_WR_CMPLT))
+    uint16_t timeoutCount = 0;
+    while ((0u == (EXPANSION_PORT_I2CMasterStatus() & EXPANSION_PORT_I2C_MSTAT_WR_CMPLT)) && ( timeoutCount < TIMEOUTCOUNTLIMIT ))
     {
+        timeoutCount++;
+    }
+    if( timeoutCount >= TIMEOUTCOUNTLIMIT )
+    {
+        //EXPANSION_PORT_slStatus = 0u;
+        incrementDevRegister( SCMD_MST_E_ERR );
+        //EXPANSION_PORT_I2C_MASTER_CLEAR_START;
+        //EXPANSION_PORT_I2CMasterSendStop();
+        SetExpansionScbConfigurationMaster();
     }
 
-    EXPANSION_PORT_I2CMasterClearStatus();
+    if( EXPANSION_PORT_I2CMasterClearStatus() & EXPANSION_PORT_I2C_MSTAT_ERR_XFER ) incrementDevRegister( SCMD_MST_E_ERR );
     EXPANSION_PORT_I2CMasterClearReadBuf();
     EXPANSION_PORT_I2CMasterClearWriteBuf();
 
@@ -288,14 +331,24 @@ uint8 WriteSlave2Data( uint8_t address, uint8_t offset, uint8_t data0, uint8_t d
     uint8_t returnVar = 0;
     
     //Write an offset
-    (void) EXPANSION_PORT_I2CMasterWriteBuf(address, buffer, 3, EXPANSION_PORT_I2C_MODE_COMPLETE_XFER);
-
+    writeDevRegister( SCMD_MST_E_STATUS, EXPANSION_PORT_I2CMasterWriteBuf(address, buffer, 3, EXPANSION_PORT_I2C_MODE_COMPLETE_XFER));
+    
     /* Waits until master completes write transfer */
-    while (0u == (EXPANSION_PORT_I2CMasterStatus() & EXPANSION_PORT_I2C_MSTAT_WR_CMPLT))
+    uint16_t timeoutCount = 0;
+    while ((0u == (EXPANSION_PORT_I2CMasterStatus() & EXPANSION_PORT_I2C_MSTAT_WR_CMPLT)) && ( timeoutCount < TIMEOUTCOUNTLIMIT ))
     {
+        timeoutCount++;
+    }
+    if( timeoutCount >= TIMEOUTCOUNTLIMIT )
+    {
+        //EXPANSION_PORT_slStatus = 0u;
+        incrementDevRegister( SCMD_MST_E_ERR );
+        //EXPANSION_PORT_I2C_MASTER_CLEAR_START;
+        //EXPANSION_PORT_I2CMasterSendStop();
+        SetExpansionScbConfigurationMaster();
     }
 
-    EXPANSION_PORT_I2CMasterClearStatus();
+    if( EXPANSION_PORT_I2CMasterClearStatus() & EXPANSION_PORT_I2C_MSTAT_ERR_XFER ) incrementDevRegister( SCMD_MST_E_ERR );
     EXPANSION_PORT_I2CMasterClearReadBuf();
     EXPANSION_PORT_I2CMasterClearWriteBuf();
 

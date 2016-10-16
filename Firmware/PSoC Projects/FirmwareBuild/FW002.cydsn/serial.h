@@ -44,6 +44,7 @@ cystatus SetScbConfiguration(uint32 opMode);
 
 // ***Known good config for slave*** //
 cystatus SetExpansionScbConfigurationSlave(void);
+cystatus ResetExpansionScbConfigurationSlave(void);
 
 //Expansion port config
 cystatus SetExpansionScbConfigurationMaster(void);
