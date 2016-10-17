@@ -323,6 +323,12 @@ void SCMD::resetRemoteDiagnosticCounts( uint8_t address )
 	
 }
 
+//****************************************************************************//
+//
+//  Register Access Functions
+//
+//****************************************************************************//
+
 uint8_t SCMD::readRegister(uint8_t offset)
 {
 	//Return value
