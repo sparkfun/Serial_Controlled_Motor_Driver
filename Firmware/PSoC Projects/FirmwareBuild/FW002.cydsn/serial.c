@@ -218,7 +218,7 @@ cystatus ResetExpansionScbConfigurationSlave(void)
     EXPANSION_PORT_I2CSlaveClearWriteBuf();
     EXPANSION_PORT_I2CSlaveClearReadStatus();
     EXPANSION_PORT_I2CSlaveClearWriteStatus();
-    USER_PORT_I2CSlaveSetAddress(readDevRegister(SCMD_SLAVE_ADDR));
+    EXPANSION_PORT_I2CSlaveSetAddress(readDevRegister(SCMD_SLAVE_ADDR));
     EXPANSION_PORT_Start(); /* Enable component after configuration change */
     return (status);
 }

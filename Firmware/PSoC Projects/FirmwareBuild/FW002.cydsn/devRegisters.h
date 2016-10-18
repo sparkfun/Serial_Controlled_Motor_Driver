@@ -23,6 +23,7 @@ void writeDevRegister( uint8_t regNumberIn, uint8_t dataToWrite );
 void incrementDevRegister( uint8_t );
 bool getChangedStatus( uint8_t regNumberIn );
 void clearChangedStatus( uint8_t regNumberIn );
-uint16_t getOutOfRangeCount( void );
+void setColdInitValues( void );
+void setWarmInitValues( void );
 
 #endif

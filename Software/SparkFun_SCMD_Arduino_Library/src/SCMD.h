@@ -64,6 +64,8 @@ struct SCMDDiagnostics
 	uint8_t SLV_POLL_CNT = 0;
 	uint8_t MST_E_ERR = 0;
 	uint8_t FSAFE_FAULTS = 0;
+	uint8_t REG_OOR_CNT = 0;
+	uint8_t REG_RO_WRITE_CNT = 0;
 
  };
 

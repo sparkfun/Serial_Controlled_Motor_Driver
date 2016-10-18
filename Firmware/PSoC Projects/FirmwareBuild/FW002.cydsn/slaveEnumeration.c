@@ -99,6 +99,7 @@ void tickMasterSM( void )
         if( readDevRegister(SCMD_SLV_POLL_CNT) > 200 )
         {
             //Must be done
+            writeDevRegister(SCMD_LOCAL_MASTER_LOCK, 0x00);  //Lock up Read-Only registers -- we're done configuring the slaves!
             masterNextState = SCMDMasterSendData;
         }
 
@@ -154,11 +155,7 @@ void tickMasterSM( void )
     }
     masterState = masterNextState;
     //Get data from next slave
-    
-    if( masterState != SCMDMasterSendData )//Needs to get data for state machine
-    {
-       // writeDevRegister(SCMD_SLAVE_ID, ReadSlaveData(readDevRegister(SCMD_REM_ADDR), SCMD_ID));
-    }
+
 }
 
 void tickSlaveSM( void )
@@ -183,6 +180,7 @@ void tickSlaveSM( void )
         {
             //New address has been programmed
             CONFIG_OUT_Write(1);
+            writeDevRegister(SCMD_LOCAL_MASTER_LOCK, 0x00);  //Lock up Read-Only registers - to preserve address
             slaveNextState = SCMDSlaveDone;
         }
         break;

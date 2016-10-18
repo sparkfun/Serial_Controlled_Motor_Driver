@@ -173,6 +173,42 @@ void processMasterRegChanges( void )
         }
         clearChangedStatus(SCMD_BRIDGE_SLV_H);
     }
+    if(getChangedStatus(SCMD_MASTER_LOCK))
+    {
+        //Do local
+        writeDevRegister( SCMD_LOCAL_MASTER_LOCK, readDevRegister(SCMD_MASTER_LOCK) );
+        //Do remote
+        int i;
+        uint8_t motorAddrTemp = 0x50;
+        if((readDevRegister(SCMD_SLV_TOP_ADDR) >= 0x50)&&(readDevRegister(SCMD_SLV_TOP_ADDR) <= 0x5F))
+        {
+            //Slave exists in range -- send all bits
+            for(i = 0; (i <= 8) && (motorAddrTemp <= readDevRegister(SCMD_SLV_TOP_ADDR)); i++)
+            {
+                WriteSlaveData(motorAddrTemp, SCMD_LOCAL_MASTER_LOCK, (readDevRegister(SCMD_MASTER_LOCK) >> i) & 0x01);
+                motorAddrTemp++;
+            }
+        }
+        clearChangedStatus(SCMD_MASTER_LOCK);
+    }
+    if(getChangedStatus(SCMD_USER_LOCK))
+    {
+        //Do local
+        writeDevRegister( SCMD_LOCAL_USER_LOCK, readDevRegister(SCMD_USER_LOCK) );
+        //Do remote
+        int i;
+        uint8_t motorAddrTemp = 0x50;
+        if((readDevRegister(SCMD_SLV_TOP_ADDR) >= 0x50)&&(readDevRegister(SCMD_SLV_TOP_ADDR) <= 0x5F))
+        {
+            //Slave exists in range -- send all bits
+            for(i = 0; (i <= 8) && (motorAddrTemp <= readDevRegister(SCMD_SLV_TOP_ADDR)); i++)
+            {
+                WriteSlaveData(motorAddrTemp, SCMD_LOCAL_USER_LOCK, (readDevRegister(SCMD_USER_LOCK) >> i) & 0x01);
+                motorAddrTemp++;
+            }
+        }
+        clearChangedStatus(SCMD_USER_LOCK);
+    }
 }
 
 void processSlaveRegChanges( void )

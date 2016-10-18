@@ -36,7 +36,8 @@ Distributed as-is; no warranty is given.
 volatile uint8_t CONFIG_BITS = 0x3;
 
 //Prototypes
-static void systemInit( void ); //get the system off the ground - run once at start
+static void systemColdInit( void ); //get the system off the ground - calls warm init - run once at start
+static void systemWarmInit( void ); //Run to reinit the system from a running state.  This preserves assigned slave addresses.
 
 //Variables and associated #defines use in functions
 
@@ -47,7 +48,7 @@ bool masterSendCounterReset = 0;
 
 int main()
 {
-    systemInit();
+    systemColdInit();
 
     while(1)
     {
@@ -69,7 +70,7 @@ int main()
         if(CONFIG_BITS == 2) //Slave
         {
             //parseSlaveI2C is also called before interrupts occur on the bus, but check here too to catch residual buffers
-            //parseSlaveI2C();
+            parseSlaveI2C();
             tickSlaveSM();
         }
         else //Do master operations
@@ -112,13 +113,12 @@ CY_ISR(FSAFE_TIMER_Interrupt)
     {
         ResetExpansionScbConfigurationSlave();
         EXPANSION_PORT_SetCustomInterruptHandler(parseSlaveI2C);
-        ////writeDevRegister(SCMD_SLAVE_ADDR, readDevRegister(SCMD_SLAVE_ADDR)); //Set address to self to activate configuration
-        //EXPANSION_PORT_I2CSlaveSetAddress(readDevRegister(SCMD_SLAVE_ADDR));
+    
         Clock_1_Stop();
         Clock_1_Start();
         CyIntEnable(EXPANSION_PORT_ISR_NUMBER);
         CyGlobalIntEnable;
-        }
+    }
     else
     {
         //SetExpansionScbConfigurationMaster();
@@ -157,7 +157,7 @@ CY_ISR(SYSTICK_ISR)
 }
 
 //get the system off the ground - run once at start
-static void systemInit( void )
+static void systemColdInit( void )
 {
     initDevRegisters();  //Prep device registers, set initial values (triggers actions)
 #ifndef USE_SW_CONFIG_BITS
@@ -199,13 +199,23 @@ static void systemInit( void )
     PWM_2_Start();
     PWM_2_WriteCompare(128u);        
     
-	initSerial(CONFIG_BITS);
+    //This convigures the serial based on the config structures in serial.h
+    //It connects the functions in customSerialInterrupts.h, and is defined in that file.
+	initSerial(CONFIG_BITS); //Pass configuration word
     
     Clock_1_Start();
         
     CyGlobalIntEnable; 
     
-    setDiagMessage(1, 1);    
+    setDiagMessage(1, 1);
+    
+    systemWarmInit();
+
+}
+
+//get the system off the ground - run once at start
+static void systemWarmInit( void )
+{
 
 }
 

@@ -271,6 +271,8 @@ void SCMD::getDiagnostics( SCMDDiagnostics &diagObjectReference )
 	}
 	diagObjectReference.MST_E_ERR = readRegister( SCMD_MST_E_ERR );
 	diagObjectReference.FSAFE_FAULTS = readRegister( SCMD_FSAFE_FAULTS );
+	diagObjectReference.REG_OOR_CNT = readRegister( SCMD_REG_OOR_CNT );
+	diagObjectReference.REG_RO_WRITE_CNT = readRegister( SCMD_REG_RO_WRITE_CNT );
 	
 }
 
@@ -292,6 +294,8 @@ void SCMD::getRemoteDiagnostics( uint8_t address, SCMDDiagnostics &diagObjectRef
 	}
 	diagObjectReference.MST_E_ERR = readRemoteRegister( address, SCMD_MST_E_ERR );
 	diagObjectReference.FSAFE_FAULTS = readRemoteRegister( address, SCMD_FSAFE_FAULTS );
+	diagObjectReference.REG_OOR_CNT = readRemoteRegister( address, SCMD_REG_OOR_CNT );
+	diagObjectReference.REG_RO_WRITE_CNT = readRemoteRegister( address, SCMD_REG_RO_WRITE_CNT );
 	
 }
 
@@ -306,6 +310,8 @@ void SCMD::resetDiagnosticCounts( void )
 	writeRegister( SCMD_UPORT_TIME, 0 );
 	writeRegister( SCMD_MST_E_ERR, 0 );
 	writeRegister( SCMD_FSAFE_FAULTS, 0 );
+	writeRegister( SCMD_REG_OOR_CNT, 0 );
+	writeRegister( SCMD_REG_RO_WRITE_CNT, 0 );
 	
 }
 
@@ -320,7 +326,8 @@ void SCMD::resetRemoteDiagnosticCounts( uint8_t address )
 	writeRemoteRegister( address, SCMD_UPORT_TIME, 0 );
 	writeRemoteRegister( address, SCMD_ID, 0 );
 	writeRemoteRegister( address, SCMD_FSAFE_FAULTS, 0 );
-	
+	writeRemoteRegister( address, SCMD_REG_OOR_CNT, 0 );
+	writeRemoteRegister( address, SCMD_REG_RO_WRITE_CNT, 0 );	
 }
 
 //****************************************************************************//

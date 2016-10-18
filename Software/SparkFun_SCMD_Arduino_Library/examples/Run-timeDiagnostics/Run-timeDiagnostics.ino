@@ -115,6 +115,10 @@ void printDiag( void )
 	Serial.println(myDiagnostics.MST_E_ERR);
 	Serial.print(" Number of failsafes that have occured: ");
 	Serial.println(myDiagnostics.FSAFE_FAULTS);
+	Serial.print(" Out of range register accesses: ");
+	Serial.println(myDiagnostics.REG_OOR_CNT);
+	Serial.print(" RO writes attempted (locked regs): ");
+	Serial.println(myDiagnostics.REG_RO_WRITE_CNT);
 	Serial.println();	
 }
 
@@ -135,6 +139,10 @@ void printRemoteDiag( void )
 		Serial.println(myDiagnostics.MST_E_ERR);
 		Serial.print(" Number of failsafes that have occured: ");
 		Serial.println(myDiagnostics.FSAFE_FAULTS);
+		Serial.print(" Out of range register accesses: ");
+		Serial.println(myDiagnostics.REG_OOR_CNT);
+		Serial.print(" RO writes attempted (locked regs): ");
+		Serial.println(myDiagnostics.REG_RO_WRITE_CNT);
 		Serial.println();		
 	}
 	

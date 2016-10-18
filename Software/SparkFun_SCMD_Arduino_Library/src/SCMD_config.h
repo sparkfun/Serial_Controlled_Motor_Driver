@@ -5,9 +5,12 @@
 #define ID_WORD            0xA9//Device ID to be programmed into memory for reads
 #define START_SLAVE_ADDR   0x50//Start address of slaves
 #define MAX_SLAVE_ADDR     0x5F//Max address of slaves
+#define MASTER_LOCK_KEY    0x9B
+#define USER_LOCK_KEY      0x5C
+#define FIRMWARE_VERSION   0x02
     
 //Address map
-#define SCMD_STATUS                0x00
+#define SCMD_FID                   0x00
 #define SCMD_ID                    0x01
 #define SCMD_SLAVE_ADDR            0x02
 #define SCMD_CONFIG_BITS           0x03
@@ -20,22 +23,20 @@
 #define SCMD_SLV_POLL_CNT          0x0A
 #define SCMD_SLV_TOP_ADDR          0x0B
 #define SCMD_MST_E_ERR             0x0C
-    
+#define SCMD_MST_E_STATUS          0x0D
 #define SCMD_FSAFE_FAULTS          0x0E
-                                  
-#define SCMD_REM_ADDR              0x11
-#define SCMD_REM_OFFSET            0x12
-#define SCMD_REM_DATA_WR           0x13
-#define SCMD_REM_DATA_RD           0x14
-#define SCMD_REM_WRITE             0x15
-#define SCMD_REM_READ              0x16
+#define SCMD_REG_OOR_CNT           0x0F
+#define SCMD_REG_RO_WRITE_CNT      0x10
 
 #define SCMD_MOTOR_A_INVERT        0x17
 #define SCMD_MOTOR_B_INVERT        0x18
 #define SCMD_BRIDGE                0x19
-
+#define SCMD_LOCAL_MASTER_LOCK     0x1A
+#define SCMD_LOCAL_USER_LOCK       0x1B                              
+#define SCMD_MST_E_IN_FN           0x1C
+    
 #define SCMD_BAUD_RATE             0x1E
-                                
+#define SCMD_PAGE_SELECT           0x1F                                
 #define SCMD_MA_DRIVE              0x20
 #define SCMD_MB_DRIVE              0x21
 #define SCMD_S1A_DRIVE             0x22
@@ -71,16 +72,26 @@
 #define SCMD_S16A_DRIVE            0x40
 #define SCMD_S16B_DRIVE            0x41
 
-#define SCMD_INV_2_9               0x60
-#define SCMD_INV_10_17             0x61
-#define SCMD_INV_18_25             0x62
-#define SCMD_INV_26_33             0x63
-#define SCMD_BRIDGE_SLV_L          0x64
-#define SCMD_BRIDGE_SLV_H          0x65
-#define SCMD_FSAFE_TIME            0x67
-
+#define SCMD_INV_2_9               0x50
+#define SCMD_INV_10_17             0x51
+#define SCMD_INV_18_25             0x52
+#define SCMD_INV_26_33             0x53
+#define SCMD_BRIDGE_SLV_L          0x54
+#define SCMD_BRIDGE_SLV_H          0x55
+    
 #define SCMD_DRIVER_ENABLE         0x70
 #define SCMD_UPDATE_RATE           0x71
 #define SCMD_FORCE_UPDATE          0x72
 
+#define SCMD_MASTER_LOCK           0x74
+#define SCMD_USER_LOCK             0x75
+#define SCMD_FSAFE_TIME            0x76
+
+#define SCMD_REM_ADDR              0x79
+#define SCMD_REM_OFFSET            0x7A
+#define SCMD_REM_DATA_WR           0x7B
+#define SCMD_REM_DATA_RD           0x7C
+#define SCMD_REM_WRITE             0x7D
+#define SCMD_REM_READ              0x7E
+    
 #endif
