@@ -7,7 +7,7 @@
 #define MAX_SLAVE_ADDR     0x5F//Max address of slaves
 #define MASTER_LOCK_KEY    0x9B
 #define USER_LOCK_KEY      0x5C
-#define FIRMWARE_VERSION   0x02
+#define FIRMWARE_VERSION   0x03
     
 //Address map
 #define SCMD_FID                   0x00
@@ -34,8 +34,8 @@
 #define SCMD_LOCAL_MASTER_LOCK     0x1A
 #define SCMD_LOCAL_USER_LOCK       0x1B                              
 #define SCMD_MST_E_IN_FN           0x1C
-    
-#define SCMD_BAUD_RATE             0x1E
+#define SCMD_U_BUS_I2C_SPEED       0x1D
+#define SCMD_U_BUS_SPI_SPEED       0x1E
 #define SCMD_PAGE_SELECT           0x1F                                
 #define SCMD_MA_DRIVE              0x20
 #define SCMD_MB_DRIVE              0x21
@@ -82,7 +82,7 @@
 #define SCMD_DRIVER_ENABLE         0x70
 #define SCMD_UPDATE_RATE           0x71
 #define SCMD_FORCE_UPDATE          0x72
-
+#define SCMD_E_BUS_SPEED           0x73
 #define SCMD_MASTER_LOCK           0x74
 #define SCMD_USER_LOCK             0x75
 #define SCMD_FSAFE_TIME            0x76

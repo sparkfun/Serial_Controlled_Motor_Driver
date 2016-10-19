@@ -15,9 +15,12 @@ Distributed as-is; no warranty is given.
 #if !defined(SLAVEENUMERATION_H)
 #define SLAVEENUMERATION_H
 #include <stdint.h> 
-//#include <stdbool.h>
+#include <stdbool.h>
 
 void tickMasterSM( void );
 void tickSlaveSM( void );
+
+void resetMasterSM( void );
+bool masterSMDone( void );
 
 #endif

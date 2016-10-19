@@ -43,7 +43,7 @@ static void systemWarmInit( void ); //Run to reinit the system from a running st
 
 uint16_t masterSendCounter = 65000;
 bool masterSendCounterReset = 0;
-
+bool slaveResetRequested = false;
 //Functions
 
 int main()
@@ -69,27 +69,84 @@ int main()
         
         if(CONFIG_BITS == 2) //Slave
         {
-            //parseSlaveI2C is also called before interrupts occur on the bus, but check here too to catch residual buffers
             parseSlaveI2C();
             tickSlaveSM();
-        }
-        else //Do master operations
-        {
-            tickMasterSM();
-        }
-
-        //Get changes -- Here, check if any registers need to be serviced
-        if(CONFIG_BITS == 2) //Slave
-        {
             processSlaveRegChanges();
         }
         else //Do master operations
         {
+            //This next block deals with the config_in line and it's behavior
+            if(CONFIG_IN_Read() == 1)
+            {
+                if(slaveResetRequested == 0)
+                {
+                    //Newly detected config_in rising edge
+                    slaveResetRequested = 1;
+                    //Send the reset request
+                    switch(readDevRegister(SCMD_MST_E_IN_FN))
+                    {
+                        default:
+                        case 0:
+                            slaveResetRequested = 0; //belay that order
+                            tickMasterSM(); //keep ticking for no-action mode
+                        break;
+                        case 1:
+                            CONFIG_OUT_Write(0);
+                            CySoftwareReset();
+                        break;
+                        case 2:
+                            CONFIG_OUT_Write(0);
+                            //insert keys
+                            writeDevRegister(SCMD_LOCAL_USER_LOCK, USER_LOCK_KEY);
+                            writeDevRegister(SCMD_LOCAL_MASTER_LOCK, MASTER_LOCK_KEY);
+                            CyDelay(1500u);
+                            resetMasterSM();
+                        break;
+                    }
+                }
+                else
+                {
+                    //Slave reset previously detected but config_in still high
+                    //Spin here until config_in goes low
+                }
+                
+            }
+            else
+            {
+                tickMasterSM();
+                if(slaveResetRequested == 1)
+                {
+                    //config_in has gone low but the slave request isn't complete
+                    //wait for reset to complete
+                    if(masterSMDone())
+                    {
+                        slaveResetRequested = 0;
+                        //Send preserved settings (trigger xfers only)
+                        writeDevRegister( SCMD_INV_2_9, readDevRegister( SCMD_INV_2_9 ));
+                        writeDevRegister( SCMD_INV_10_17, readDevRegister( SCMD_INV_10_17 ));
+                        writeDevRegister( SCMD_INV_18_25, readDevRegister( SCMD_INV_18_25 ));
+                        writeDevRegister( SCMD_INV_26_33, readDevRegister( SCMD_INV_26_33 ));
+                        writeDevRegister( SCMD_BRIDGE_SLV_L, readDevRegister( SCMD_BRIDGE_SLV_L ));
+                        writeDevRegister( SCMD_BRIDGE_SLV_H, readDevRegister( SCMD_BRIDGE_SLV_H ));
+                        writeDevRegister( SCMD_DRIVER_ENABLE, readDevRegister( SCMD_DRIVER_ENABLE ));
+                        writeDevRegister( SCMD_UPDATE_RATE, readDevRegister( SCMD_UPDATE_RATE ));
+                        writeDevRegister( SCMD_FORCE_UPDATE, readDevRegister( SCMD_FORCE_UPDATE ));
+                        writeDevRegister( SCMD_FSAFE_TIME, readDevRegister( SCMD_FSAFE_TIME ));
+                        
+                    }
+                }
+                else
+                {
+                    //config_in low and reset request cleared.  This is the default condition.
+                }
+            }
             processMasterRegChanges();
+
         }        
         //operations regardless       
         processRegChanges();
         
+       
     }//End of while loop
 }
 
@@ -170,7 +227,7 @@ static void systemColdInit( void )
     
     CONFIG_IN_Write(0); //Tell the slaves to start fresh
     //Do a boot-up delay
-    CyDelay(1500u);
+    CyDelay(100u);
     if(CONFIG_BITS != 0x02) CyDelay(1000u); //Give the slaves extra time
     
     MODE_Write(1);

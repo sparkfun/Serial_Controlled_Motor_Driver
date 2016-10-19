@@ -36,7 +36,7 @@ static uint8_t slaveState = SCMDSlaveIdle;
 #define SCMDMasterWait 3
 #define SCMDMasterSendData 4
 
-static uint8_t masterState = SCMDMasterIdle;
+uint8_t masterState = SCMDMasterIdle;
 
 extern uint16_t masterSendCounter;
 extern bool masterSendCounterReset; //set this to 1 to reset counter.... self clearing
@@ -52,7 +52,7 @@ void tickMasterSM( void )
     {
     case SCMDMasterIdle:
         //Set initial variable value
-        slaveAddrEnumerator = START_SLAVE_ADDR;  
+        slaveAddrEnumerator = START_SLAVE_ADDR;
         CONFIG_OUT_Write(1);
         writeDevRegister(SCMD_SLV_POLL_CNT, 0);
         //Target 0x4A, point to address slot, clear local data
@@ -103,7 +103,7 @@ void tickMasterSM( void )
             masterNextState = SCMDMasterSendData;
         }
 
-        CyDelay(5);
+        CyDelay(10);
         break;
     case SCMDMasterWait:
         //Wait while tick counts
@@ -187,8 +187,8 @@ void tickSlaveSM( void )
     case SCMDSlaveDone:
         if(CONFIG_IN_Read() == 0)
         {
-            //CONFIG_IN went low (it shouldn't).  wait a sec and reboot
-            CyDelay(1000);
+            //CONFIG_IN went low (it shouldn't).  wait a bit and reboot
+            CyDelay(100);
             CySoftwareReset();
         }
         else
@@ -203,4 +203,19 @@ void tickSlaveSM( void )
     }
     slaveState = slaveNextState;
 
+}
+
+void resetMasterSM( void )
+{
+    masterState = SCMDMasterIdle;
+}
+
+bool masterSMDone( void )
+{
+    bool returnVar = false;
+    if(( masterState == SCMDMasterSendData ) || ( masterState == SCMDMasterWait ))
+    {
+        returnVar = true;
+    }
+    return returnVar;
 }
