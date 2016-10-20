@@ -17,7 +17,8 @@ uint8_t masterAddressPointer = 0;
 extern uint16_t SCBCLK_UART_DIVIDER;
 uint8_t addressPointer = 0;
 uint8_t expansionAddressPointer = 0;
-
+extern const uint16_t SCBCLK_UART_DIVIDER_TABLE[8];
+extern const uint16_t SCBCLK_I2C_DIVIDER_TABLE[4];
 //rxBuffer is used for serial input storage
 static uint8_t rxBufferPtr = 0;
 static char rxBuffer[20];
@@ -373,55 +374,42 @@ void parseUART( void )
                 {
                     case '1':
                     USER_PORT_UartPutString("2400\r\n");
-                    CyDelay(400);
-                    SCBCLK_UART_DIVIDER = 625;
-                    SetScbConfiguration(OP_MODE_UART);
+                    writeDevRegister(SCMD_U_BUS_UART_BAUD, 0);
                     break;
                     case '2':
                     USER_PORT_UartPutString("4800\r\n");
-                    CyDelay(400);
-                    SCBCLK_UART_DIVIDER = 312;
-                    SetScbConfiguration(OP_MODE_UART);
+                    writeDevRegister(SCMD_U_BUS_UART_BAUD, 1);
                     break;
                     case '3':
                     USER_PORT_UartPutString("9600\r\n");
-                    CyDelay(400);
-                    SCBCLK_UART_DIVIDER = 156;
-                    SetScbConfiguration(OP_MODE_UART);
+                    writeDevRegister(SCMD_U_BUS_UART_BAUD, 2);
                     break;
                     case '4':
                     USER_PORT_UartPutString("14400\r\n");
-                    CyDelay(400);
-                    SCBCLK_UART_DIVIDER = 102;
-                    SetScbConfiguration(OP_MODE_UART);
+                    writeDevRegister(SCMD_U_BUS_UART_BAUD, 3);
                     break;
                     case '5':
                     USER_PORT_UartPutString("19200\r\n");
-                    CyDelay(400);
-                    SCBCLK_UART_DIVIDER = 77;
-                    SetScbConfiguration(OP_MODE_UART);
+                    writeDevRegister(SCMD_U_BUS_UART_BAUD, 4);
                     break;
                     case '6':
                     USER_PORT_UartPutString("38400\r\n");
-                    CyDelay(400);
-                    SCBCLK_UART_DIVIDER = 38;
-                    SetScbConfiguration(OP_MODE_UART);
+                    writeDevRegister(SCMD_U_BUS_UART_BAUD, 5);
                     break;
                     case '7':
                     USER_PORT_UartPutString("57600\r\n");
-                    CyDelay(400);
-                    SCBCLK_UART_DIVIDER = 25;
-                    SetScbConfiguration(OP_MODE_UART);
+                    writeDevRegister(SCMD_U_BUS_UART_BAUD, 6);
                     break;
                     case '8':
                     USER_PORT_UartPutString("115200\r\n");
-                    CyDelay(400);
-                    SCBCLK_UART_DIVIDER = 12;
-                    SetScbConfiguration(OP_MODE_UART);
+                    writeDevRegister(SCMD_U_BUS_UART_BAUD, 7);
                     break;
                     default:
                     break;
                 }
+                //Cause the update, but give time to print the new speed at the old speed:
+                CyDelay(400);
+                SetScbConfiguration(OP_MODE_UART);
             }
             else
             {
@@ -627,6 +615,53 @@ void parseSlaveI2C( void )
     }
 }
 
+//This configures the divider registers in accordance with the SCMD_U_BUS_UART_BAUD and configBitsVar passed to it.
+void resetClockDividerRegs( uint8_t configBitsVar )
+{
+    //Config USER_PORT
+    if(configBitsVar == 0) //UART
+    {
+        writeDevRegister(SCMD_U_PORT_CLKDIV_U, (SCBCLK_UART_DIVIDER_TABLE[readDevRegister(SCMD_U_BUS_UART_BAUD & 0x07)] & 0xFF00) >> 8);
+        writeDevRegister(SCMD_U_PORT_CLKDIV_L, SCBCLK_UART_DIVIDER_TABLE[readDevRegister(SCMD_U_BUS_UART_BAUD & 0x07)] & 0x00FF);
+        writeDevRegister(SCMD_U_PORT_CLKDIV_FRAC, 0);
+    }
+    if(configBitsVar == 1) //SPI
+    {
+        writeDevRegister(SCMD_U_PORT_CLKDIV_U, 0);
+        writeDevRegister(SCMD_U_PORT_CLKDIV_L, 1);
+        writeDevRegister(SCMD_U_PORT_CLKDIV_FRAC, 0);
+    }
+    
+    if(configBitsVar == 2) //Slave
+    {
+        writeDevRegister(SCMD_E_PORT_CLKDIV_U, 0);
+        writeDevRegister(SCMD_E_PORT_CLKDIV_L, 1);
+        writeDevRegister(SCMD_E_PORT_CLKDIV_FRAC, 0);
+    }
+    else
+    {
+        writeDevRegister(SCMD_E_PORT_CLKDIV_U, 0);
+        writeDevRegister(SCMD_E_PORT_CLKDIV_L, SCBCLK_I2C_DIVIDER_TABLE[readDevRegister(SCMD_E_BUS_SPEED) & 0x03]);
+        writeDevRegister(SCMD_E_PORT_CLKDIV_FRAC, 0);
+    }
+    
+    if((configBitsVar >= 0x3)&&(configBitsVar <= 0xE)) //I2C
+    {
+        writeDevRegister(SCMD_U_PORT_CLKDIV_U, 0);
+        writeDevRegister(SCMD_U_PORT_CLKDIV_L, 1);
+        writeDevRegister(SCMD_U_PORT_CLKDIV_FRAC, 0);
+    }
+    
+    //Clear all read flags
+    clearChangedStatus( SCMD_U_PORT_CLKDIV_U );
+    clearChangedStatus( SCMD_U_PORT_CLKDIV_L );
+    clearChangedStatus( SCMD_U_PORT_CLKDIV_FRAC );
+    clearChangedStatus( SCMD_E_PORT_CLKDIV_U );
+    clearChangedStatus( SCMD_E_PORT_CLKDIV_L );
+    clearChangedStatus( SCMD_E_PORT_CLKDIV_FRAC );
+    
+}
+
 void initSerial( uint8_t configBitsVar )
 {
     //Config USER_PORT
@@ -660,7 +695,7 @@ void initSerial( uint8_t configBitsVar )
     {
         SetScbConfiguration(OP_MODE_I2C);
         USER_PORT_SetCustomInterruptHandler(parseI2C);
-    }	
+    }
 }
 
 /* [] END OF FILE */

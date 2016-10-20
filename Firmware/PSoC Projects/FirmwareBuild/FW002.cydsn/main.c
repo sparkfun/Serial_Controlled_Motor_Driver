@@ -36,19 +36,18 @@ Distributed as-is; no warranty is given.
 volatile uint8_t CONFIG_BITS = 0x3;
 
 //Prototypes
-static void systemColdInit( void ); //get the system off the ground - calls warm init - run once at start
-static void systemWarmInit( void ); //Run to reinit the system from a running state.  This preserves assigned slave addresses.
+static void systemInit( void ); //get the system off the ground - calls warm init - run once at start
 
 //Variables and associated #defines use in functions
 
-uint16_t masterSendCounter = 65000;
-bool masterSendCounterReset = 0;
+volatile uint16_t masterSendCounter = 65000;
+volatile bool masterSendCounterReset = 0;
 bool slaveResetRequested = false;
 //Functions
 
 int main()
 {
-    systemColdInit();
+    systemInit();
 
     while(1)
     {
@@ -168,17 +167,16 @@ CY_ISR(FSAFE_TIMER_Interrupt)
     
     if(CONFIG_BITS == 2) //Slave
     {
-        ResetExpansionScbConfigurationSlave();
-        EXPANSION_PORT_SetCustomInterruptHandler(parseSlaveI2C);
+        SetExpansionScbConfigurationSlave();
+//        ResetExpansionScbConfigurationSlave();
+//        EXPANSION_PORT_SetCustomInterruptHandler(parseSlaveI2C);
     
-        Clock_1_Stop();
-        Clock_1_Start();
         CyIntEnable(EXPANSION_PORT_ISR_NUMBER);
         CyGlobalIntEnable;
     }
     else
     {
-        //SetExpansionScbConfigurationMaster();
+        SetExpansionScbConfigurationMaster();
     }    
     
     //  Tell someone
@@ -214,7 +212,7 @@ CY_ISR(SYSTICK_ISR)
 }
 
 //get the system off the ground - run once at start
-static void systemColdInit( void )
+static void systemInit( void )
 {
     initDevRegisters();  //Prep device registers, set initial values (triggers actions)
 #ifndef USE_SW_CONFIG_BITS
@@ -256,23 +254,17 @@ static void systemColdInit( void )
     PWM_2_Start();
     PWM_2_WriteCompare(128u);        
     
-    //This convigures the serial based on the config structures in serial.h
+    //This configures the serial based on the config structures in serial.h
     //It connects the functions in customSerialInterrupts.h, and is defined in that file.
-	initSerial(CONFIG_BITS); //Pass configuration word
+	resetClockDividerRegs(CONFIG_BITS);
+    initSerial(CONFIG_BITS); //Pass configuration word
     
+    //Clock_1 is the motor PWM clock
     Clock_1_Start();
         
     CyGlobalIntEnable; 
     
     setDiagMessage(1, 1);
-    
-    systemWarmInit();
-
-}
-
-//get the system off the ground - run once at start
-static void systemWarmInit( void )
-{
 
 }
 

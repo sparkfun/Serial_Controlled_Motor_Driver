@@ -16,6 +16,9 @@
 #include "SCMD_config.h"
 #include "serial.h"
 
+extern const uint16_t SCBCLK_UART_DIVIDER_TABLE[8];
+extern const uint16_t SCBCLK_I2C_DIVIDER_TABLE[4];
+
 void processMasterRegChanges( void )
 {
     //Remote reads (window reads through interface)
@@ -208,6 +211,30 @@ void processMasterRegChanges( void )
             }
         }
         clearChangedStatus(SCMD_USER_LOCK);
+    }
+    if(getChangedStatus(SCMD_E_BUS_SPEED))
+    {
+        //Do local
+        writeDevRegister(SCMD_E_PORT_CLKDIV_U, 0);
+        writeDevRegister(SCMD_E_PORT_CLKDIV_L, SCBCLK_I2C_DIVIDER_TABLE[readDevRegister(SCMD_E_BUS_SPEED) & 0x03]);
+        writeDevRegister(SCMD_E_PORT_CLKDIV_FRAC, 0);
+        clearChangedStatus( SCMD_E_PORT_CLKDIV_U );
+        clearChangedStatus( SCMD_E_PORT_CLKDIV_L );
+        clearChangedStatus( SCMD_E_PORT_CLKDIV_FRAC );
+        SetExpansionScbConfigurationMaster();
+        //Do remote
+        //int i;
+        //uint8_t motorAddrTemp = 0x50;
+        //if((readDevRegister(SCMD_SLV_TOP_ADDR) >= 0x50)&&(readDevRegister(SCMD_SLV_TOP_ADDR) <= 0x5F))
+        //{
+        //    //Slave exists in range -- send all bits
+        //    for(i = 0; (i <= 8) && (motorAddrTemp <= readDevRegister(SCMD_SLV_TOP_ADDR)); i++)
+        //    {
+        //        WriteSlaveData(motorAddrTemp, SCMD_LOCAL_USER_LOCK, (readDevRegister(SCMD_USER_LOCK) >> i) & 0x01);
+        //        motorAddrTemp++;
+        //    }
+        //}
+        clearChangedStatus(SCMD_E_BUS_SPEED);
     }
 }
 

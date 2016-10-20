@@ -11,6 +11,7 @@ void parseUART( void );
 void parseI2C( void );
 void parseSlaveI2C( void );
 
+void resetClockDividerRegs( uint8_t configBitsVar ); //Pass configuration word
 void initSerial( uint8_t configBitsVar ); //Pass configuration word
 
 #endif

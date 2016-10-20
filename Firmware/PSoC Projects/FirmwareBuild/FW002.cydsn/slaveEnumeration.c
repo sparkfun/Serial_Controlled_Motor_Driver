@@ -38,8 +38,8 @@ static uint8_t slaveState = SCMDSlaveIdle;
 
 uint8_t masterState = SCMDMasterIdle;
 
-extern uint16_t masterSendCounter;
-extern bool masterSendCounterReset; //set this to 1 to reset counter.... self clearing
+extern volatile uint16_t masterSendCounter;
+extern volatile bool masterSendCounterReset; //set this to 1 to reset counter.... self clearing
 
 //Functions
 

@@ -7,7 +7,7 @@
 #define MAX_SLAVE_ADDR     0x5F//Max address of slaves
 #define MASTER_LOCK_KEY    0x9B
 #define USER_LOCK_KEY      0x5C
-#define FIRMWARE_VERSION   0x02
+#define FIRMWARE_VERSION   0x03
     
 //Address map
 #define SCMD_FID                   0x00
@@ -18,7 +18,7 @@
 #define SCMD_U_I2C_WR_ERR          0x05
 #define SCMD_U_BUF_DUMPED          0x06
 #define SCMD_E_I2C_RD_ERR          0x07
-#define SCMD_E_I2C_WR_ERR          0x08    
+#define SCMD_E_I2C_WR_ERR          0x08
 #define SCMD_UPORT_TIME	           0x09
 #define SCMD_SLV_POLL_CNT          0x0A
 #define SCMD_SLV_TOP_ADDR          0x0B
@@ -28,15 +28,21 @@
 #define SCMD_REG_OOR_CNT           0x0F
 #define SCMD_REG_RO_WRITE_CNT      0x10
 
-#define SCMD_MOTOR_A_INVERT        0x17
-#define SCMD_MOTOR_B_INVERT        0x18
-#define SCMD_BRIDGE                0x19
-#define SCMD_LOCAL_MASTER_LOCK     0x1A
-#define SCMD_LOCAL_USER_LOCK       0x1B                              
-#define SCMD_MST_E_IN_FN           0x1C
-    
-#define SCMD_BAUD_RATE             0x1E
-#define SCMD_PAGE_SELECT           0x1F                                
+#define SCMD_MOTOR_A_INVERT        0x12
+#define SCMD_MOTOR_B_INVERT        0x13
+#define SCMD_BRIDGE                0x14
+#define SCMD_LOCAL_MASTER_LOCK     0x15
+#define SCMD_LOCAL_USER_LOCK       0x16
+#define SCMD_MST_E_IN_FN           0x17
+#define SCMD_U_PORT_CLKDIV_U       0x18
+#define SCMD_U_PORT_CLKDIV_L       0x19
+#define SCMD_U_PORT_CLKDIV_FRAC    0x1A
+#define SCMD_E_PORT_CLKDIV_U       0x1B
+#define SCMD_E_PORT_CLKDIV_L       0x1C
+#define SCMD_E_PORT_CLKDIV_FRAC    0x1D
+
+#define SCMD_U_BUS_UART_BAUD       0x1E
+//#define SCMD_PAGE_SELECT           0x1F
 #define SCMD_MA_DRIVE              0x20
 #define SCMD_MB_DRIVE              0x21
 #define SCMD_S1A_DRIVE             0x22
@@ -78,10 +84,12 @@
 #define SCMD_INV_26_33             0x53
 #define SCMD_BRIDGE_SLV_L          0x54
 #define SCMD_BRIDGE_SLV_H          0x55
-    
+
+
 #define SCMD_DRIVER_ENABLE         0x70
 #define SCMD_UPDATE_RATE           0x71
 #define SCMD_FORCE_UPDATE          0x72
+#define SCMD_E_BUS_SPEED           0x73
 
 #define SCMD_MASTER_LOCK           0x74
 #define SCMD_USER_LOCK             0x75
@@ -93,5 +101,6 @@
 #define SCMD_REM_DATA_RD           0x7C
 #define SCMD_REM_WRITE             0x7D
 #define SCMD_REM_READ              0x7E
-    
+
+
 #endif
