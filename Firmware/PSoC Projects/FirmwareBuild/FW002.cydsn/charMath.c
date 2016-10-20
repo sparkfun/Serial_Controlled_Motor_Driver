@@ -36,7 +36,7 @@
 //
 int char2hex(char charin)
 {
-  int hexout;
+  int hexout = 0;
   if(charin >= 0x30)
   {
     if(charin <= 0x39)
@@ -71,8 +71,7 @@ int char2hex(char charin)
 //
 char hex2char(int hexin)
 {
-  int charout;
-  charout = 0x24; // default $ state
+  int charout = 0x24; // default $ state
   if(hexin >= 0x00)
   {
     if(hexin <= 0x09)
@@ -93,8 +92,7 @@ char hex2char(int hexin)
 //Returns 1 if the input char is in the hex range
 int ishex(char charin)
 {
-  int answer;
-  answer = 0;
+  int answer = 0;
   if(charin >= 0x30)
   {
     if(charin <= 0x39)

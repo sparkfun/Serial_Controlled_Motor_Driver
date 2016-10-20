@@ -36,10 +36,10 @@
 #define SCMD_MST_E_IN_FN           0x17
 #define SCMD_U_PORT_CLKDIV_U       0x18
 #define SCMD_U_PORT_CLKDIV_L       0x19
-#define SCMD_U_PORT_CLKDIV_FRAC    0x1A
+#define SCMD_U_PORT_CLKDIV_CTRL    0x1A
 #define SCMD_E_PORT_CLKDIV_U       0x1B
 #define SCMD_E_PORT_CLKDIV_L       0x1C
-#define SCMD_E_PORT_CLKDIV_FRAC    0x1D
+#define SCMD_E_PORT_CLKDIV_CTRL    0x1D
 #define SCMD_U_BUS_UART_BAUD       0x1E
 //#define SCMD_PAGE_SELECT           0x1F
 #define SCMD_MA_DRIVE              0x20

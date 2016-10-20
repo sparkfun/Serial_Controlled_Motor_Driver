@@ -164,20 +164,22 @@ CY_ISR(FSAFE_TIMER_Interrupt)
     writeDevRegister( SCMD_MB_DRIVE, 0x80 );
     //  Reconfigure?  Try and recover the bus?
 
+    initUserSerial(CONFIG_BITS);
+	//initExpansionSerial(CONFIG_BITS);    
     
-    if(CONFIG_BITS == 2) //Slave
-    {
-        SetExpansionScbConfigurationSlave();
-//        ResetExpansionScbConfigurationSlave();
-//        EXPANSION_PORT_SetCustomInterruptHandler(parseSlaveI2C);
-    
-        CyIntEnable(EXPANSION_PORT_ISR_NUMBER);
-        CyGlobalIntEnable;
-    }
-    else
-    {
-        SetExpansionScbConfigurationMaster();
-    }    
+    //if(CONFIG_BITS == 2) //Slave
+    //{
+    //    SetExpansionScbConfigurationSlave();
+    ////    ResetExpansionScbConfigurationSlave();
+    ////    EXPANSION_PORT_SetCustomInterruptHandler(parseSlaveI2C);
+    //
+    //    CyIntEnable(EXPANSION_PORT_ISR_NUMBER);
+    //    CyGlobalIntEnable;
+    //}
+    //else
+    //{
+    //    SetExpansionScbConfigurationMaster();
+    //}    
     
     //  Tell someone
     setDiagMessage(7,8);
@@ -256,8 +258,11 @@ static void systemInit( void )
     
     //This configures the serial based on the config structures in serial.h
     //It connects the functions in customSerialInterrupts.h, and is defined in that file.
-	resetClockDividerRegs(CONFIG_BITS);
-    initSerial(CONFIG_BITS); //Pass configuration word
+	calcUserDivider(CONFIG_BITS);
+	calcExpansionDivider(CONFIG_BITS);
+
+    initUserSerial(CONFIG_BITS);
+	initExpansionSerial(CONFIG_BITS);
     
     //Clock_1 is the motor PWM clock
     Clock_1_Start();

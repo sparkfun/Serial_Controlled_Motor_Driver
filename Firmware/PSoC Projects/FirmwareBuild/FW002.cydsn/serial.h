@@ -46,6 +46,10 @@ cystatus SetExpansionScbConfigurationMaster(void);
 uint8 ReadSlaveData( uint8_t address, uint8_t offset );
 uint8 WriteSlaveData( uint8_t address, uint8_t offset, uint8_t data );
 uint8 WriteSlave2Data( uint8_t address, uint8_t offset, uint8_t data0, uint8_t data1 );
+void calcUserDivider( uint8_t configBitsVar ); //Pass configuration word
+void calcExpansionDivider( uint8_t configBitsVar ); //Pass configuration word
+void initUserSerial( uint8_t configBitsVar ); //Pass configuration word
+void initExpansionSerial( uint8_t configBitsVar ); //Pass configuration word
 
 
 #endif

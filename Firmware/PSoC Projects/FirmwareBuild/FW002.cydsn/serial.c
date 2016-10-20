@@ -166,7 +166,7 @@ cystatus SetScbConfiguration(uint32 opMode)
         USER_PORT_Stop(); /* Disable component before configuration change */
         /* Change clock divider */
         SCBCLK_Stop();
-        SCBCLK_SetFractionalDividerRegister((readDevRegister( SCMD_U_PORT_CLKDIV_U ) << 8) | readDevRegister( SCMD_U_PORT_CLKDIV_L ), SCMD_U_PORT_CLKDIV_FRAC);
+        SCBCLK_SetFractionalDividerRegister((readDevRegister( SCMD_U_PORT_CLKDIV_U ) << 8) | readDevRegister( SCMD_U_PORT_CLKDIV_L ), SCMD_U_PORT_CLKDIV_CTRL);
         SCBCLK_Start();
         /* Configure to I2C slave operation */
         USER_PORT_I2CSlaveInitReadBuf (bufferTx, USER_PORT_BUFFER_SIZE);
@@ -180,7 +180,7 @@ cystatus SetScbConfiguration(uint32 opMode)
         USER_PORT_Stop(); /* Disable component before configuration change */
         /* Change clock divider */
         SCBCLK_Stop();
-        SCBCLK_SetFractionalDividerRegister((readDevRegister( SCMD_U_PORT_CLKDIV_U ) << 8) | readDevRegister( SCMD_U_PORT_CLKDIV_L ), SCMD_U_PORT_CLKDIV_FRAC);
+        SCBCLK_SetFractionalDividerRegister((readDevRegister( SCMD_U_PORT_CLKDIV_U ) << 8) | readDevRegister( SCMD_U_PORT_CLKDIV_L ), SCMD_U_PORT_CLKDIV_CTRL);
         SCBCLK_Start();
         /* Configure to UART operation */
         USER_PORT_UartInit(&configUart);
@@ -191,7 +191,7 @@ cystatus SetScbConfiguration(uint32 opMode)
         USER_PORT_Stop(); /* Disable component before configuration change */
         /* Change clock divider */
         SCBCLK_Stop();
-        SCBCLK_SetFractionalDividerRegister((readDevRegister( SCMD_U_PORT_CLKDIV_U ) << 8) | readDevRegister( SCMD_U_PORT_CLKDIV_L ), SCMD_U_PORT_CLKDIV_FRAC);
+        SCBCLK_SetFractionalDividerRegister((readDevRegister( SCMD_U_PORT_CLKDIV_U ) << 8) | readDevRegister( SCMD_U_PORT_CLKDIV_L ), SCMD_U_PORT_CLKDIV_CTRL);
         SCBCLK_Start();
         
         /* Configure to SPI operation */
@@ -216,7 +216,7 @@ cystatus SetExpansionScbConfigurationSlave(void)
     EXPANSION_PORT_Stop(); /* Disable component before configuration change */
     /* Change clock divider */
     EXPANSION_SCBCLK_Stop();
-    EXPANSION_SCBCLK_SetFractionalDividerRegister((readDevRegister( SCMD_E_PORT_CLKDIV_U ) << 8) | readDevRegister( SCMD_E_PORT_CLKDIV_L ), SCMD_E_PORT_CLKDIV_FRAC);
+    EXPANSION_SCBCLK_SetFractionalDividerRegister((readDevRegister( SCMD_E_PORT_CLKDIV_U ) << 8) | readDevRegister( SCMD_E_PORT_CLKDIV_L ), SCMD_E_PORT_CLKDIV_CTRL);
     EXPANSION_SCBCLK_Start();
     /* Configure to I2C slave operation */
     EXPANSION_PORT_I2CSlaveInitReadBuf (expansionBufferTx, USER_PORT_BUFFER_SIZE);
@@ -238,7 +238,7 @@ cystatus SetExpansionScbConfigurationSlave(void)
 //    EXPANSION_PORT_Stop(); /* Disable component before configuration change */
 //    /* Change clock divider */
 //    EXPANSION_SCBCLK_Stop();
-//    EXPANSION_SCBCLK_SetFractionalDividerRegister((readDevRegister( SCMD_E_PORT_CLKDIV_U ) << 8) | readDevRegister( SCMD_E_PORT_CLKDIV_L ), SCMD_E_PORT_CLKDIV_FRAC);
+//    EXPANSION_SCBCLK_SetFractionalDividerRegister((readDevRegister( SCMD_E_PORT_CLKDIV_U ) << 8) | readDevRegister( SCMD_E_PORT_CLKDIV_L ), SCMD_E_PORT_CLKDIV_CTRL);
 //    EXPANSION_SCBCLK_Start();
 //    /* Configure to I2C slave operation */
 //    EXPANSION_PORT_I2CSlaveInitReadBuf (expansionBufferTx, USER_PORT_BUFFER_SIZE);
@@ -260,7 +260,7 @@ cystatus SetExpansionScbConfigurationMaster(void)
     EXPANSION_PORT_Stop(); /* Disable component before configuration change */
     /* Change clock divider */
     EXPANSION_SCBCLK_Stop();
-    EXPANSION_SCBCLK_SetFractionalDividerRegister((readDevRegister( SCMD_E_PORT_CLKDIV_U ) << 8) | readDevRegister( SCMD_E_PORT_CLKDIV_L ), SCMD_E_PORT_CLKDIV_FRAC);
+    EXPANSION_SCBCLK_SetFractionalDividerRegister((readDevRegister( SCMD_E_PORT_CLKDIV_U ) << 8) | readDevRegister( SCMD_E_PORT_CLKDIV_L ), SCMD_E_PORT_CLKDIV_CTRL);
     EXPANSION_SCBCLK_Start();
     /* Configure to I2C slave operation */
     EXPANSION_PORT_I2CSlaveInitReadBuf (expansionBufferTx, USER_PORT_BUFFER_SIZE);
@@ -386,4 +386,106 @@ uint8 WriteSlave2Data( uint8_t address, uint8_t offset, uint8_t data0, uint8_t d
     EXPANSION_PORT_I2CMasterClearWriteBuf();
 
     return returnVar;
+}
+
+//****************************************************************************//
+//
+//  Clock divider calculators
+//
+//****************************************************************************//
+void calcUserDivider( uint8_t configBitsVar )
+{
+    //Config USER_PORT
+    if(configBitsVar == 0) //UART
+    {
+        writeDevRegister(SCMD_U_PORT_CLKDIV_U, (SCBCLK_UART_DIVIDER_TABLE[readDevRegister(SCMD_U_BUS_UART_BAUD & 0x07)] & 0xFF00) >> 8);
+        writeDevRegister(SCMD_U_PORT_CLKDIV_L, SCBCLK_UART_DIVIDER_TABLE[readDevRegister(SCMD_U_BUS_UART_BAUD & 0x07)] & 0x00FF);
+        writeDevRegister(SCMD_U_PORT_CLKDIV_CTRL, 0);
+    }
+    else if(configBitsVar == 1) //SPI
+    {
+        writeDevRegister(SCMD_U_PORT_CLKDIV_U, 0);
+        writeDevRegister(SCMD_U_PORT_CLKDIV_L, 1);
+        writeDevRegister(SCMD_U_PORT_CLKDIV_CTRL, 0);
+    }
+    else if((configBitsVar >= 0x3)&&(configBitsVar <= 0xE)) //I2C
+    {
+        writeDevRegister(SCMD_U_PORT_CLKDIV_U, 0);
+        writeDevRegister(SCMD_U_PORT_CLKDIV_L, 1);
+        writeDevRegister(SCMD_U_PORT_CLKDIV_CTRL, 0);
+    }
+    
+    //Clear all flags
+    clearChangedStatus( SCMD_U_PORT_CLKDIV_U );
+    clearChangedStatus( SCMD_U_PORT_CLKDIV_L );
+    clearChangedStatus( SCMD_U_PORT_CLKDIV_CTRL );
+}
+
+//This configures 
+void calcExpansionDivider( uint8_t configBitsVar )
+{
+    //Config EXPANSION_PORT
+    if(configBitsVar == 2) //Slave
+    {
+        writeDevRegister(SCMD_E_PORT_CLKDIV_U, 0);
+        writeDevRegister(SCMD_E_PORT_CLKDIV_L, 1);
+        writeDevRegister(SCMD_E_PORT_CLKDIV_CTRL, 0);
+    }
+    else
+    {
+        writeDevRegister(SCMD_E_PORT_CLKDIV_U, 0);
+        writeDevRegister(SCMD_E_PORT_CLKDIV_L, SCBCLK_I2C_DIVIDER_TABLE[readDevRegister(SCMD_E_BUS_SPEED) & 0x03]);
+        writeDevRegister(SCMD_E_PORT_CLKDIV_CTRL, 0);
+    }
+    //Clear flags
+    clearChangedStatus( SCMD_E_PORT_CLKDIV_U );
+    clearChangedStatus( SCMD_E_PORT_CLKDIV_L );
+    clearChangedStatus( SCMD_E_PORT_CLKDIV_CTRL );
+}
+
+extern void custom_USER_PORT_SPI_UART_ISR( void );
+extern void parseI2C( void );
+//****************************************************************************//
+//
+//  init functions
+//
+//****************************************************************************//
+void initUserSerial( uint8_t configBitsVar ) //Pass configuration word
+{
+    //Config USER_PORT
+    if(configBitsVar == 0) //UART
+    {
+        SetScbConfiguration(OP_MODE_UART);
+    }
+    else if(configBitsVar == 1) //SPI
+    {
+        SetScbConfiguration(OP_MODE_SPI);
+        USER_PORT_SpiUartClearRxBuffer();
+        
+        //rerouting interrupts
+        //USER_PORT_SetCustomInterruptHandler(parseSPI);
+        
+        //overwrite custom ISR to vector table
+        CyIntSetVector(USER_PORT_ISR_NUMBER, &custom_USER_PORT_SPI_UART_ISR);
+    }
+    else if((configBitsVar >= 0x3)&&(configBitsVar <= 0xE)) //I2C
+    {
+        SetScbConfiguration(OP_MODE_I2C);
+        USER_PORT_SetCustomInterruptHandler(parseI2C);
+    }
+}
+
+extern void parseSlaveI2C( void );
+void initExpansionSerial( uint8_t configBitsVar ) //Pass configuration word
+{
+    //Config EXPANSION_PORT
+    if(configBitsVar == 2) //Slave
+    {
+        SetExpansionScbConfigurationSlave();
+    }
+    else
+    {
+        SetExpansionScbConfigurationMaster();
+    }
+    EXPANSION_PORT_SetCustomInterruptHandler(parseSlaveI2C);
 }

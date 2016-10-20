@@ -214,15 +214,7 @@ void processMasterRegChanges( void )
     }
     if(getChangedStatus(SCMD_E_BUS_SPEED))
     {
-        //Do local
-        writeDevRegister(SCMD_E_PORT_CLKDIV_U, 0);
-        writeDevRegister(SCMD_E_PORT_CLKDIV_L, SCBCLK_I2C_DIVIDER_TABLE[readDevRegister(SCMD_E_BUS_SPEED) & 0x03]);
-        writeDevRegister(SCMD_E_PORT_CLKDIV_FRAC, 0);
-        clearChangedStatus( SCMD_E_PORT_CLKDIV_U );
-        clearChangedStatus( SCMD_E_PORT_CLKDIV_L );
-        clearChangedStatus( SCMD_E_PORT_CLKDIV_FRAC );
-        SetExpansionScbConfigurationMaster();
-        //Do remote
+        //Do remote first -- configure slaves before reconfiguring the bus
         //int i;
         //uint8_t motorAddrTemp = 0x50;
         //if((readDevRegister(SCMD_SLV_TOP_ADDR) >= 0x50)&&(readDevRegister(SCMD_SLV_TOP_ADDR) <= 0x5F))
@@ -234,6 +226,11 @@ void processMasterRegChanges( void )
         //        motorAddrTemp++;
         //    }
         //}
+        //Do local
+        writeDevRegister(SCMD_E_PORT_CLKDIV_U, 0);
+        writeDevRegister(SCMD_E_PORT_CLKDIV_L, SCBCLK_I2C_DIVIDER_TABLE[readDevRegister(SCMD_E_BUS_SPEED) & 0x03]);
+        writeDevRegister(SCMD_E_PORT_CLKDIV_CTRL, 0); //Triggers clock change
+
         clearChangedStatus(SCMD_E_BUS_SPEED);
     }
 }
@@ -372,6 +369,20 @@ void processRegChanges( void )
         }
      
         clearChangedStatus(SCMD_DRIVER_ENABLE);
+    }
+    if(getChangedStatus(SCMD_E_PORT_CLKDIV_CTRL))
+    {
+        //Do local only
+        initExpansionSerial(readDevRegister(SCMD_CONFIG_BITS));
+
+        clearChangedStatus(SCMD_E_PORT_CLKDIV_CTRL);
+    }
+    if(getChangedStatus(SCMD_U_PORT_CLKDIV_CTRL))
+    {
+        //Do local only
+        initUserSerial(readDevRegister(SCMD_CONFIG_BITS));
+
+        clearChangedStatus(SCMD_U_PORT_CLKDIV_CTRL);
     }
 
 }

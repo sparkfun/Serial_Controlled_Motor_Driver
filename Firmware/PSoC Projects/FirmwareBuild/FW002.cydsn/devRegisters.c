@@ -63,10 +63,10 @@ void initDevRegisters( void )
     registerAccessTable[SCMD_MASTER_LOCK] = USER_READ_ONLY;
     registerAccessTable[SCMD_U_PORT_CLKDIV_U] = GLOBAL_READ_ONLY;
     registerAccessTable[SCMD_U_PORT_CLKDIV_L] = GLOBAL_READ_ONLY;
-    registerAccessTable[SCMD_U_PORT_CLKDIV_FRAC] = GLOBAL_READ_ONLY;
+    registerAccessTable[SCMD_U_PORT_CLKDIV_CTRL] = GLOBAL_READ_ONLY;
     registerAccessTable[SCMD_E_PORT_CLKDIV_U] = GLOBAL_READ_ONLY;
     registerAccessTable[SCMD_E_PORT_CLKDIV_L] = GLOBAL_READ_ONLY;
-    registerAccessTable[SCMD_E_PORT_CLKDIV_FRAC] = GLOBAL_READ_ONLY;
+    registerAccessTable[SCMD_E_PORT_CLKDIV_CTRL] = GLOBAL_READ_ONLY;
     registerAccessTable[SCMD_U_BUS_UART_BAUD] = GLOBAL_READ_ONLY;
     registerAccessTable[SCMD_E_BUS_SPEED] = USER_READ_ONLY;
     

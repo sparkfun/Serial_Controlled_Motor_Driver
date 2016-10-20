@@ -487,7 +487,9 @@ void parseUART( void )
 
 //****************************************************************************//
 //
-//  User Port in I2C mode
+//  User Port in I2C mode pseudo-ISR
+//
+//  This is called from an interrupt, and periodically by the main
 //
 //****************************************************************************//
 
@@ -551,7 +553,9 @@ void parseI2C( void )
 
 //****************************************************************************//
 //
-//  Expansion Port
+//  Expansion Port pseudo-ISR
+//
+//  This is called from an interrupt, and periodically by the main
 //
 //****************************************************************************//
 
@@ -615,87 +619,5 @@ void parseSlaveI2C( void )
     }
 }
 
-//This configures the divider registers in accordance with the SCMD_U_BUS_UART_BAUD and configBitsVar passed to it.
-void resetClockDividerRegs( uint8_t configBitsVar )
-{
-    //Config USER_PORT
-    if(configBitsVar == 0) //UART
-    {
-        writeDevRegister(SCMD_U_PORT_CLKDIV_U, (SCBCLK_UART_DIVIDER_TABLE[readDevRegister(SCMD_U_BUS_UART_BAUD & 0x07)] & 0xFF00) >> 8);
-        writeDevRegister(SCMD_U_PORT_CLKDIV_L, SCBCLK_UART_DIVIDER_TABLE[readDevRegister(SCMD_U_BUS_UART_BAUD & 0x07)] & 0x00FF);
-        writeDevRegister(SCMD_U_PORT_CLKDIV_FRAC, 0);
-    }
-    if(configBitsVar == 1) //SPI
-    {
-        writeDevRegister(SCMD_U_PORT_CLKDIV_U, 0);
-        writeDevRegister(SCMD_U_PORT_CLKDIV_L, 1);
-        writeDevRegister(SCMD_U_PORT_CLKDIV_FRAC, 0);
-    }
-    
-    if(configBitsVar == 2) //Slave
-    {
-        writeDevRegister(SCMD_E_PORT_CLKDIV_U, 0);
-        writeDevRegister(SCMD_E_PORT_CLKDIV_L, 1);
-        writeDevRegister(SCMD_E_PORT_CLKDIV_FRAC, 0);
-    }
-    else
-    {
-        writeDevRegister(SCMD_E_PORT_CLKDIV_U, 0);
-        writeDevRegister(SCMD_E_PORT_CLKDIV_L, SCBCLK_I2C_DIVIDER_TABLE[readDevRegister(SCMD_E_BUS_SPEED) & 0x03]);
-        writeDevRegister(SCMD_E_PORT_CLKDIV_FRAC, 0);
-    }
-    
-    if((configBitsVar >= 0x3)&&(configBitsVar <= 0xE)) //I2C
-    {
-        writeDevRegister(SCMD_U_PORT_CLKDIV_U, 0);
-        writeDevRegister(SCMD_U_PORT_CLKDIV_L, 1);
-        writeDevRegister(SCMD_U_PORT_CLKDIV_FRAC, 0);
-    }
-    
-    //Clear all read flags
-    clearChangedStatus( SCMD_U_PORT_CLKDIV_U );
-    clearChangedStatus( SCMD_U_PORT_CLKDIV_L );
-    clearChangedStatus( SCMD_U_PORT_CLKDIV_FRAC );
-    clearChangedStatus( SCMD_E_PORT_CLKDIV_U );
-    clearChangedStatus( SCMD_E_PORT_CLKDIV_L );
-    clearChangedStatus( SCMD_E_PORT_CLKDIV_FRAC );
-    
-}
-
-void initSerial( uint8_t configBitsVar )
-{
-    //Config USER_PORT
-    if(configBitsVar == 0) //UART
-    {
-        SetScbConfiguration(OP_MODE_UART);
-    }
-    if(configBitsVar == 1) //SPI
-    {
-        SetScbConfiguration(OP_MODE_SPI);
-        USER_PORT_SpiUartClearRxBuffer();
-        
-        //rerouting interrupts
-        //USER_PORT_SetCustomInterruptHandler(parseSPI);
-        
-        //overwrite custom ISR to vector table
-        CyIntSetVector(USER_PORT_ISR_NUMBER, &custom_USER_PORT_SPI_UART_ISR);
-    }
-    
-    if(configBitsVar == 2) //Slave
-    {
-        SetExpansionScbConfigurationSlave();
-    }
-    else
-    {
-        SetExpansionScbConfigurationMaster();
-    }
-    EXPANSION_PORT_SetCustomInterruptHandler(parseSlaveI2C);
-    
-    if((configBitsVar >= 0x3)&&(configBitsVar <= 0xE)) //I2C
-    {
-        SetScbConfiguration(OP_MODE_I2C);
-        USER_PORT_SetCustomInterruptHandler(parseI2C);
-    }
-}
 
 /* [] END OF FILE */
