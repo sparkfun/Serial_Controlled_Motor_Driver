@@ -24,15 +24,23 @@ extern volatile uint8_t CONFIG_BITS;
 //SCBCLK constants for USER UART
 // UART: 115200 kbps with OVS = 16. Required SCBCLK = 1.846 MHz, Div = 25
 const uint16_t SCBCLK_UART_DIVIDER_TABLE[8] = {
-1250,//625, //2400
-624,//312, //4800
-312,//156, //9600
-204,//102, //14400
-154,//77, //19200
-76,//38, //38400
-50,//25, //57600
-24//12 //115200
+625, //2400
+312, //4800
+156, //9600
+102, //14400
+77, //19200
+38, //38400
+25, //57600
+12 //115200
 };
+//1250,//625, //2400
+//624,//312, //4800
+//312,//156, //9600
+//204,//102, //14400
+//154,//77, //19200
+//76,//38, //38400
+//50,//25, //57600
+//24//12 //115200
 
 //#define SCBCLK_I2C_DIVIDER (4u) // I2C Slave: 100 kbps Required SCBCLK = 1.6 MHz, Div = 15
 //SCBCLK source rate / divider / oversampling h+l = bit rate
@@ -160,6 +168,8 @@ const EXPANSION_PORT_I2C_INIT_STRUCT expansionConfigI2CMaster =
 
 cystatus SetScbConfiguration(uint32 opMode)
 {
+    //Do I need to enable interrupt for all cases????????????????????????????????????????
+    
     cystatus status = CYRET_SUCCESS;
     if (OP_MODE_I2C == opMode)
     {
@@ -302,10 +312,19 @@ uint8 ReadSlaveData( uint8_t address, uint8_t offset )
     (void) EXPANSION_PORT_I2CMasterReadBuf(address, buffer, 1, EXPANSION_PORT_I2C_MODE_COMPLETE_XFER);
 
     /* Waits until master complete read transfer */
-    while (0u == (EXPANSION_PORT_I2CMasterStatus() & EXPANSION_PORT_I2C_MSTAT_RD_CMPLT))
+    while ((0u == (EXPANSION_PORT_I2CMasterStatus() & EXPANSION_PORT_I2C_MSTAT_RD_CMPLT)) && ( timeoutCount < TIMEOUTCOUNTLIMIT ))
     {
+        timeoutCount++;
     }
-
+    if( timeoutCount >= TIMEOUTCOUNTLIMIT )
+    {
+        //EXPANSION_PORT_slStatus = 0u;
+        incrementDevRegister( SCMD_MST_E_ERR );
+        //EXPANSION_PORT_I2C_MASTER_CLEAR_START;
+        //EXPANSION_PORT_I2CMasterSendStop();
+        SetExpansionScbConfigurationMaster();
+    }
+    
     /* Displays transfer status */
     if (0u == (EXPANSION_PORT_I2C_MSTAT_ERR_XFER & EXPANSION_PORT_I2CMasterStatus()))
     {
@@ -395,11 +414,18 @@ uint8 WriteSlave2Data( uint8_t address, uint8_t offset, uint8_t data0, uint8_t d
 //****************************************************************************//
 void calcUserDivider( uint8_t configBitsVar )
 {
+    //Save current keys
+    uint8_t tempUserKey = readDevRegister(SCMD_LOCAL_USER_LOCK);
+    uint8_t tempMasterKey = readDevRegister(SCMD_LOCAL_MASTER_LOCK);
+    //Allow writes
+    writeDevRegister(SCMD_LOCAL_USER_LOCK, USER_LOCK_KEY);
+    writeDevRegister(SCMD_LOCAL_MASTER_LOCK, MASTER_LOCK_KEY);
+    
     //Config USER_PORT
     if(configBitsVar == 0) //UART
     {
-        writeDevRegister(SCMD_U_PORT_CLKDIV_U, (SCBCLK_UART_DIVIDER_TABLE[readDevRegister(SCMD_U_BUS_UART_BAUD & 0x07)] & 0xFF00) >> 8);
-        writeDevRegister(SCMD_U_PORT_CLKDIV_L, SCBCLK_UART_DIVIDER_TABLE[readDevRegister(SCMD_U_BUS_UART_BAUD & 0x07)] & 0x00FF);
+        writeDevRegister(SCMD_U_PORT_CLKDIV_U, (SCBCLK_UART_DIVIDER_TABLE[readDevRegister(SCMD_U_BUS_UART_BAUD) & 0x07] & 0xFF00) >> 8);
+        writeDevRegister(SCMD_U_PORT_CLKDIV_L, SCBCLK_UART_DIVIDER_TABLE[readDevRegister(SCMD_U_BUS_UART_BAUD) & 0x07] & 0x00FF);
         writeDevRegister(SCMD_U_PORT_CLKDIV_CTRL, 0);
     }
     else if(configBitsVar == 1) //SPI
@@ -419,11 +445,22 @@ void calcUserDivider( uint8_t configBitsVar )
     clearChangedStatus( SCMD_U_PORT_CLKDIV_U );
     clearChangedStatus( SCMD_U_PORT_CLKDIV_L );
     clearChangedStatus( SCMD_U_PORT_CLKDIV_CTRL );
+    
+    //Replace keys
+    writeDevRegister(SCMD_LOCAL_USER_LOCK, tempUserKey);
+    writeDevRegister(SCMD_LOCAL_MASTER_LOCK, tempMasterKey);
 }
 
 //This configures 
 void calcExpansionDivider( uint8_t configBitsVar )
 {
+    //Save current keys
+    uint8_t tempUserKey = readDevRegister(SCMD_LOCAL_USER_LOCK);
+    uint8_t tempMasterKey = readDevRegister(SCMD_LOCAL_MASTER_LOCK);
+    //Allow writes
+    writeDevRegister(SCMD_LOCAL_USER_LOCK, USER_LOCK_KEY);
+    writeDevRegister(SCMD_LOCAL_MASTER_LOCK, MASTER_LOCK_KEY);
+ 
     //Config EXPANSION_PORT
     if(configBitsVar == 2) //Slave
     {
@@ -441,6 +478,11 @@ void calcExpansionDivider( uint8_t configBitsVar )
     clearChangedStatus( SCMD_E_PORT_CLKDIV_U );
     clearChangedStatus( SCMD_E_PORT_CLKDIV_L );
     clearChangedStatus( SCMD_E_PORT_CLKDIV_CTRL );
+
+    //Replace keys
+    writeDevRegister(SCMD_LOCAL_USER_LOCK, tempUserKey);
+    writeDevRegister(SCMD_LOCAL_MASTER_LOCK, tempMasterKey);
+
 }
 
 extern void custom_USER_PORT_SPI_UART_ISR( void );

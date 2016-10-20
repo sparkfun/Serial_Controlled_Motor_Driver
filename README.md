@@ -23,10 +23,15 @@ Repository Contents
     * RegisterMap.ods - Description, and listing, of user-facing memory locations
     * Test Plan.x, Test Record.x, TPx.x - various test documents
 	* UartCommands.odt - Anatomy of UART serial commands
+	* SCMD_Datasheet.odt - all other docs combined into a datasheet
 * **/Firmware** - PSoC projects of embedded firmware
 * **/Hardware** - Eagle design files (.brd, .sch)
 * **/Production** - Production files
-* **/Software** - Arduino sketches showing use-of the SCMD
+* **/Software** - Arduino sketches and examples
+    * /examples/MotorTest - Step through driving all attached motors
+    * /examples/RegisterRWTool - Tool for reading and writing registers using I2C or SPI
+    * /examples/Run-timeDiagnostics - Demonstration of the various diagnostic registers and failsafe
+	
 
 Version History
 ---------------

@@ -370,6 +370,13 @@ void parseUART( void )
             //Check for valid next char
             if( ishex(rxBuffer[1]) )
             {
+                //Save current keys
+                uint8_t tempUserKey = readDevRegister(SCMD_LOCAL_USER_LOCK);
+                uint8_t tempMasterKey = readDevRegister(SCMD_LOCAL_MASTER_LOCK);
+                //Allow writes
+                writeDevRegister(SCMD_LOCAL_USER_LOCK, USER_LOCK_KEY);
+                writeDevRegister(SCMD_LOCAL_MASTER_LOCK, MASTER_LOCK_KEY);
+
                 switch(rxBuffer[1])
                 {
                     case '1':
@@ -407,8 +414,12 @@ void parseUART( void )
                     default:
                     break;
                 }
+                //Replace keys
+                writeDevRegister(SCMD_LOCAL_USER_LOCK, tempUserKey);
+                writeDevRegister(SCMD_LOCAL_MASTER_LOCK, tempMasterKey);
                 //Cause the update, but give time to print the new speed at the old speed:
                 CyDelay(400);
+                calcUserDivider(readDevRegister(SCMD_CONFIG_BITS));
                 SetScbConfiguration(OP_MODE_UART);
             }
             else

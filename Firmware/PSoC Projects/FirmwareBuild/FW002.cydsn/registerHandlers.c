@@ -214,6 +214,13 @@ void processMasterRegChanges( void )
     }
     if(getChangedStatus(SCMD_E_BUS_SPEED))
     {
+        //Save current keys
+        uint8_t tempUserKey = readDevRegister(SCMD_LOCAL_USER_LOCK);
+        uint8_t tempMasterKey = readDevRegister(SCMD_LOCAL_MASTER_LOCK);
+        //Allow writes
+        writeDevRegister(SCMD_LOCAL_USER_LOCK, USER_LOCK_KEY);
+        writeDevRegister(SCMD_LOCAL_MASTER_LOCK, MASTER_LOCK_KEY);
+        
         //Do remote first -- configure slaves before reconfiguring the bus
         //int i;
         //uint8_t motorAddrTemp = 0x50;
@@ -226,11 +233,16 @@ void processMasterRegChanges( void )
         //        motorAddrTemp++;
         //    }
         //}
+        
         //Do local
         writeDevRegister(SCMD_E_PORT_CLKDIV_U, 0);
         writeDevRegister(SCMD_E_PORT_CLKDIV_L, SCBCLK_I2C_DIVIDER_TABLE[readDevRegister(SCMD_E_BUS_SPEED) & 0x03]);
         writeDevRegister(SCMD_E_PORT_CLKDIV_CTRL, 0); //Triggers clock change
-
+        
+        //Replace keys
+        writeDevRegister(SCMD_LOCAL_USER_LOCK, tempUserKey);
+        writeDevRegister(SCMD_LOCAL_MASTER_LOCK, tempMasterKey);
+        
         clearChangedStatus(SCMD_E_BUS_SPEED);
     }
 }

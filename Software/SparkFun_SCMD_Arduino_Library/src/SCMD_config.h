@@ -36,11 +36,10 @@
 #define SCMD_MST_E_IN_FN           0x17
 #define SCMD_U_PORT_CLKDIV_U       0x18
 #define SCMD_U_PORT_CLKDIV_L       0x19
-#define SCMD_U_PORT_CLKDIV_FRAC    0x1A
+#define SCMD_U_PORT_CLKDIV_CTRL    0x1A
 #define SCMD_E_PORT_CLKDIV_U       0x1B
 #define SCMD_E_PORT_CLKDIV_L       0x1C
-#define SCMD_E_PORT_CLKDIV_FRAC    0x1D
-
+#define SCMD_E_PORT_CLKDIV_CTRL    0x1D
 #define SCMD_U_BUS_UART_BAUD       0x1E
 //#define SCMD_PAGE_SELECT           0x1F
 #define SCMD_MA_DRIVE              0x20
@@ -85,12 +84,10 @@
 #define SCMD_BRIDGE_SLV_L          0x54
 #define SCMD_BRIDGE_SLV_H          0x55
 
-
 #define SCMD_DRIVER_ENABLE         0x70
 #define SCMD_UPDATE_RATE           0x71
 #define SCMD_FORCE_UPDATE          0x72
 #define SCMD_E_BUS_SPEED           0x73
-
 #define SCMD_MASTER_LOCK           0x74
 #define SCMD_USER_LOCK             0x75
 #define SCMD_FSAFE_TIME            0x76
@@ -101,6 +98,5 @@
 #define SCMD_REM_DATA_RD           0x7C
 #define SCMD_REM_WRITE             0x7D
 #define SCMD_REM_READ              0x7E
-
 
 #endif

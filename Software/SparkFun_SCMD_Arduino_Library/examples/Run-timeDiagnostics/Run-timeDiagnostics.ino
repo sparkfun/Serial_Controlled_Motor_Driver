@@ -31,8 +31,8 @@ void setup()
 
 	//Specify configuration for the driver
 	//  Can be I2C_MODE, SPI_MODE
-	myMotorDriver.settings.commInterface = I2C_MODE;
-	//myMotorDriver.settings.commInterface = SPI_MODE;
+	//myMotorDriver.settings.commInterface = I2C_MODE;
+	myMotorDriver.settings.commInterface = SPI_MODE;
 	myMotorDriver.settings.I2CAddress = 0x5A;
 	myMotorDriver.settings.chipSelectPin = 10;
 	delay(500);
