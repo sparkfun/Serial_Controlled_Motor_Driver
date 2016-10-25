@@ -1,11 +1,9 @@
 /******************************************************************************
-SparkFun_PSoCMotorDriverAPI.cpp
+SCMD.cpp
 SCMD Arduino and Teensy Driver
 Marshall Taylor @ SparkFun Electronics
 May 20, 2015
-https://github.com/sparkfun/______________
-
-<multiline verbose description of file functionality>
+https://github.com/sparkfun/Serial_Controlled_Motor_Driver
 
 Resources:
 Uses Wire.h for i2c operation
@@ -31,7 +29,7 @@ Distributed as-is; no warranty is given.
 #include <stdint.h>
 #include <math.h>
 #include "SCMD.h"
-#include "SCMD_config.h"
+#include "SCMD_config.h" //Contains #defines for common SCMD register names and values
 
 #ifdef USE_ALT_I2C
 #include <i2c_t3.h>
@@ -44,22 +42,21 @@ Distributed as-is; no warranty is given.
 
 //****************************************************************************//
 //
-//  Settings and configuration
+//  Constructor
+//
+//    Initalizes settings to default.
 //
 //****************************************************************************//
-
-//Constructor -- Specifies default configuration
 SCMD::SCMD( void )
 {
 	//Construct with these default settings if nothing is specified
 
 	//Select interface mode
-	settings.commInterface = I2C_MODE; //Can be I2C_MODE, SPI_MODE
-	//Select address for I2C.  Does nothing for SPI
+	settings.commInterface = I2C_MODE; //I2C_MODE or SPI_MODE
+	//Select default I2C address.
 	settings.I2CAddress = 0x58; //Ignored for SPI_MODE
-	//Select CS pin for SPI.  Does nothing for I2C
-	settings.chipSelectPin = 10;
-	
+	//Select default SPI CS pin.
+	settings.chipSelectPin = 10; //Ignored for I2C_MODE
 
 }
 
@@ -68,9 +65,12 @@ SCMD::SCMD( void )
 //
 //  Configuration section
 //
-//  This uses the stored SensorSettings to start the IMU
-//  Use statements such as "mySensor.settings.commInterface = SPI_MODE;" to 
-//  configure before calling .begin();
+//    This uses the stored SensorSettings to start the IMU.
+//  
+//  Example usage:
+//  //Configure for SPI mode using default CS pin of 10
+//  mySensor.settings.commInterface = SPI_MODE; 
+//  mySensor.begin();
 //
 //****************************************************************************//
 uint8_t SCMD::begin()
@@ -108,9 +108,8 @@ uint8_t SCMD::begin()
 	
 	//dummy read
 	readRegister(SCMD_ID);
-	writeRegister(SCMD_DRIVER_ENABLE, 0x01);
-//	delay(10);
 
+	writeRegister(SCMD_DRIVER_ENABLE, 0x01);
 	return readRegister(SCMD_ID);
 }
 
@@ -134,35 +133,35 @@ void SCMD::reset( void )
 //  Drive Section
 //
 //****************************************************************************//
-void SCMD::setDrive( uint8_t channel, uint8_t direction, uint8_t level )
+
+//setDrive( ... )
+//
+//    Drive a motor at a level
+//
+//  uint8_t motorNum -- Motor number from 0 to 33
+//  uint8_t direction -- 0 or 1 for forward and backward
+//  uint8_t level -- 0 to 255 for drive strength
+void SCMD::setDrive( uint8_t motorNum, uint8_t direction, uint8_t level )
 {
 	//convert to 7 bit
 	level = level >> 1;
 	int16_t driveValue; //use to build value to actually write to register
 	
-	//switch(channel)
-	//{
-	//	case 0:  //master
-	//		driveValue = (level * direction) + ((int8_t)level * ((int8_t)direction - 1)); //set to 1/2 drive if direction = 1 or -1/2 drive if direction = 0; (level * direction);
-	//		driveValue += 128;
-	//		writeRegister(SCMD_MA_DRIVE, driveValue);
-	//		break;
-	//	case 1:  //master
-	//		driveValue = (level * direction) + ((int8_t)level * ((int8_t)direction - 1)); //set to 1/2 drive if direction = 1 or -1/2 drive if direction = 0; (level * direction);
-	//		driveValue += 128;
-	//		writeRegister(SCMD_MB_DRIVE, driveValue);
-	//		break;
-	//	default:
-	//	break;
-	//}
-	if(channel < 34)
+	//Make sure the motor number is valid
+	if(motorNum < 34)
 	{
 		driveValue = (level * direction) + ((int8_t)level * ((int8_t)direction - 1)); //set to 1/2 drive if direction = 1 or -1/2 drive if direction = 0; (level * direction);
 		driveValue += 128;
-		writeRegister(SCMD_MA_DRIVE + channel, driveValue);
+		writeRegister(SCMD_MA_DRIVE + motorNum, driveValue);
 	}
 }
 
+//inversionMode( ... )
+//
+//    Configure a motor's direction inversion
+//
+//  uint8_t motorNum -- Motor number from 0 to 33
+//  uint8_t polarity -- 0 or 1 for default or inverted
 void SCMD::inversionMode( uint8_t motorNum, uint8_t polarity )
 {
 	uint8_t regTemp;
@@ -212,6 +211,12 @@ void SCMD::inversionMode( uint8_t motorNum, uint8_t polarity )
 
 }
 
+//bridgingMode( ... )
+//
+//    Configure a driver's bridging state
+//
+//  uint8_t driverNum -- Number of driver.  Master is 0, slave 1 is 1, etc.  0 to 16
+//  uint8_t bridged -- 0 or 1 for forward and backward
 void SCMD::bridgingMode( uint8_t driverNum, uint8_t bridged )
 {
 	uint8_t regTemp;
@@ -253,6 +258,12 @@ void SCMD::bridgingMode( uint8_t driverNum, uint8_t bridged )
 //  Diagnostics
 //
 //****************************************************************************//
+
+//getDiagnostics( ... )
+//
+//    Get diagnostic information from the master
+//
+//  SCMDDiagnostics &diagObjectReference -- Object to contain returned data
 void SCMD::getDiagnostics( SCMDDiagnostics &diagObjectReference )
 {
 	diagObjectReference.U_I2C_RD_ERR = readRegister( SCMD_U_I2C_RD_ERR );
@@ -276,6 +287,12 @@ void SCMD::getDiagnostics( SCMDDiagnostics &diagObjectReference )
 	
 }
 
+//getRemoteDiagnostics( ... )
+//
+//    Get diagnostic information from a slave
+//
+//  uint8_t address -- Address of slave to read.  Can be 0x50 to 0x5F for slave 1 to 16.
+//  SCMDDiagnostics &diagObjectReference -- Object to contain returned data
 void SCMD::getRemoteDiagnostics( uint8_t address, SCMDDiagnostics &diagObjectReference )
 {
 	diagObjectReference.U_I2C_RD_ERR = readRemoteRegister( address, SCMD_U_I2C_RD_ERR );
@@ -299,6 +316,10 @@ void SCMD::getRemoteDiagnostics( uint8_t address, SCMDDiagnostics &diagObjectRef
 	
 }
 
+//resetDiagnosticCounts( ... )
+//
+//    Reset the master's diagnostic counters
+//
 void SCMD::resetDiagnosticCounts( void )
 {
 	writeRegister( SCMD_U_I2C_RD_ERR, 0 );
@@ -315,6 +336,11 @@ void SCMD::resetDiagnosticCounts( void )
 	
 }
 
+//resetRemoteDiagnosticCounts( ... )
+//
+//    Reset a slave's diagnostic counters
+//
+//  uint8_t address -- Address of slave to read.  Can be 0x50 to 0x5F for slave 1 to 16.
 void SCMD::resetRemoteDiagnosticCounts( uint8_t address )
 {
 	writeRemoteRegister( address, SCMD_U_I2C_RD_ERR, 0 );
@@ -336,6 +362,11 @@ void SCMD::resetRemoteDiagnosticCounts( uint8_t address )
 //
 //****************************************************************************//
 
+//readRegister( ... )
+//
+//    Read data from the master
+//
+//  uint8_t offset -- Address of data to read.  Can be 0x00 to 0x7F
 uint8_t SCMD::readRegister(uint8_t offset)
 {
 	//Return value
@@ -370,7 +401,7 @@ uint8_t SCMD::readRegister(uint8_t offset)
 		// take the chip select high to de-select:
 		digitalWrite(settings.chipSelectPin, HIGH);
 		
-		
+		//For loop delay for 16 Mhz CPU
 		for(volatile int i = 0; i < 25; i++);
 		
 		//do a dummy read
@@ -380,6 +411,7 @@ uint8_t SCMD::readRegister(uint8_t offset)
 		// take the chip select high to de-select:
 		digitalWrite(settings.chipSelectPin, HIGH);
 		
+		//For loop delay for 16 Mhz CPU
 		for(volatile int i = 0; i < 25; i++);
 		
 		break;
@@ -390,6 +422,12 @@ uint8_t SCMD::readRegister(uint8_t offset)
 	return result;
 }
 
+//writeRegister( ... )
+//
+//    Write data to the master
+//
+//  uint8_t offset -- Address of data to write.  Can be 0x00 to 0x7F
+//  uint8_t dataToWrite -- Data to write.
 void SCMD::writeRegister(uint8_t offset, uint8_t dataToWrite)
 {
 	switch (settings.commInterface)
@@ -426,6 +464,14 @@ void SCMD::writeRegister(uint8_t offset, uint8_t dataToWrite)
 		break;
 	}
 }
+
+//readRegister( ... )
+//
+//    Read data from a slave.  Note that this waits 5ms for slave data to be aquired
+//  before making the final read.
+//
+//  uint8_t address -- Address of slave to read.  Can be 0x50 to 0x5F for slave 1 to 16.
+//  uint8_t offset -- Address of data to read.  Can be 0x00 to 0x7F
 uint8_t SCMD::readRemoteRegister(uint8_t address, uint8_t offset)
 {
 	writeRegister(SCMD_REM_ADDR, address);
@@ -436,6 +482,13 @@ uint8_t SCMD::readRemoteRegister(uint8_t address, uint8_t offset)
 	
 }
 
+//writeRegister( ... )
+//
+//    Write data from a slave
+//
+//  uint8_t address -- Address of slave to read.  Can be 0x50 to 0x5F for slave 1 to 16.
+//  uint8_t offset -- Address of data to write.  Can be 0x00 to 0x7F
+//  uint8_t dataToWrite -- Data to write.
 void SCMD::writeRemoteRegister(uint8_t address, uint8_t offset, uint8_t dataToWrite)
 {
 	writeRegister(SCMD_REM_ADDR, address);

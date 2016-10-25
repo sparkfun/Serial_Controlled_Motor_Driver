@@ -1,9 +1,9 @@
 /******************************************************************************
-ArduinoPSoCMotorDriverAPI.cpp
-BME280 Arduino and Teensy Driver
+SCMD.h
+Serial Controlled Motor Driver
 Marshall Taylor @ SparkFun Electronics
 May 20, 2015
-https://github.com/sparkfun/______________
+https://github.com/sparkfun/Serial_Controlled_Motor_Driver
 
 Resources:
 Uses Wire.h for i2c operation
@@ -18,38 +18,37 @@ Please review the LICENSE.md file included with this example. If you have any qu
 or concerns with licensing, please contact techsupport@sparkfun.com.
 Distributed as-is; no warranty is given.
 ******************************************************************************/
-
-// Test derived class for base class SparkFunIMU
 #ifndef __SERIALCONTROLLEDMOTORDRIVERAPI_H__
 #define __SERIALCONTROLLEDMOTORDRIVERAPI_H__
 
 #include <stdint.h>
 #include "SCMD_config.h"
 
+//  Setting options for commInterface
 #define I2C_MODE 0
 #define SPI_MODE 1
 
-//Class SensorSettings.  This object is used to hold settings data.  The application
-//uses this classes' data directly.  The settings are adopted and sent to the sensor
-//at special times, such as .begin.  Some are used for doing math.
+//  SCMDSettings
 //
-//This is a kind of bloated way to do this.  The trade-off is that the user doesn't
-//need to deal with #defines or enums with bizarre names.
-//
-//A power user would strip out SensorSettings entirely, and send specific read and
-//write command directly to the IC. (ST #defines below)
-//
+//    This is used by the SCMD class to hold settings.  It is public within that class
+//  and the user is expected to write desired values into the settings before calling
+//  .begin();
 struct SCMDSettings
 {
   public:
 	
   //Main Interface and mode settings
-    uint8_t commInterface;
-    uint8_t I2CAddress;
-    uint8_t chipSelectPin;
+    uint8_t commInterface;  //Set equal to I2C_MODE or SPI_MODE
+    uint8_t I2CAddress;  //Set to address that master is configured to in case of I2C usage
+    uint8_t chipSelectPin;  //Set to chip select pin used on Arduino in case of SPI
 
 };
 
+//  SCMDDiagnostics
+//
+//    This can be created by the application and used to hold data.  Pass the created
+//  object to the diagnostic reading functions and they will be written with the
+//  aquired data.
 struct SCMDDiagnostics
 {
 	public:
@@ -69,8 +68,12 @@ struct SCMDDiagnostics
 
  };
 
-//This is the man operational class of the driver.
-
+//  SCMD
+//
+//    This object provides control of a motor driver and attached slave chain, for
+//  a single master address.
+//
+//  create an object in the global space, then configure and run begin();
 class SCMD
 {
   public:
@@ -83,7 +86,7 @@ class SCMD
 	
     uint8_t begin( void );  //Call to apply SCMDSettings and enable drivers.
 	void reset( void );  //Software reset routine
-    void setDrive( uint8_t channel, uint8_t direction, uint8_t level );//apply drive levels to motors
+    void setDrive( uint8_t motorNum, uint8_t direction, uint8_t level );//apply drive levels to motors
 	void inversionMode( uint8_t motorNum, uint8_t polarity );//Set inversion states for motors
 	void bridgingMode( uint8_t driverNum, uint8_t bridged );//Enable bridging ('B' channel will have no effect in bridged mode)
 	void getDiagnostics( SCMDDiagnostics &diagObjectReference );//Gets and formats the diagnostic information.  Make sure the passed char array is big enough (size not determined yet)

@@ -1,3 +1,26 @@
+/******************************************************************************
+SCMD_config.h
+Serial Controlled Motor Driver
+Marshall Taylor @ SparkFun Electronics
+May 20, 2015
+https://github.com/sparkfun/Serial_Controlled_Motor_Driver
+
+This file contains names for register locations described in the documentation.
+Use in conjunction with readRegister() and writeRegister().
+
+Resources:
+Uses Wire.h for i2c operation
+Uses SPI.h for SPI operation
+
+Development environment specifics:
+Arduino IDE _______
+Teensy loader ________
+
+This code is released under the [MIT License](http://opensource.org/licenses/MIT).
+Please review the LICENSE.md file included with this example. If you have any questions 
+or concerns with licensing, please contact techsupport@sparkfun.com.
+Distributed as-is; no warranty is given.
+******************************************************************************/
 #if !defined(SCMD_CONFIG_H)
 #define SCMD_CONFIG_H
 

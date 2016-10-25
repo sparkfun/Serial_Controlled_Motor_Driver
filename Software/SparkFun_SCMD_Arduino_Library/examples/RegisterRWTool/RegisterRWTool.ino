@@ -1,31 +1,50 @@
-//To write a register:
-// "Wnnhh"  Write hh to nn
+/******************************************************************************
+RegisterRWTool.ino
+Serial Controlled Motor Driver
+Marshall Taylor @ SparkFun Electronics
+May 20, 2015
+https://github.com/sparkfun/Serial_Controlled_Motor_Driver
+
+Resources:
+Uses Wire.h for i2c operation
+Uses SPI.h for SPI operation
+
+Development environment specifics:
+Arduino IDE _______
+Teensy loader ________
+
+This code is released under the [MIT License](http://opensource.org/licenses/MIT).
+Please review the LICENSE.md file included with this example. If you have any questions 
+or concerns with licensing, please contact techsupport@sparkfun.com.
+Distributed as-is; no warranty is given.
+******************************************************************************/
+//  This example allows reading and writing of driver registers by human input,
+//    using the serial terminal at 115200 baud.  All numbers should be entered
+//    as 2-digit hex.
 //
-//To read a register:
-// "Rnn"  Read register nn
+//  To write a register:
+//    "Wnnhh"  Write hh to nn
 //
-//  Pin 4 can be used to trigger a scope, and placed at the relevant location
+//  To read a register:
+//    "Rnn"  Read register nn
 
 #include <Arduino.h>
 #include <stdint.h>
 #include "SCMD.h"
-#include "SCMD_config.h"
+#include "SCMD_config.h" //Contains #defines for common SCMD register names and values
 #include "Wire.h"
 
 //#defines
 #define LEDPIN 13
+#define PACKET_LENGTH 24
 
 //Variables
 SCMD myMotorDriver;
-
-//Serial packet defines
-#define PACKET_LENGTH 24
 
 char lastchar;
 char packet[PACKET_LENGTH];
 char lastPacket[PACKET_LENGTH];
 char packetPending = 0;
-
 char packet_ptr;
 
 //Function prototypes
@@ -37,9 +56,6 @@ void setup()
 	Serial.begin(115200);
 	pinMode(LEDPIN, OUTPUT);
 
-	pinMode(4, OUTPUT);
-	digitalWrite(4, 0);
-	
 	Serial.println("Starting sketch.");
 
 	//Specify configuration for the driver
@@ -51,11 +67,9 @@ void setup()
 	delay(500);
 	
 	Serial.print("Starting driver... ID = 0x");
-	digitalWrite(4, 1);
-	digitalWrite(4, 0);
-	digitalWrite(4, 1);
 	Serial.println(myMotorDriver.begin(), HEX);
 	
+	//Prepare the input buffer --
 	//Fill packet with null, reset the pointer
 	for( int i = 0; i < PACKET_LENGTH; i++ )
 	{
@@ -64,6 +78,7 @@ void setup()
 	//reset the pointer
 	packet_ptr = 0;
 	
+	//Splash help
 	Serial.println();
 	Serial.println("Use capital letters for 'R' and 'W'");
 	Serial.println("Address and data must be upper case hex");
@@ -73,7 +88,7 @@ void setup()
 
 void loop()
 {
-	//User code
+	//Get and parse serial data
 	while(Serial.available())
 	{
 		lastchar = Serial.read();
@@ -83,7 +98,6 @@ void loop()
 			packet[packet_ptr] = lastchar;
 			//advance the pointer
 			packet_ptr++;
-			//turn on LED
 		}
 		else
 		{
@@ -96,7 +110,7 @@ void loop()
 		uint8_t addressTemp = 0;
 		uint8_t dataTemp = 0;
 		
-		//do the things
+		//Packet acquired!  Now do the things
         switch(packet[0])
         {
             case 'W':
@@ -154,25 +168,19 @@ void loop()
 		//reset the pointer
 		packet_ptr = 0;
 	}
-	
 
 	delay(100);
 	digitalWrite( LEDPIN, digitalRead( LEDPIN ) ^ 0x01 );
-	//myMotorDriver.inversionMode(0 + (2*currentSwitchValues[3]), currentSwitchValues[i]);
+
 }
 
-// This takes a char input and converts to int
-//
-// The output will be an int if the char
-//  is a number
-//  is A-F
-//  is a-f
-//
-// Otherwise, the output is zero.
+//  This takes a char input in the hex range and converts to int
+//    Accepts upper or lower case alpha chars
+//    Outputs 0 with bad input
 //
 int char2hex(char charin)
 {
-  int hexout;
+  int hexout = 0;
   if(charin >= 0x30)
   {
     if(charin <= 0x39)
