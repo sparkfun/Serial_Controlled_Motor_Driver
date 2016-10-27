@@ -69,6 +69,7 @@ void initDevRegisters( void )
     registerAccessTable[SCMD_E_PORT_CLKDIV_CTRL] = GLOBAL_READ_ONLY;
     registerAccessTable[SCMD_U_BUS_UART_BAUD] = GLOBAL_READ_ONLY;
     registerAccessTable[SCMD_E_BUS_SPEED] = USER_READ_ONLY;
+    registerAccessTable[SCMD_GEN_TEST_WORD] = GLOBAL_READ_ONLY;
     
     setColdInitValues();
 }
@@ -91,7 +92,7 @@ void setColdInitValues( void )
     writeDevRegister(SCMD_SLV_POLL_CNT, 0);
     writeDevRegister(SCMD_SLAVE_ADDR, 0x10); // No one should ever ask for data on 0x10
     writeDevRegister(SCMD_UPDATE_RATE, 0x0A);
-    registerTable[SCMD_U_BUS_UART_BAUD] = 0x07;
+    registerTable[SCMD_U_BUS_UART_BAUD] = 0x03; // Default baud rate of 9600
     registerTable[SCMD_E_BUS_SPEED] = 0x01;
 
     setWarmInitValues();

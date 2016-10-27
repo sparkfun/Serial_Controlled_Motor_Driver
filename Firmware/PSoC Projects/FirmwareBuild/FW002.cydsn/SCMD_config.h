@@ -27,7 +27,7 @@
 #define SCMD_FSAFE_FAULTS          0x0E
 #define SCMD_REG_OOR_CNT           0x0F
 #define SCMD_REG_RO_WRITE_CNT      0x10
-
+#define SCMD_GEN_TEST_WORD         0x11
 #define SCMD_MOTOR_A_INVERT        0x12
 #define SCMD_MOTOR_B_INVERT        0x13
 #define SCMD_BRIDGE                0x14
