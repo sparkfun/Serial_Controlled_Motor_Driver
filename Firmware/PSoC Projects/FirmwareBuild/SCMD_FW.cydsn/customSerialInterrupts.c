@@ -379,35 +379,35 @@ void parseUART( void )
 
                 switch(rxBuffer[1])
                 {
-                    case '1':
+                    case '0':
                     USER_PORT_UartPutString("2400\r\n");
                     writeDevRegister(SCMD_U_BUS_UART_BAUD, 0);
                     break;
-                    case '2':
+                    case '1':
                     USER_PORT_UartPutString("4800\r\n");
                     writeDevRegister(SCMD_U_BUS_UART_BAUD, 1);
                     break;
-                    case '3':
+                    case '2':
                     USER_PORT_UartPutString("9600\r\n");
                     writeDevRegister(SCMD_U_BUS_UART_BAUD, 2);
                     break;
-                    case '4':
+                    case '3':
                     USER_PORT_UartPutString("14400\r\n");
                     writeDevRegister(SCMD_U_BUS_UART_BAUD, 3);
                     break;
-                    case '5':
+                    case '4':
                     USER_PORT_UartPutString("19200\r\n");
                     writeDevRegister(SCMD_U_BUS_UART_BAUD, 4);
                     break;
-                    case '6':
+                    case '5':
                     USER_PORT_UartPutString("38400\r\n");
                     writeDevRegister(SCMD_U_BUS_UART_BAUD, 5);
                     break;
-                    case '7':
+                    case '6':
                     USER_PORT_UartPutString("57600\r\n");
                     writeDevRegister(SCMD_U_BUS_UART_BAUD, 6);
                     break;
-                    case '8':
+                    case '7':
                     USER_PORT_UartPutString("115200\r\n");
                     writeDevRegister(SCMD_U_BUS_UART_BAUD, 7);
                     break;

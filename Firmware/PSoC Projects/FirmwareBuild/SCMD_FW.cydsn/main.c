@@ -43,6 +43,7 @@ static void systemInit( void ); //get the system off the ground - calls warm ini
 volatile uint16_t masterSendCounter = 65000;
 volatile bool masterSendCounterReset = 0;
 bool slaveResetRequested = false;
+
 //Functions
 
 int main()
@@ -51,7 +52,7 @@ int main()
 
     while(1)
     {
-        if(CONFIG_BITS == 0) //UART
+        if((CONFIG_BITS == 0) || (CONFIG_BITS == 0x0D) || (CONFIG_BITS == 0x0E)) //UART
         {
             parseUART();
         }
@@ -60,7 +61,7 @@ int main()
         //{
         //    parseSPI();
         //}
-        if((CONFIG_BITS >= 0x3)&&(CONFIG_BITS <= 0xE)) //I2C
+        if((CONFIG_BITS >= 0x3)&&(CONFIG_BITS <= 0xC)) //I2C
         {
             //parceI2C is also called before interrupts occur on the bus, but check here too to catch residual buffers
             parseI2C();
@@ -220,6 +221,7 @@ static void systemInit( void )
 #ifndef USE_SW_CONFIG_BITS
     CONFIG_BITS = readDevRegister(SCMD_CONFIG_BITS); //Get the bits value
 #endif
+    
 
     DIAG_LED_CLK_Start();
     KHZ_CLK_Start();

@@ -99,6 +99,7 @@ void tickMasterSM( void )
         if( readDevRegister(SCMD_SLV_POLL_CNT) > 200 )
         {
             //Must be done
+            writeDevRegister( SCMD_STATUS_1, readDevRegister( SCMD_STATUS_1 ) | SCMD_ENUMERATION_B0); //Write "i'm done" bit
             writeDevRegister(SCMD_LOCAL_MASTER_LOCK, 0x00);  //Lock up Read-Only registers -- we're done configuring the slaves!
             masterNextState = SCMDMasterSendData;
         }

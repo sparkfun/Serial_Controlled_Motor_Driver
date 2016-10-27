@@ -70,6 +70,8 @@ void initDevRegisters( void )
     registerAccessTable[SCMD_U_BUS_UART_BAUD] = GLOBAL_READ_ONLY;
     registerAccessTable[SCMD_E_BUS_SPEED] = USER_READ_ONLY;
     registerAccessTable[SCMD_GEN_TEST_WORD] = GLOBAL_READ_ONLY;
+    registerAccessTable[SCMD_STATUS_1] = GLOBAL_READ_ONLY;
+    registerAccessTable[SCMD_CONTROL_1] = USER_READ_ONLY;
     
     setColdInitValues();
 }
@@ -92,7 +94,10 @@ void setColdInitValues( void )
     writeDevRegister(SCMD_SLV_POLL_CNT, 0);
     writeDevRegister(SCMD_SLAVE_ADDR, 0x10); // No one should ever ask for data on 0x10
     writeDevRegister(SCMD_UPDATE_RATE, 0x0A);
-    registerTable[SCMD_U_BUS_UART_BAUD] = 0x03; // Default baud rate of 9600
+    //Set default baud based on jumpers
+    if( readDevRegister( SCMD_CONFIG_BITS ) == 0x0D ) registerTable[SCMD_U_BUS_UART_BAUD] = 0x06; // Set 57600
+    else if( readDevRegister( SCMD_CONFIG_BITS ) == 0x0E ) registerTable[SCMD_U_BUS_UART_BAUD] = 0x07; // Set 115200
+    else registerTable[SCMD_U_BUS_UART_BAUD] = 0x02; // Default baud rate of 9600
     registerTable[SCMD_E_BUS_SPEED] = 0x01;
 
     setWarmInitValues();

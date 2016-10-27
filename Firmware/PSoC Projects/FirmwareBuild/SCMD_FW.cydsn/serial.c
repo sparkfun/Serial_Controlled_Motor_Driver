@@ -422,7 +422,7 @@ void calcUserDivider( uint8_t configBitsVar )
     writeDevRegister(SCMD_LOCAL_MASTER_LOCK, MASTER_LOCK_KEY);
     
     //Config USER_PORT
-    if(configBitsVar == 0) //UART
+    if((configBitsVar == 0) || (configBitsVar == 0x0D) || (configBitsVar == 0x0E)) //UART
     {
         writeDevRegister(SCMD_U_PORT_CLKDIV_U, (SCBCLK_UART_DIVIDER_TABLE[readDevRegister(SCMD_U_BUS_UART_BAUD) & 0x07] & 0xFF00) >> 8);
         writeDevRegister(SCMD_U_PORT_CLKDIV_L, SCBCLK_UART_DIVIDER_TABLE[readDevRegister(SCMD_U_BUS_UART_BAUD) & 0x07] & 0x00FF);
@@ -434,7 +434,7 @@ void calcUserDivider( uint8_t configBitsVar )
         writeDevRegister(SCMD_U_PORT_CLKDIV_L, 1);
         writeDevRegister(SCMD_U_PORT_CLKDIV_CTRL, 0);
     }
-    else if((configBitsVar >= 0x3)&&(configBitsVar <= 0xE)) //I2C
+    else if((configBitsVar >= 0x3)&&(configBitsVar <= 0xC)) //I2C
     {
         writeDevRegister(SCMD_U_PORT_CLKDIV_U, 0);
         writeDevRegister(SCMD_U_PORT_CLKDIV_L, 1);
@@ -495,7 +495,7 @@ extern void parseI2C( void );
 void initUserSerial( uint8_t configBitsVar ) //Pass configuration word
 {
     //Config USER_PORT
-    if(configBitsVar == 0) //UART
+    if((configBitsVar == 0) || (configBitsVar == 0x0D) || (configBitsVar == 0x0E)) //UART
     {
         SetScbConfiguration(OP_MODE_UART);
     }
