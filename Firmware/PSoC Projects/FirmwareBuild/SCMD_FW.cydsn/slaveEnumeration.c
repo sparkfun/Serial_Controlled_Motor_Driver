@@ -81,15 +81,16 @@ void tickMasterSM( void )
             writeDevRegister(SCMD_REM_WRITE, 1);//flag the transfer
             writeDevRegister(SCMD_SLV_TOP_ADDR, slaveAddrEnumerator);//Save to local reg
             
-            writeDevRegister(SCMD_SLV_POLL_CNT, 0);
-            if(slaveAddrEnumerator < MAX_SLAVE_ADDR)
+            writeDevRegister(SCMD_SLV_POLL_CNT, 0); //reset the polling counter.
+            if(slaveAddrEnumerator < MAX_SLAVE_ADDR)  //We got a response and there are more addresses to explore
             {
                 slaveAddrEnumerator++;
                 masterNextState = SCMDMasterPollDefault; //go look for another
             }
-            else
+            else  //We got a response but there are no more addresses to explore
             {
-                masterNextState = SCMDMasterSendData; //go back to this state
+                //force the poll count to expire (this will cause state changes below)
+                writeDevRegister(SCMD_SLV_POLL_CNT, 201);
             }
         }
         else
@@ -137,12 +138,6 @@ void tickMasterSM( void )
         for (slaveAddri = START_SLAVE_ADDR; slaveAddri <= readDevRegister(SCMD_SLV_TOP_ADDR); slaveAddri++)
         {
             //Write drive states out to slaves
-            //  OLD WAY:
-            //WriteSlaveData( slaveAddri, SCMD_MA_DRIVE, readDevRegister(SCMD_S1A_DRIVE + ((slaveAddri - START_SLAVE_ADDR) << 1 )) );
-            //CyDelayUs(100);
-            //WriteSlaveData( slaveAddri, SCMD_MB_DRIVE, readDevRegister(SCMD_S1B_DRIVE + ((slaveAddri - START_SLAVE_ADDR) << 1 )) );
-            //CyDelayUs(100);
-            //  NEW WAY:
             WriteSlave2Data( slaveAddri, SCMD_MA_DRIVE, readDevRegister(SCMD_S1A_DRIVE + ((slaveAddri - START_SLAVE_ADDR) << 1 )), readDevRegister(SCMD_S1B_DRIVE + ((slaveAddri - START_SLAVE_ADDR) << 1 )) );
             CyDelayUs(100);
             
