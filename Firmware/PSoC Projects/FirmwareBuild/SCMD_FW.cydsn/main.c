@@ -75,7 +75,7 @@ int main()
         }
         else //Do master operations
         {
-            //This next block deals with the config_in line and it's behavior
+            //This next block deals with the config_in line and its behavior
             if(CONFIG_IN_Read() == 1)
             {
                 if(slaveResetRequested == 0)
@@ -99,7 +99,7 @@ int main()
                             //insert keys
                             writeDevRegister(SCMD_LOCAL_USER_LOCK, USER_LOCK_KEY);
                             writeDevRegister(SCMD_LOCAL_MASTER_LOCK, MASTER_LOCK_KEY);
-                            CyDelay(1500u);
+                            CyDelay(1000u);
                             resetMasterSM();
                         break;
                     }
