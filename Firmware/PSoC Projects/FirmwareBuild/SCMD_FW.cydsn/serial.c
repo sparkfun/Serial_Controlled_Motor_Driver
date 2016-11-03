@@ -447,8 +447,8 @@ void calcUserDivider( uint8_t configBitsVar )
     clearChangedStatus( SCMD_U_PORT_CLKDIV_CTRL );
     
     //Replace keys
-    writeDevRegister(SCMD_LOCAL_USER_LOCK, tempUserKey);
     writeDevRegister(SCMD_LOCAL_MASTER_LOCK, tempMasterKey);
+    writeDevRegister(SCMD_LOCAL_USER_LOCK, tempUserKey);
 }
 
 //This configures 
@@ -480,8 +480,8 @@ void calcExpansionDivider( uint8_t configBitsVar )
     clearChangedStatus( SCMD_E_PORT_CLKDIV_CTRL );
 
     //Replace keys
-    writeDevRegister(SCMD_LOCAL_USER_LOCK, tempUserKey);
     writeDevRegister(SCMD_LOCAL_MASTER_LOCK, tempMasterKey);
+    writeDevRegister(SCMD_LOCAL_USER_LOCK, tempUserKey);
 
 }
 

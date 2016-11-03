@@ -33,8 +33,13 @@ Distributed as-is; no warranty is given.
 #define FIRMWARE_VERSION   0x04
 
 //SCMD_STATUS_1 masks
-#define SCMD_ENUMERATION_B0 0x01
+#define SCMD_ENUMERATION_BIT  0x01
+#define SCMD_BUSY_BIT        0x02
 
+//SCMD_CONTROL_1 masks
+#define SCMD_FULL_RESET_BIT       0x01
+#define SCMD_RE_ENUMERATE_BIT       0x02
+    
 //Address map
 #define SCMD_FID                   0x00
 #define SCMD_ID                    0x01

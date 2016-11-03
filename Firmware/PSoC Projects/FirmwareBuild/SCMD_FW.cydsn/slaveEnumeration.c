@@ -15,13 +15,17 @@ Distributed as-is; no warranty is given.
 #include <stdint.h>
 #include <project.h>
 #include "devRegisters.h"
+#include "registerHandlers.h"
 #include "charMath.h"
 #include "SCMD_config.h"
 #include "serial.h"
 #include "diagLEDS.h"
+#include "slaveEnumeration.h"
 
 //Variables and associated #defines use in functions
 static uint8_t slaveAddrEnumerator;
+static uint8_t slaveData = 0;
+static volatile bool slaveResetRequested = false;
 
 #define SCMDSlaveIdle 0
 #define SCMDSlaveWaitForSync 1
@@ -52,35 +56,26 @@ void tickMasterSM( void )
     {
     case SCMDMasterIdle:
         //Set initial variable value
+        writeDevRegister(SCMD_LOCAL_USER_LOCK, USER_LOCK_KEY);
+        writeDevRegister(SCMD_LOCAL_MASTER_LOCK, MASTER_LOCK_KEY);
         slaveAddrEnumerator = START_SLAVE_ADDR;
-        CONFIG_OUT_Write(1);
+		CONFIG_OUT_Write(1);
         writeDevRegister(SCMD_SLV_POLL_CNT, 0);
-        //Target 0x4A, point to address slot, clear local data
-        writeDevRegister(SCMD_REM_ADDR, 0x4A);
-        writeDevRegister(SCMD_REM_OFFSET, SCMD_SLAVE_ADDR);
-        writeDevRegister(SCMD_REM_DATA_RD, 0);
-        //Flag read op
-        writeDevRegister(SCMD_REM_READ, 1);
+
         masterNextState = SCMDMasterPollDefault;
         break;
     case SCMDMasterPollDefault:
         //Poll address 0x4A
         incrementDevRegister(SCMD_SLV_POLL_CNT);
-        writeDevRegister(SCMD_REM_ADDR, 0x4A);  //Target device 0x4A
-        writeDevRegister(SCMD_REM_OFFSET, SCMD_SLAVE_ADDR);  //Get contents of self address register       
-        writeDevRegister(SCMD_REM_DATA_RD, 0); //Clear the returned data slot
-        //Flag read op
-        writeDevRegister(SCMD_REM_READ, 1);
-        
+        slaveData =	ReadSlaveData( 0x4A, SCMD_SLAVE_ADDR );
+
         masterNextState = SCMDMasterSendAddr;
         break;
     case SCMDMasterSendAddr:
-        if( readDevRegister(SCMD_REM_DATA_RD) == 0x4A )//if the address came back reflected
+        if( slaveData == 0x4A )//if the address came back reflected
         {
-            writeDevRegister(SCMD_REM_DATA_WR, slaveAddrEnumerator);
-            writeDevRegister(SCMD_REM_WRITE, 1);//flag the transfer
+			WriteSlaveData( 0x4A, SCMD_SLAVE_ADDR, slaveAddrEnumerator );
             writeDevRegister(SCMD_SLV_TOP_ADDR, slaveAddrEnumerator);//Save to local reg
-            
             writeDevRegister(SCMD_SLV_POLL_CNT, 0); //reset the polling counter.
             if(slaveAddrEnumerator < MAX_SLAVE_ADDR)  //We got a response and there are more addresses to explore
             {
@@ -100,11 +95,10 @@ void tickMasterSM( void )
         if( readDevRegister(SCMD_SLV_POLL_CNT) > 200 )
         {
             //Must be done
-            writeDevRegister( SCMD_STATUS_1, readDevRegister( SCMD_STATUS_1 ) | SCMD_ENUMERATION_B0); //Write "i'm done" bit
+			setStatusBit(SCMD_ENUMERATION_BIT);  //Write "i'm done" bit
             writeDevRegister(SCMD_LOCAL_MASTER_LOCK, 0x00);  //Lock up Read-Only registers -- we're done configuring the slaves!
             masterNextState = SCMDMasterSendData;
         }
-
         CyDelay(10);
         break;
     case SCMDMasterWait:
@@ -132,6 +126,7 @@ void tickMasterSM( void )
         }
         break;
     case SCMDMasterSendData:
+		setStatusBit( SCMD_BUSY_BIT );
         //Set output drive levels for master
         PWM_1_WriteCompare(readDevRegister(SCMD_MA_DRIVE));
         PWM_2_WriteCompare(readDevRegister(SCMD_MB_DRIVE)); 
@@ -142,16 +137,53 @@ void tickMasterSM( void )
             CyDelayUs(100);
             
         }
-        masterSendCounterReset = 1; //maybe should be protected
-        while(masterSendCounter > 0);
+		clearStatusBit( SCMD_BUSY_BIT );
+        masterSendCounterReset = 1; //Request the ISR to reset the counter
+        while(masterSendCounter > 0); //Counter now = 0
         masterNextState = SCMDMasterWait;
         break;
     default:
         break;
     }
     masterState = masterNextState;
-    //Get data from next slave
 
+    //This next block deals with the config_in line and its behavior
+    if((CONFIG_IN_Read() == 1)&&(slaveResetRequested == 0))
+    {
+        //Newly detected config_in rising edge
+        slaveResetRequested = 1;
+        //Send the reset request
+        switch(readDevRegister(SCMD_MST_E_IN_FN))
+        {
+            default:
+            case 0:
+                slaveResetRequested = 0; //belay that order
+            break;
+            case 1:
+                hardReset();
+            break;
+            case 2:
+                reEnumerate();
+            break;
+        }
+    }
+    //State machine is done but the request is still high (we came from soft re-enum)
+    if(masterSMDone()&&(slaveResetRequested == 1))
+	{
+		slaveResetRequested = 0;
+		//Send preserved settings (trigger xfers only)
+		writeDevRegister( SCMD_INV_2_9, readDevRegister( SCMD_INV_2_9 ));
+		writeDevRegister( SCMD_INV_10_17, readDevRegister( SCMD_INV_10_17 ));
+		writeDevRegister( SCMD_INV_18_25, readDevRegister( SCMD_INV_18_25 ));
+		writeDevRegister( SCMD_INV_26_33, readDevRegister( SCMD_INV_26_33 ));
+		writeDevRegister( SCMD_BRIDGE_SLV_L, readDevRegister( SCMD_BRIDGE_SLV_L ));
+		writeDevRegister( SCMD_BRIDGE_SLV_H, readDevRegister( SCMD_BRIDGE_SLV_H ));
+		writeDevRegister( SCMD_DRIVER_ENABLE, readDevRegister( SCMD_DRIVER_ENABLE ));
+		writeDevRegister( SCMD_UPDATE_RATE, readDevRegister( SCMD_UPDATE_RATE ));
+		writeDevRegister( SCMD_FORCE_UPDATE, readDevRegister( SCMD_FORCE_UPDATE ));
+		writeDevRegister( SCMD_FSAFE_TIME, readDevRegister( SCMD_FSAFE_TIME ));
+		
+	}
 }
 
 void tickSlaveSM( void )
@@ -172,6 +204,13 @@ void tickSlaveSM( void )
         }
         break;
     case SCMDSlaveWaitForAddr:
+        if(CONFIG_IN_Read() == 0)
+        {
+            //CONFIG_IN went low (it shouldn't).  wait a bit and reboot
+			CONFIG_OUT_Write(0);
+            CyDelay(100);
+            CySoftwareReset();
+        }
         if( readDevRegister(SCMD_SLAVE_ADDR) != 0x4A )
         {
             //New address has been programmed
@@ -184,6 +223,7 @@ void tickSlaveSM( void )
         if(CONFIG_IN_Read() == 0)
         {
             //CONFIG_IN went low (it shouldn't).  wait a bit and reboot
+			CONFIG_OUT_Write(0);
             CyDelay(100);
             CySoftwareReset();
         }
@@ -214,4 +254,28 @@ bool masterSMDone( void )
         returnVar = true;
     }
     return returnVar;
+}
+
+void hardReset( void )
+{
+    CONFIG_OUT_Write(0);
+    CySoftwareReset();
+}
+
+void reEnumerate( void )
+{
+    writeDevRegister(SCMD_LOCAL_USER_LOCK, USER_LOCK_KEY);
+    writeDevRegister(SCMD_LOCAL_MASTER_LOCK, MASTER_LOCK_KEY);
+    
+	clearStatusBit(SCMD_ENUMERATION_BIT);  //Clear "i'm done" bit
+
+    //set slaveResetRequested to cause config transfer after re-enumeration
+    slaveResetRequested = true;
+    
+    CONFIG_OUT_Write(0);
+
+    //insert keys
+    CyDelay(1000u);
+    resetMasterSM();
+
 }

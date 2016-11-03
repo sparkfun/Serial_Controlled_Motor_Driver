@@ -201,6 +201,18 @@ void writeDevRegister( uint8_t regNumberIn, uint8_t dataToWrite )
     }
 }
 
+void writeDevRegisterUnprotected( uint8_t regNumberIn, uint8_t dataToWrite )
+{
+    if( regNumberIn >= REGISTER_TABLE_LENGTH )
+    {
+        incrementDevRegister(SCMD_REG_OOR_CNT);
+    }
+    else
+    {
+        registerTable[regNumberIn] = dataToWrite;
+    }
+}
+
 void incrementDevRegister( uint8_t regNumberIn )
 {
     if( regNumberIn >= REGISTER_TABLE_LENGTH )

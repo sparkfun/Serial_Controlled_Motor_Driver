@@ -22,5 +22,7 @@ void tickSlaveSM( void );
 
 void resetMasterSM( void );
 bool masterSMDone( void );
+void hardReset( void );
+void reEnumerate( void );
 
 #endif

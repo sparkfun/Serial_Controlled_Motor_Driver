@@ -15,6 +15,7 @@
 #include "devRegisters.h"
 #include "SCMD_config.h"
 #include "serial.h"
+#include "slaveEnumeration.h"
 
 extern const uint16_t SCBCLK_UART_DIVIDER_TABLE[8];
 extern const uint16_t SCBCLK_I2C_DIVIDER_TABLE[4];
@@ -24,16 +25,20 @@ void processMasterRegChanges( void )
     //Remote reads (window reads through interface)
     if(getChangedStatus(SCMD_REM_WRITE))
     {
+		setStatusBit( SCMD_BUSY_BIT );
         WriteSlaveData( readDevRegister(SCMD_REM_ADDR), readDevRegister(SCMD_REM_OFFSET), readDevRegister(SCMD_REM_DATA_WR) );
         writeDevRegister( SCMD_REM_WRITE, 0 );
         clearChangedStatus(SCMD_REM_WRITE);
+		clearStatusBit( SCMD_BUSY_BIT );
     }
     //Do writes before reads if both present
     if(getChangedStatus(SCMD_REM_READ))
     {
+		setStatusBit( SCMD_BUSY_BIT );
         writeDevRegister(SCMD_REM_DATA_RD, ReadSlaveData(readDevRegister(SCMD_REM_ADDR), readDevRegister(SCMD_REM_OFFSET)));
         writeDevRegister( SCMD_REM_READ, 0 );
         clearChangedStatus(SCMD_REM_READ);
+		clearStatusBit( SCMD_BUSY_BIT );
     } 
     //Tell slaves to change their inversion/bridging if the master was written
 
@@ -52,6 +57,7 @@ void processMasterRegChanges( void )
     
     if(getChangedStatus(SCMD_INV_2_9))
     {
+		setStatusBit( SCMD_BUSY_BIT );
         int i;
         for(i = 0; i < 8; i++)
         {
@@ -73,9 +79,11 @@ void processMasterRegChanges( void )
             }
         }
         clearChangedStatus(SCMD_INV_2_9);
+		clearStatusBit( SCMD_BUSY_BIT );
     } 
     if(getChangedStatus(SCMD_INV_10_17))
     {
+		setStatusBit( SCMD_BUSY_BIT );
         int i;
         for(i = 0; i < 8; i++)
         {
@@ -97,9 +105,11 @@ void processMasterRegChanges( void )
             }
         }
         clearChangedStatus(SCMD_INV_10_17);
+		clearStatusBit( SCMD_BUSY_BIT );
     }
     if(getChangedStatus(SCMD_INV_18_25))
     {
+		setStatusBit( SCMD_BUSY_BIT );
         int i;
         for(i = 0; i < 8; i++)
         {
@@ -121,9 +131,11 @@ void processMasterRegChanges( void )
             }
         }
         clearChangedStatus(SCMD_INV_18_25);
+		clearStatusBit( SCMD_BUSY_BIT );
     }
     if(getChangedStatus(SCMD_INV_26_33))
     {
+		setStatusBit( SCMD_BUSY_BIT );
         int i;
         for(i = 0; i < 8; i++)
         {
@@ -145,9 +157,11 @@ void processMasterRegChanges( void )
             }
         }
         clearChangedStatus(SCMD_INV_26_33);
+		clearStatusBit( SCMD_BUSY_BIT );
     }
     if(getChangedStatus(SCMD_BRIDGE_SLV_L))
     {
+		setStatusBit( SCMD_BUSY_BIT );
         int i;
         uint8_t motorAddrTemp = 0x50;
         if((readDevRegister(SCMD_SLV_TOP_ADDR) >= 0x50)&&(readDevRegister(SCMD_SLV_TOP_ADDR) <= 0x57))
@@ -160,9 +174,11 @@ void processMasterRegChanges( void )
             }
         }
         clearChangedStatus(SCMD_BRIDGE_SLV_L);
+		clearStatusBit( SCMD_BUSY_BIT );
     } 
     if(getChangedStatus(SCMD_BRIDGE_SLV_H))
     {
+		setStatusBit( SCMD_BUSY_BIT );
         int i;
         uint8_t motorAddrTemp = 0x58;
         if((readDevRegister(SCMD_SLV_TOP_ADDR) >= 0x50)&&(readDevRegister(SCMD_SLV_TOP_ADDR) <= 0x5F))
@@ -175,42 +191,39 @@ void processMasterRegChanges( void )
             }
         }
         clearChangedStatus(SCMD_BRIDGE_SLV_H);
+		clearStatusBit( SCMD_BUSY_BIT );
     }
     if(getChangedStatus(SCMD_MASTER_LOCK))
     {
+		setStatusBit( SCMD_BUSY_BIT );
         //Do local
         writeDevRegister( SCMD_LOCAL_MASTER_LOCK, readDevRegister(SCMD_MASTER_LOCK) );
-        //Do remote
+        //send out to slaves here
         int i;
-        uint8_t motorAddrTemp = 0x50;
-        if((readDevRegister(SCMD_SLV_TOP_ADDR) >= 0x50)&&(readDevRegister(SCMD_SLV_TOP_ADDR) <= 0x5F))
+        for( i = 0x50; i <= readDevRegister(SCMD_SLV_TOP_ADDR); i++)
         {
-            //Slave exists in range -- send all bits
-            for(i = 0; (i <= 8) && (motorAddrTemp <= readDevRegister(SCMD_SLV_TOP_ADDR)); i++)
-            {
-                WriteSlaveData(motorAddrTemp, SCMD_LOCAL_MASTER_LOCK, (readDevRegister(SCMD_MASTER_LOCK) >> i) & 0x01);
-                motorAddrTemp++;
-            }
+            WriteSlaveData(i, SCMD_LOCAL_MASTER_LOCK, readDevRegister(SCMD_MASTER_LOCK) );
+            CyDelayUs(100);
         }
+
         clearChangedStatus(SCMD_MASTER_LOCK);
+		clearStatusBit( SCMD_BUSY_BIT );
     }
     if(getChangedStatus(SCMD_USER_LOCK))
     {
+		setStatusBit( SCMD_BUSY_BIT );
         //Do local
         writeDevRegister( SCMD_LOCAL_USER_LOCK, readDevRegister(SCMD_USER_LOCK) );
-        //Do remote
+        //send out to slaves here
         int i;
-        uint8_t motorAddrTemp = 0x50;
-        if((readDevRegister(SCMD_SLV_TOP_ADDR) >= 0x50)&&(readDevRegister(SCMD_SLV_TOP_ADDR) <= 0x5F))
+        for( i = 0x50; i <= readDevRegister(SCMD_SLV_TOP_ADDR); i++)
         {
-            //Slave exists in range -- send all bits
-            for(i = 0; (i <= 8) && (motorAddrTemp <= readDevRegister(SCMD_SLV_TOP_ADDR)); i++)
-            {
-                WriteSlaveData(motorAddrTemp, SCMD_LOCAL_USER_LOCK, (readDevRegister(SCMD_USER_LOCK) >> i) & 0x01);
-                motorAddrTemp++;
-            }
+            WriteSlaveData(i, SCMD_LOCAL_USER_LOCK, readDevRegister(SCMD_USER_LOCK) );
+            CyDelayUs(100);
         }
+
         clearChangedStatus(SCMD_USER_LOCK);
+		clearStatusBit( SCMD_BUSY_BIT );
     }
     if(getChangedStatus(SCMD_E_BUS_SPEED))
     {
@@ -221,29 +234,42 @@ void processMasterRegChanges( void )
         writeDevRegister(SCMD_LOCAL_USER_LOCK, USER_LOCK_KEY);
         writeDevRegister(SCMD_LOCAL_MASTER_LOCK, MASTER_LOCK_KEY);
         
-        //Do remote first -- configure slaves before reconfiguring the bus
-        //int i;
-        //uint8_t motorAddrTemp = 0x50;
-        //if((readDevRegister(SCMD_SLV_TOP_ADDR) >= 0x50)&&(readDevRegister(SCMD_SLV_TOP_ADDR) <= 0x5F))
-        //{
-        //    //Slave exists in range -- send all bits
-        //    for(i = 0; (i <= 8) && (motorAddrTemp <= readDevRegister(SCMD_SLV_TOP_ADDR)); i++)
-        //    {
-        //        WriteSlaveData(motorAddrTemp, SCMD_LOCAL_USER_LOCK, (readDevRegister(SCMD_USER_LOCK) >> i) & 0x01);
-        //        motorAddrTemp++;
-        //    }
-        //}
-        
         //Do local
         writeDevRegister(SCMD_E_PORT_CLKDIV_U, 0);
         writeDevRegister(SCMD_E_PORT_CLKDIV_L, SCBCLK_I2C_DIVIDER_TABLE[readDevRegister(SCMD_E_BUS_SPEED) & 0x03]);
         writeDevRegister(SCMD_E_PORT_CLKDIV_CTRL, 0); //Triggers clock change
         
         //Replace keys
-        writeDevRegister(SCMD_LOCAL_USER_LOCK, tempUserKey);
         writeDevRegister(SCMD_LOCAL_MASTER_LOCK, tempMasterKey);
+        writeDevRegister(SCMD_LOCAL_USER_LOCK, tempUserKey);
         
         clearChangedStatus(SCMD_E_BUS_SPEED);
+    }
+    if(getChangedStatus(SCMD_CONTROL_1))
+    {
+        //Save current keys
+        uint8_t tempUserKey = readDevRegister(SCMD_LOCAL_USER_LOCK);
+        uint8_t tempMasterKey = readDevRegister(SCMD_LOCAL_MASTER_LOCK);
+        //Allow writes
+        writeDevRegister(SCMD_LOCAL_USER_LOCK, USER_LOCK_KEY);
+        writeDevRegister(SCMD_LOCAL_MASTER_LOCK, MASTER_LOCK_KEY);
+
+		setStatusBit( SCMD_BUSY_BIT );
+        if( readDevRegister( SCMD_CONTROL_1 ) & SCMD_FULL_RESET_BIT )
+        {
+            hardReset();
+			//Bit will be cleared by reset
+        }
+        if( readDevRegister( SCMD_CONTROL_1 ) & SCMD_RE_ENUMERATE_BIT )
+        {
+            reEnumerate();
+			writeDevRegister( SCMD_CONTROL_1, readDevRegister( SCMD_CONTROL_1 ) & ~SCMD_RE_ENUMERATE_BIT); //Clear bit
+        }
+        clearChangedStatus(SCMD_CONTROL_1);
+		clearStatusBit( SCMD_BUSY_BIT );
+        //Replace keys
+        writeDevRegister(SCMD_LOCAL_MASTER_LOCK, tempMasterKey);
+        writeDevRegister(SCMD_LOCAL_USER_LOCK, tempUserKey);
     }
 }
 
@@ -335,6 +361,7 @@ void processRegChanges( void )
     //  Check for change of failsafe time/enable register SCMD_FSAFE_TIME
     if(getChangedStatus(SCMD_FSAFE_TIME))
     {
+		setStatusBit( SCMD_BUSY_BIT );
         uint8_t tempValue = readDevRegister( SCMD_FSAFE_TIME );
         if(( readDevRegister(SCMD_CONFIG_BITS) != 2 )&&(readDevRegister(SCMD_SLV_TOP_ADDR) >= 0x50)) //if you are master, and there are slaves
         {
@@ -361,12 +388,13 @@ void processRegChanges( void )
             FSAFE_TIMER_Stop();
         }
         clearChangedStatus(SCMD_FSAFE_TIME);
+		clearStatusBit( SCMD_BUSY_BIT );
     }
 
     //Set enable state
     if(getChangedStatus(SCMD_DRIVER_ENABLE))
     {
-        
+ 		setStatusBit( SCMD_BUSY_BIT );
         A_EN_Write(readDevRegister(SCMD_DRIVER_ENABLE) & 0x01);
         B_EN_Write(readDevRegister(SCMD_DRIVER_ENABLE) & 0x01);
         if(( readDevRegister(SCMD_CONFIG_BITS) != 2 )&&(readDevRegister(SCMD_SLV_TOP_ADDR) >= 0x50)) //if you are master, and there are slaves
@@ -381,6 +409,7 @@ void processRegChanges( void )
         }
      
         clearChangedStatus(SCMD_DRIVER_ENABLE);
+		clearStatusBit( SCMD_BUSY_BIT );
     }
     if(getChangedStatus(SCMD_E_PORT_CLKDIV_CTRL))
     {
@@ -411,6 +440,16 @@ void processRegChanges( void )
         clearChangedStatus(SCMD_GEN_TEST_WORD);
     }
 
+}
+
+void setStatusBit( uint8_t bitMask )
+{
+	writeDevRegisterUnprotected( SCMD_STATUS_1, readDevRegister( SCMD_STATUS_1 ) | bitMask); //Write bit
+}
+
+void clearStatusBit( uint8_t bitMask )
+{
+	writeDevRegisterUnprotected( SCMD_STATUS_1, readDevRegister( SCMD_STATUS_1 ) & ~bitMask); //Clear bit
 }
 
 /* [] END OF FILE */

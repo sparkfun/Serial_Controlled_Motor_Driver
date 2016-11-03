@@ -42,7 +42,6 @@ static void systemInit( void ); //get the system off the ground - calls warm ini
 
 volatile uint16_t masterSendCounter = 65000;
 volatile bool masterSendCounterReset = 0;
-bool slaveResetRequested = false;
 
 //Functions
 
@@ -56,7 +55,7 @@ int main()
         {
             parseUART();
         }
-        //Now called from within the interrupt
+        //parseSPI() now called from within the interrupt
         //if(CONFIG_BITS == 1) //SPI
         //{
         //    parseSPI();
@@ -75,77 +74,12 @@ int main()
         }
         else //Do master operations
         {
-            //This next block deals with the config_in line and its behavior
-            if(CONFIG_IN_Read() == 1)
-            {
-                if(slaveResetRequested == 0)
-                {
-                    //Newly detected config_in rising edge
-                    slaveResetRequested = 1;
-                    //Send the reset request
-                    switch(readDevRegister(SCMD_MST_E_IN_FN))
-                    {
-                        default:
-                        case 0:
-                            slaveResetRequested = 0; //belay that order
-                            tickMasterSM(); //keep ticking for no-action mode
-                        break;
-                        case 1:
-                            CONFIG_OUT_Write(0);
-                            CySoftwareReset();
-                        break;
-                        case 2:
-                            CONFIG_OUT_Write(0);
-                            //insert keys
-                            writeDevRegister(SCMD_LOCAL_USER_LOCK, USER_LOCK_KEY);
-                            writeDevRegister(SCMD_LOCAL_MASTER_LOCK, MASTER_LOCK_KEY);
-                            CyDelay(1000u);
-                            resetMasterSM();
-                        break;
-                    }
-                }
-                else
-                {
-                    //Slave reset previously detected but config_in still high
-                    //Spin here until config_in goes low
-                }
-                
-            }
-            else
-            {
-                tickMasterSM();
-                if(slaveResetRequested == 1)
-                {
-                    //config_in has gone low but the slave request isn't complete
-                    //wait for reset to complete
-                    if(masterSMDone())
-                    {
-                        slaveResetRequested = 0;
-                        //Send preserved settings (trigger xfers only)
-                        writeDevRegister( SCMD_INV_2_9, readDevRegister( SCMD_INV_2_9 ));
-                        writeDevRegister( SCMD_INV_10_17, readDevRegister( SCMD_INV_10_17 ));
-                        writeDevRegister( SCMD_INV_18_25, readDevRegister( SCMD_INV_18_25 ));
-                        writeDevRegister( SCMD_INV_26_33, readDevRegister( SCMD_INV_26_33 ));
-                        writeDevRegister( SCMD_BRIDGE_SLV_L, readDevRegister( SCMD_BRIDGE_SLV_L ));
-                        writeDevRegister( SCMD_BRIDGE_SLV_H, readDevRegister( SCMD_BRIDGE_SLV_H ));
-                        writeDevRegister( SCMD_DRIVER_ENABLE, readDevRegister( SCMD_DRIVER_ENABLE ));
-                        writeDevRegister( SCMD_UPDATE_RATE, readDevRegister( SCMD_UPDATE_RATE ));
-                        writeDevRegister( SCMD_FORCE_UPDATE, readDevRegister( SCMD_FORCE_UPDATE ));
-                        writeDevRegister( SCMD_FSAFE_TIME, readDevRegister( SCMD_FSAFE_TIME ));
-                        
-                    }
-                }
-                else
-                {
-                    //config_in low and reset request cleared.  This is the default condition.
-                }
-            }
+			tickMasterSM();
             processMasterRegChanges();
 
         }        
         //operations regardless       
         processRegChanges();
-        
        
     }//End of while loop
 }
@@ -222,8 +156,9 @@ static void systemInit( void )
     CONFIG_BITS = readDevRegister(SCMD_CONFIG_BITS); //Get the bits value
 #endif
     
-
+    DIAG_LED_CLK_Stop();
     DIAG_LED_CLK_Start();
+    KHZ_CLK_Stop();
     KHZ_CLK_Start();
     setDiagMessage(0, CONFIG_BITS);
     
@@ -235,7 +170,9 @@ static void systemInit( void )
     MODE_Write(1);
     
     //Debug timer
+    DEBUG_CLK_Stop();
     DEBUG_CLK_Start();
+    DEBUG_TIMER_Stop();
     DEBUG_TIMER_Start();
     
     //SysTick timer (software driven)
@@ -247,7 +184,9 @@ static void systemInit( void )
     
     //Failsafe timer
     FSAFE_ISR_StartEx(FSAFE_TIMER_Interrupt);
+    FSAFE_CLK_Stop();
     FSAFE_CLK_Start();
+    FSAFE_TIMER_Stop();
     FSAFE_TIMER_Start();
        
     CyDelay(50u);
@@ -267,6 +206,7 @@ static void systemInit( void )
 	initExpansionSerial(CONFIG_BITS);
     
     //Clock_1 is the motor PWM clock
+    Clock_1_Stop();
     Clock_1_Start();
         
     CyGlobalIntEnable; 

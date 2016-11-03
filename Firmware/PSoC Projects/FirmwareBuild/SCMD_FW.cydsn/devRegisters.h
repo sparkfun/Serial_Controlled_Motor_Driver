@@ -20,6 +20,7 @@ Distributed as-is; no warranty is given.
 void initDevRegisters( void );
 uint8_t readDevRegister( uint8_t );
 void writeDevRegister( uint8_t regNumberIn, uint8_t dataToWrite );
+void writeDevRegisterUnprotected( uint8_t regNumberIn, uint8_t dataToWrite );
 void incrementDevRegister( uint8_t );
 bool getChangedStatus( uint8_t regNumberIn );
 void clearChangedStatus( uint8_t regNumberIn );
