@@ -3,7 +3,7 @@ main.c
 Serial controlled motor driver firmware
 marshall.taylor@sparkfun.com
 7-8-2016
-https://github.com/sparkfun/Serial_Controlled_Motor_Driver/tree/RevisionRepaired
+https://github.com/sparkfun/Serial_Controlled_Motor_Driver/
 
 See github readme for mor information.
 
@@ -51,6 +51,10 @@ int main()
 
     while(1)
     {
+		DEBUG_TIMER_Stop();
+		DEBUG_TIMER_WriteCounter(0);
+		DEBUG_TIMER_Start();
+		
         if((CONFIG_BITS == 0) || (CONFIG_BITS == 0x0D) || (CONFIG_BITS == 0x0E)) //UART
         {
             parseUART();
@@ -80,7 +84,15 @@ int main()
         }        
         //operations regardless       
         processRegChanges();
-       
+        
+        
+        LED_R_SetDriveMode(LED_R_DM_STRONG);
+		
+		//Save time
+		uint32_t tempValue = DEBUG_TIMER_ReadCounter() / 100;
+		if(tempValue > 0xFF) tempValue = 0xFF;
+		//do 'peak hold' on SCMD_UPORT_TIME -- write 0 to reset
+		if(tempValue > readDevRegister(SCMD_LOOP_TIME)) writeDevRegister(SCMD_LOOP_TIME, tempValue);
     }//End of while loop
 }
 
@@ -160,7 +172,7 @@ static void systemInit( void )
     DIAG_LED_CLK_Start();
     KHZ_CLK_Stop();
     KHZ_CLK_Start();
-    setDiagMessage(0, CONFIG_BITS);
+    //setDiagMessage(0, CONFIG_BITS);
     
     CONFIG_IN_Write(0); //Tell the slaves to start fresh
     //Do a boot-up delay
@@ -208,7 +220,8 @@ static void systemInit( void )
     //Clock_1 is the motor PWM clock
     Clock_1_Stop();
     Clock_1_Start();
-        
+    
+    
     CyGlobalIntEnable; 
     
     setDiagMessage(1, 1);

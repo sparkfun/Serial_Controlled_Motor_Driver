@@ -1,3 +1,17 @@
+/******************************************************************************
+customSerialInterrupts.c
+Serial controlled motor driver firmware
+marshall.taylor@sparkfun.com
+7-8-2016
+https://github.com/sparkfun/Serial_Controlled_Motor_Driver/
+
+See github readme for mor information.
+
+This code is released under the [MIT License](http://opensource.org/licenses/MIT).
+Please review the LICENSE.md file included with this example. If you have any questions 
+or concerns with licensing, please contact techsupport@sparkfun.com.
+Distributed as-is; no warranty is given.
+******************************************************************************/
 //#include "project.h"
 #include "SCMD_config.h"
 #include "devRegisters.h"
@@ -131,6 +145,8 @@ void parseSPI( void )
 {
     if(USER_PORT_SpiUartGetRxBufferSize())
     {
+        LED_PULSE_Write(1);
+
         //Data exists to be read.
         while(USER_PORT_SpiUartGetRxBufferSize())  //This reads out all rx data
         {
@@ -177,7 +193,8 @@ void parseSPI( void )
             }
         }
         
-        LED_R_Write(LED_R_Read()^0x01);
+        LED_PULSE_Write(0);
+
     }
 
 }
@@ -293,21 +310,21 @@ void parseUART( void )
                 }
                 else if(motorNum < 18) //must be 10 through 17
                 {
-                    dataTemp = readDevRegister(SCMD_INV_2_9);
+                    dataTemp = readDevRegister(SCMD_INV_10_17);
                     dataTemp ^= 0x01 << (motorNum - 10);
-                    writeDevRegister(SCMD_INV_2_9, dataTemp);
+                    writeDevRegister(SCMD_INV_10_17, dataTemp);
                 }
                 else if(motorNum < 26) //must be 18 through 25
                 {
-                    dataTemp = readDevRegister(SCMD_INV_2_9);
+                    dataTemp = readDevRegister(SCMD_INV_18_25);
                     dataTemp ^= 0x01 << (motorNum - 18);
-                    writeDevRegister(SCMD_INV_2_9, dataTemp);
+                    writeDevRegister(SCMD_INV_18_25, dataTemp);
                 }
                 else if(motorNum < 34) //must be 26 through 33
                 {
-                    dataTemp = readDevRegister(SCMD_INV_2_9);
+                    dataTemp = readDevRegister(SCMD_INV_26_33);
                     dataTemp ^= 0x01 << (motorNum - 26);
-                    writeDevRegister(SCMD_INV_2_9, dataTemp);
+                    writeDevRegister(SCMD_INV_26_33, dataTemp);
                 }
             }
             else
@@ -506,9 +523,6 @@ void parseUART( void )
 
 void parseI2C( void )
 {
-    DEBUG_TIMER_Stop();
-    DEBUG_TIMER_WriteCounter(0);
-    DEBUG_TIMER_Start();
     /* Write complete: parse command packet */
     if (0u != (USER_PORT_I2CSlaveStatus() & USER_PORT_I2C_SSTAT_WR_CMPLT))
     {
@@ -556,10 +570,7 @@ void parseI2C( void )
         //Count errors while clearing the status
         if( USER_PORT_I2CSlaveClearReadStatus() & USER_PORT_I2C_SSTAT_RD_ERR ) incrementDevRegister( SCMD_U_I2C_RD_ERR );
     }
-    uint32_t tempValue = DEBUG_TIMER_ReadCounter();
-    if(tempValue > 0xFF) tempValue = 0xFF;
-    //do 'peak hold' on SCMD_UPORT_TIME -- write 0 to reset
-    if(tempValue > readDevRegister(SCMD_UPORT_TIME)) writeDevRegister(SCMD_UPORT_TIME, tempValue);
+
 }
 
 //****************************************************************************//
@@ -622,7 +633,6 @@ void parseSlaveI2C( void )
 
     if (0u != (EXPANSION_PORT_I2CSlaveStatus() & EXPANSION_PORT_I2C_SSTAT_RD_CMPLT))
     {
-        LED_R_Write(LED_R_Read()^0x01);
         /* Clear slave read buffer and status */
         EXPANSION_PORT_I2CSlaveClearReadBuf();
         //Count errors while clearing the status

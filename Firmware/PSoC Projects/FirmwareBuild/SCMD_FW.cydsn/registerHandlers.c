@@ -1,14 +1,17 @@
-/* ========================================
- *
- * Copyright YOUR COMPANY, THE YEAR
- * All Rights Reserved
- * UNPUBLISHED, LICENSED SOFTWARE.
- *
- * CONFIDENTIAL AND PROPRIETARY INFORMATION
- * WHICH IS THE PROPERTY OF your company.
- *
- * ========================================
-*/
+/******************************************************************************
+registerHandlers.c
+Serial controlled motor driver firmware
+marshall.taylor@sparkfun.com
+7-8-2016
+https://github.com/sparkfun/Serial_Controlled_Motor_Driver/
+
+See github readme for mor information.
+
+This code is released under the [MIT License](http://opensource.org/licenses/MIT).
+Please review the LICENSE.md file included with this example. If you have any questions
+or concerns with licensing, please contact techsupport@sparkfun.com.
+Distributed as-is; no warranty is given.
+******************************************************************************/
 #include <stdint.h>
 #include "project.h"
 #include "registerHandlers.h"
@@ -164,7 +167,7 @@ void processMasterRegChanges( void )
 		setStatusBit( SCMD_BUSY_BIT );
         int i;
         uint8_t motorAddrTemp = 0x50;
-        if((readDevRegister(SCMD_SLV_TOP_ADDR) >= 0x50)&&(readDevRegister(SCMD_SLV_TOP_ADDR) <= 0x57))
+        if(readDevRegister(SCMD_SLV_TOP_ADDR) >= 0x50)
         {
             //Slave exists in range -- send all bits
             for(i = 0; (i <= 8) && (motorAddrTemp <= readDevRegister(SCMD_SLV_TOP_ADDR)); i++)
@@ -181,7 +184,7 @@ void processMasterRegChanges( void )
 		setStatusBit( SCMD_BUSY_BIT );
         int i;
         uint8_t motorAddrTemp = 0x58;
-        if((readDevRegister(SCMD_SLV_TOP_ADDR) >= 0x50)&&(readDevRegister(SCMD_SLV_TOP_ADDR) <= 0x5F))
+        if(readDevRegister(SCMD_SLV_TOP_ADDR) >= 0x58)
         {
             //Slave exists in range -- send all bits
             for(i = 0; (i <= 8) && (motorAddrTemp <= readDevRegister(SCMD_SLV_TOP_ADDR)); i++)

@@ -50,7 +50,7 @@ Distributed as-is; no warranty is given.
 #define SCMD_U_BUF_DUMPED          0x06
 #define SCMD_E_I2C_RD_ERR          0x07
 #define SCMD_E_I2C_WR_ERR          0x08
-#define SCMD_UPORT_TIME	           0x09
+#define SCMD_LOOP_TIME	           0x09
 #define SCMD_SLV_POLL_CNT          0x0A
 #define SCMD_SLV_TOP_ADDR          0x0B
 #define SCMD_MST_E_ERR             0x0C

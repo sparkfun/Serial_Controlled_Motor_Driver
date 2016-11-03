@@ -3,7 +3,7 @@ devRegisters.c
 Serial controlled motor driver firmware
 marshall.taylor@sparkfun.com
 7-8-2016
-https://github.com/sparkfun/Serial_Controlled_Motor_Driver/tree/RevisionRepaired
+https://github.com/sparkfun/Serial_Controlled_Motor_Driver/
 
 See github readme for mor information.
 
