@@ -216,7 +216,7 @@ void parseUART( void )
     //Save data (echo it) until we get a delimiter
     //Parse data and take action
     char ch = USER_PORT_UartGetChar();
-    if( ch )
+    if(ch)
     {
         //Show data on LED
         LED_PULSE_Write(1);
@@ -230,20 +230,23 @@ void parseUART( void )
             clearDiagMessage(7);
         }
         //Save data
-        if( rxBufferPtr < 19)
+        if(rxBufferPtr < 19)
         {
-            rxBuffer[rxBufferPtr] = ch;
-            rxBufferPtr++;
+			if(((rxBufferPtr == 0)&&(ch != '\n'))||(rxBufferPtr > 0))
+			{
+				rxBuffer[rxBufferPtr] = ch;
+				rxBufferPtr++;
+			}
         }
         else
         {
             //Overwrite last
             rxBuffer[rxBufferPtr - 1] = ch;
-            USER_PORT_UartPutString( "\r\novf\r\n" );
+            USER_PORT_UartPutString( "\r\novf" );
         }
-        //Echo
-        //if((ch != '\n')&&(ch != '\r')) USER_PORT_UartPutChar(ch);
-        USER_PORT_UartPutChar(ch);
+        //Echo all but nl and cr
+        if((ch != '\n')&&(ch != '\r')) USER_PORT_UartPutChar(ch);
+        //USER_PORT_UartPutChar(ch);
         LED_PULSE_Write(0);
     }
     if((rxBuffer[rxBufferPtr - 1] == '\n')||(rxBuffer[rxBufferPtr - 1] == '\r'))//Delimiter found
@@ -411,7 +414,6 @@ void parseUART( void )
                     errorFlag = 2;
                     break;
                 }
-                USER_PORT_UartPutString("\r\n");
             }
             break;
             case 'W':
@@ -421,7 +423,6 @@ void parseUART( void )
                 addressTemp = char2hex(rxBuffer[1]) << 4 | char2hex(rxBuffer[2]);
                 dataTemp = char2hex(rxBuffer[3]) << 4 | char2hex(rxBuffer[4]);
                 writeDevRegister(addressTemp, dataTemp);
-                USER_PORT_UartPutString("\r\n");
             }
             else
             {
@@ -437,7 +438,6 @@ void parseUART( void )
                 dataTemp = readDevRegister(addressTemp);
                 USER_PORT_UartPutChar(hex2char((dataTemp&0xF0) >> 4));
                 USER_PORT_UartPutChar(hex2char(dataTemp&0x0F));
-                USER_PORT_UartPutString("\r\n");
             }
             else
             {
@@ -505,11 +505,9 @@ void parseUART( void )
             break;
             case 'E': //Handle enable
             writeDevRegister(SCMD_DRIVER_ENABLE, 0x01);
-            USER_PORT_UartPutString("\r\n");
             break;
             case 'D': //Handle disable
             writeDevRegister(SCMD_DRIVER_ENABLE, 0x00);
-            USER_PORT_UartPutString("\r\n");
             break;
             case 'B': //Handle bridging 
             if( ishex(rxBuffer[1])&&ishex(rxBuffer[2])) //2 digits
@@ -531,21 +529,18 @@ void parseUART( void )
             {
                 //Write local
                 writeDevRegister(SCMD_BRIDGE, 0x01);
-                USER_PORT_UartPutString("\r\n");
             }
             if( slaveNum < 9 )
             {
                 dataTemp = readDevRegister(SCMD_BRIDGE_SLV_L);
                 dataTemp |= 0x01 << (slaveNum - 1);
                 writeDevRegister(SCMD_BRIDGE_SLV_L, dataTemp);
-                USER_PORT_UartPutString("\r\n");
             }
             else if( slaveNum < 17 )
             {
                 dataTemp = readDevRegister(SCMD_BRIDGE_SLV_H);
                 dataTemp |= 0x01 << (slaveNum - 9);
                 writeDevRegister(SCMD_BRIDGE_SLV_H, dataTemp);
-                USER_PORT_UartPutString("\r\n");
             }
             else
             {
@@ -573,21 +568,18 @@ void parseUART( void )
             {
                 //Write local
                 writeDevRegister(SCMD_BRIDGE, 0x00);
-                USER_PORT_UartPutString("\r\n");
             }
             if( slaveNum < 9 )
             {
                 dataTemp = readDevRegister(SCMD_BRIDGE_SLV_L);
                 dataTemp &= ~(0x01 << (slaveNum - 1));
                 writeDevRegister(SCMD_BRIDGE_SLV_L, dataTemp);
-                USER_PORT_UartPutString("\r\n");
             }
             else if( slaveNum < 17 )
             {
                 dataTemp = readDevRegister(SCMD_BRIDGE_SLV_H);
                 dataTemp &= ~(0x01 << (slaveNum - 9));
                 writeDevRegister(SCMD_BRIDGE_SLV_H, dataTemp);
-                USER_PORT_UartPutString("\r\n");
             }
             else
             {
@@ -602,22 +594,24 @@ void parseUART( void )
             // USER_PORT_UartPutString("\r\n");
             break;
             default:
-            USER_PORT_UartPutString("\r\ninv\r\n");
+            USER_PORT_UartPutString("\r\ninv");
             break;
         }
         if( errorFlag == 1 )
         {
-            USER_PORT_UartPutString("\r\nfmt\r\n");
+            USER_PORT_UartPutString("\r\nfmt");
         }
         if( errorFlag == 2 )
         {
-            USER_PORT_UartPutString("\r\nnom\r\n");
+            USER_PORT_UartPutString("\r\nnom");
         }
         //Reset the buffers
         rxBufferPtr = 0;
         //Clear that char (in case it is delimiter)
         rxBuffer[rxBufferPtr] = 0;
         LED_PULSE_Write(0);
+		USER_PORT_UartPutString("\r\n");
+		USER_PORT_UartPutString(">");
     }
 
 }
