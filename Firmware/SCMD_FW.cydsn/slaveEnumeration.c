@@ -97,6 +97,13 @@ void tickMasterSM( void )
             //Must be done
 			setStatusBit( SCMD_ENUMERATION_BIT );  //Write "i'm done" bit
             writeDevRegister( SCMD_LOCAL_MASTER_LOCK, 0x00 );  //Lock up Read-Only registers -- we're done configuring the slaves!
+			uint8_t configTemp = readDevRegister( SCMD_CONFIG_BITS );
+			if((configTemp == 0) || (configTemp == 0x0D) || (configTemp == 0x0E)) //UART
+			{
+				//Display a splash screen
+				USER_PORT_UartPutString("\r\nSparkFun Serial Controlled Motor Driver (SCMD)\r\n");
+				USER_PORT_UartPutString("Enter 'H' for help.\r\n>");
+			}
             masterNextState = SCMDMasterSendData;
         }
         CyDelay(10);

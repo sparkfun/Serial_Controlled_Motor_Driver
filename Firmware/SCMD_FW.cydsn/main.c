@@ -93,7 +93,8 @@ int main()
 ********************************************************************************/
 CY_ISR(FSAFE_TIMER_Interrupt)
 {
-	/* Clear TC Inerrupt */
+    CyGlobalIntDisable;
+    /* Clear TC Inerrupt */
    	FSAFE_TIMER_ClearInterrupt(FSAFE_TIMER_INTR_MASK_CC_MATCH);
     incrementDevRegister( SCMD_FSAFE_FAULTS );
 
@@ -139,6 +140,7 @@ CY_ISR(FSAFE_TIMER_Interrupt)
     FSAFE_TIMER_Stop();
     FSAFE_TIMER_WriteCounter(0);
     FSAFE_TIMER_Start();
+    CyGlobalIntEnable;
 
 }
 

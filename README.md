@@ -18,20 +18,11 @@ Features:
 
 Repository Contents
 -------------------
-* **/Documentation**
-    * ConfigBits.ods - Full list of jumper configurations
-    * RegisterMap.ods - Description, and listing, of user-facing memory locations
-    * Test Plan.x, Test Record.x, TPx.x - various test documents
-	* UartCommands.odt - Anatomy of UART serial commands
-	* SCMD_Datasheet.odt - all other docs combined into a datasheet
+* **/Documentation** - Datasheet, test information, and diagrams
 * **/Firmware** - PSoC projects of embedded firmware
 * **/Hardware** - Eagle design files (.brd, .sch)
 * **/Production** - Production files
 * **/Software** - Arduino sketches and examples
-    * /examples/MotorTest - Step through driving all attached motors
-    * /examples/RegisterRWTool - Tool for reading and writing registers using I2C or SPI
-    * /examples/Run-timeDiagnostics - Demonstration of the various diagnostic registers and failsafe
-	
 
 Version History
 ---------------
@@ -39,7 +30,6 @@ Version History
 * [V_1.5](https://github.com/sparkfun/Serial_Controlled_Motor_Driver/tree/V_1.5) - Revision prototype 1
 * [V_1.6](https://github.com/sparkfun/Serial_Controlled_Motor_Driver/tree/V_1.6) - Revision prototype 2
 * [V_1.6.1](https://github.com/sparkfun/Serial_Controlled_Motor_Driver/tree/V_1.6.1) - Revision prototype 2 with non-zero width poly outlines and dev board version V_1.X
-
 
 License Information
 -------------------

@@ -267,6 +267,20 @@ void parseUART( void )
         //  Branch based of type of message
         switch(rxBuffer[0])
         {
+            case 'H':
+            case '?':
+			USER_PORT_UartPutString("\r\nCommands:\r\n");
+			USER_PORT_UartPutString(" M<motor num><F/R><level> -- Drive motor\r\n");
+			USER_PORT_UartPutString(" M<motor num><I/C> -- Invert motor\r\n");
+			USER_PORT_UartPutString(" W<offset><data> -- Write register\r\n");
+			USER_PORT_UartPutString(" R<offset> -- Read register\r\n");
+			USER_PORT_UartPutString(" E -- Enable\r\n");
+			USER_PORT_UartPutString(" D -- Disable\r\n");
+			USER_PORT_UartPutString(" B<driver num> -- Bridge\r\n");
+			USER_PORT_UartPutString(" N<driver num> -- Un-bridge\r\n");
+			USER_PORT_UartPutString(" U<0-7> -- Set baud\r\n");
+			USER_PORT_UartPutString("Ex: M1F75 for motor 1 forward 75%\r\n");
+            break;
             case 'M':
             //Find direction
             if(( rxBuffer[dirPtr] != 'F' )&&( rxBuffer[dirPtr] != 'R' )&&( rxBuffer[dirPtr] != 'I' )&&( rxBuffer[dirPtr] != 'C' )) // not here
@@ -436,6 +450,7 @@ void parseUART( void )
             {
                 addressTemp = char2hex(rxBuffer[1]) << 4 | char2hex(rxBuffer[2]);
                 dataTemp = readDevRegister(addressTemp);
+				USER_PORT_UartPutString("\r\n");
                 USER_PORT_UartPutChar(hex2char((dataTemp&0xF0) >> 4));
                 USER_PORT_UartPutChar(hex2char(dataTemp&0x0F));
             }
@@ -450,6 +465,7 @@ void parseUART( void )
             //Check for valid next char
             if( ishex(rxBuffer[1]) )
             {
+                USER_PORT_UartPutString("\r\n");
 				saveKeysFullAccess(); //allow writes to registers
 
                 switch(rxBuffer[1])

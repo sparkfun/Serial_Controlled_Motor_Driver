@@ -32,20 +32,28 @@ void processMasterRegChanges( void )
 	//Remote reads (window reads through interface)
 	if(getChangedStatus(SCMD_REM_WRITE))
 	{
+        saveKeysFullAccess(); //allow writes to registers
+        
 		setStatusBit( SCMD_BUSY_BIT );
 		WriteSlaveData( readDevRegister(SCMD_REM_ADDR), readDevRegister(SCMD_REM_OFFSET), readDevRegister(SCMD_REM_DATA_WR) );
 		writeDevRegister( SCMD_REM_WRITE, 0 );
 		clearChangedStatus( SCMD_REM_WRITE );
 		clearStatusBit( SCMD_BUSY_BIT );
+        
+        restoreKeys();//Replace previous keys
 	}
 	//Do writes before reads if both present
 	if(getChangedStatus(SCMD_REM_READ))
 	{
+        saveKeysFullAccess(); //allow writes to registers
+        
 		setStatusBit( SCMD_BUSY_BIT );
 		writeDevRegister( SCMD_REM_DATA_RD, ReadSlaveData(readDevRegister(SCMD_REM_ADDR), readDevRegister(SCMD_REM_OFFSET)) );
 		writeDevRegister( SCMD_REM_READ, 0 );
 		clearChangedStatus(SCMD_REM_READ);
 		clearStatusBit( SCMD_BUSY_BIT );
+        
+        restoreKeys();//Replace previous keys
 	} 
 	//Tell slaves to change their inversion/bridging if the master was written
 
