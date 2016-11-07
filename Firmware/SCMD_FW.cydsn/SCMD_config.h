@@ -17,7 +17,7 @@ Distributed as-is; no warranty is given.
 #if !defined(SCMD_CONFIG_H)
 #define SCMD_CONFIG_H
 
-//defaults    
+//defaults ( Set config in PSoC, use for reference in Arduino )   
 #define ID_WORD                    0xA9  //Device ID to be programmed into memory for reads
 #define START_SLAVE_ADDR           0x50  //Start address of slaves
 #define MAX_SLAVE_ADDR             0x5F  //Max address of slaves
@@ -42,6 +42,13 @@ Distributed as-is; no warranty is given.
 	#define SCMD_FSAFE_RE_ENUM         0x04
 #define SCMD_FSAFE_CYCLE_USER      0x08
 #define SCMD_FSAFE_CYCLE_EXP       0x10
+
+//SCMD_MST_E_IN_FN bits and masks
+#define SCMD_M_IN_RESTART_MASK    0x03
+	#define SCMD_M_IN_REBOOT          0x01
+	#define SCMD_M_IN_RE_ENUM         0x02
+#define SCMD_M_IN_CYCLE_USER      0x04
+#define SCMD_M_IN_CYCLE_EXP       0x08
 
 //Address map
 #define SCMD_FID                   0x00

@@ -40,7 +40,6 @@ cystatus SetScbConfiguration(uint32 opMode);
 
 //Expansion port config
 cystatus SetExpansionScbConfigurationSlave(void);
-//cystatus ResetExpansionScbConfigurationSlave(void);
 cystatus SetExpansionScbConfigurationMaster(void);
 
 uint8 ReadSlaveData( uint8_t address, uint8_t offset );

@@ -165,6 +165,13 @@ cystatus SetScbConfiguration(uint32 opMode)
     if(OP_MODE_I2C == opMode)
     {
         USER_PORT_Stop(); /* Disable component before configuration change */
+        USER_PORT_SetRxInterruptMode(USER_PORT_NO_INTR_SOURCES);
+        USER_PORT_SetTxInterruptMode(USER_PORT_NO_INTR_SOURCES);
+        USER_PORT_ClearTxInterruptSource(USER_PORT_INTR_RX_ALL);
+        USER_PORT_ClearRxInterruptSource(USER_PORT_INTR_TX_ALL);
+        USER_PORT_ClearSlaveInterruptSource(USER_PORT_INTR_SLAVE_ALL);
+        USER_PORT_ClearMasterInterruptSource(USER_PORT_INTR_MASTER_ALL);
+        
         /* Change clock divider */
         SCBCLK_Stop();
         SCBCLK_SetFractionalDividerRegister( (readDevRegister( SCMD_U_PORT_CLKDIV_U ) << 8) | readDevRegister( SCMD_U_PORT_CLKDIV_L ), SCMD_U_PORT_CLKDIV_CTRL );
@@ -179,6 +186,13 @@ cystatus SetScbConfiguration(uint32 opMode)
     else if(OP_MODE_UART == opMode)
     {
         USER_PORT_Stop(); /* Disable component before configuration change */
+        USER_PORT_SetRxInterruptMode(USER_PORT_NO_INTR_SOURCES);
+        USER_PORT_SetTxInterruptMode(USER_PORT_NO_INTR_SOURCES);
+        USER_PORT_ClearTxInterruptSource(USER_PORT_INTR_RX_ALL);
+        USER_PORT_ClearRxInterruptSource(USER_PORT_INTR_TX_ALL);
+        USER_PORT_ClearSlaveInterruptSource(USER_PORT_INTR_SLAVE_ALL);
+        USER_PORT_ClearMasterInterruptSource(USER_PORT_INTR_MASTER_ALL);
+        
         /* Change clock divider */
         SCBCLK_Stop();
         SCBCLK_SetFractionalDividerRegister( (readDevRegister( SCMD_U_PORT_CLKDIV_U ) << 8) | readDevRegister( SCMD_U_PORT_CLKDIV_L ), SCMD_U_PORT_CLKDIV_CTRL );
@@ -190,6 +204,13 @@ cystatus SetScbConfiguration(uint32 opMode)
     else if(OP_MODE_SPI == opMode)
     {
         USER_PORT_Stop(); /* Disable component before configuration change */
+        USER_PORT_SetRxInterruptMode(USER_PORT_NO_INTR_SOURCES);
+        USER_PORT_SetTxInterruptMode(USER_PORT_NO_INTR_SOURCES);
+        USER_PORT_ClearTxInterruptSource(USER_PORT_INTR_RX_ALL);
+        USER_PORT_ClearRxInterruptSource(USER_PORT_INTR_TX_ALL);
+        USER_PORT_ClearSlaveInterruptSource(USER_PORT_INTR_SLAVE_ALL);
+        USER_PORT_ClearMasterInterruptSource(USER_PORT_INTR_MASTER_ALL);
+        
         /* Change clock divider */
         SCBCLK_Stop();
         SCBCLK_SetFractionalDividerRegister( (readDevRegister( SCMD_U_PORT_CLKDIV_U ) << 8) | readDevRegister( SCMD_U_PORT_CLKDIV_L ), SCMD_U_PORT_CLKDIV_CTRL );
@@ -215,6 +236,13 @@ cystatus SetExpansionScbConfigurationSlave(void)
 {
     cystatus status = CYRET_SUCCESS;
     EXPANSION_PORT_Stop(); /* Disable component before configuration change */
+    EXPANSION_PORT_SetRxInterruptMode(EXPANSION_PORT_NO_INTR_SOURCES);
+    EXPANSION_PORT_SetTxInterruptMode(EXPANSION_PORT_NO_INTR_SOURCES);
+    EXPANSION_PORT_ClearTxInterruptSource(EXPANSION_PORT_INTR_RX_ALL);
+    EXPANSION_PORT_ClearRxInterruptSource(EXPANSION_PORT_INTR_TX_ALL);
+    EXPANSION_PORT_ClearSlaveInterruptSource(EXPANSION_PORT_INTR_SLAVE_ALL);
+    EXPANSION_PORT_ClearMasterInterruptSource(EXPANSION_PORT_INTR_MASTER_ALL);
+    
     /* Change clock divider */
     EXPANSION_SCBCLK_Stop();
     EXPANSION_SCBCLK_SetFractionalDividerRegister( (readDevRegister( SCMD_E_PORT_CLKDIV_U ) << 8) | readDevRegister( SCMD_E_PORT_CLKDIV_L ), SCMD_E_PORT_CLKDIV_CTRL );
@@ -233,32 +261,19 @@ cystatus SetExpansionScbConfigurationSlave(void)
     return(status);
 }
 
-//cystatus ResetExpansionScbConfigurationSlave(void)
-//{
-//    cystatus status = CYRET_SUCCESS;
-//    EXPANSION_PORT_Stop(); /* Disable component before configuration change */
-//    /* Change clock divider */
-//    EXPANSION_SCBCLK_Stop();
-//    EXPANSION_SCBCLK_SetFractionalDividerRegister((readDevRegister( SCMD_E_PORT_CLKDIV_U ) << 8) | readDevRegister( SCMD_E_PORT_CLKDIV_L ), SCMD_E_PORT_CLKDIV_CTRL);
-//    EXPANSION_SCBCLK_Start();
-//    /* Configure to I2C slave operation */
-//    EXPANSION_PORT_I2CSlaveInitReadBuf (expansionBufferTx, USER_PORT_BUFFER_SIZE);
-//    EXPANSION_PORT_I2CSlaveInitWriteBuf(expansionBufferRx, USER_PORT_BUFFER_SIZE);
-//    EXPANSION_PORT_I2CInit(&expansionConfigI2CSlave);
-//    EXPANSION_PORT_I2CSlaveClearReadBuf();
-//    EXPANSION_PORT_I2CSlaveClearWriteBuf();
-//    EXPANSION_PORT_I2CSlaveClearReadStatus();
-//    EXPANSION_PORT_I2CSlaveClearWriteStatus();
-//    EXPANSION_PORT_I2CSlaveSetAddress(readDevRegister(SCMD_SLAVE_ADDR));
-//    EXPANSION_PORT_Start(); /* Enable component after configuration change */
-//    return (status);
-//}
-
 //Expansion port config
 cystatus SetExpansionScbConfigurationMaster(void)
 {
     cystatus status = CYRET_SUCCESS;
+    /* Clear interrupt sources as they are not automatically cleared after SCB is disabled */
     EXPANSION_PORT_Stop(); /* Disable component before configuration change */
+    EXPANSION_PORT_SetRxInterruptMode(EXPANSION_PORT_NO_INTR_SOURCES);
+    EXPANSION_PORT_SetTxInterruptMode(EXPANSION_PORT_NO_INTR_SOURCES);
+    EXPANSION_PORT_ClearTxInterruptSource(EXPANSION_PORT_INTR_RX_ALL);
+    EXPANSION_PORT_ClearRxInterruptSource(EXPANSION_PORT_INTR_TX_ALL);
+    EXPANSION_PORT_ClearSlaveInterruptSource(EXPANSION_PORT_INTR_SLAVE_ALL);
+    EXPANSION_PORT_ClearMasterInterruptSource(EXPANSION_PORT_INTR_MASTER_ALL);
+    
     /* Change clock divider */
     EXPANSION_SCBCLK_Stop();
     EXPANSION_SCBCLK_SetFractionalDividerRegister( (readDevRegister( SCMD_E_PORT_CLKDIV_U ) << 8) | readDevRegister( SCMD_E_PORT_CLKDIV_L ), SCMD_E_PORT_CLKDIV_CTRL );
@@ -296,7 +311,8 @@ uint8 ReadSlaveData( uint8_t address, uint8_t offset )
         incrementDevRegister( SCMD_MST_E_ERR );
         //EXPANSION_PORT_I2C_MASTER_CLEAR_START;
         //EXPANSION_PORT_I2CMasterSendStop();
-        SetExpansionScbConfigurationMaster();
+        //SetExpansionScbConfigurationMaster();
+        initExpansionSerial(CONFIG_BITS); 
     }
 
     //Get a byte
@@ -313,7 +329,8 @@ uint8 ReadSlaveData( uint8_t address, uint8_t offset )
         incrementDevRegister( SCMD_MST_E_ERR );
         //EXPANSION_PORT_I2C_MASTER_CLEAR_START;
         //EXPANSION_PORT_I2CMasterSendStop();
-        SetExpansionScbConfigurationMaster();
+        //SetExpansionScbConfigurationMaster();
+        initExpansionSerial( CONFIG_BITS );
     }
     
     /* Displays transfer status */
@@ -355,7 +372,8 @@ uint8 WriteSlaveData( uint8_t address, uint8_t offset, uint8_t data )
         incrementDevRegister( SCMD_MST_E_ERR );
         //EXPANSION_PORT_I2C_MASTER_CLEAR_START;
         //EXPANSION_PORT_I2CMasterSendStop();
-        SetExpansionScbConfigurationMaster();
+        //SetExpansionScbConfigurationMaster();
+        initExpansionSerial(CONFIG_BITS);
     }
 
     if( EXPANSION_PORT_I2CMasterClearStatus() & EXPANSION_PORT_I2C_MSTAT_ERR_XFER ) incrementDevRegister( SCMD_MST_E_ERR );
@@ -388,7 +406,8 @@ uint8 WriteSlave2Data( uint8_t address, uint8_t offset, uint8_t data0, uint8_t d
         incrementDevRegister( SCMD_MST_E_ERR );
         //EXPANSION_PORT_I2C_MASTER_CLEAR_START;
         //EXPANSION_PORT_I2CMasterSendStop();
-        SetExpansionScbConfigurationMaster();
+        //SetExpansionScbConfigurationMaster();
+        initExpansionSerial(CONFIG_BITS); 
     }
 
     if( EXPANSION_PORT_I2CMasterClearStatus() & EXPANSION_PORT_I2C_MSTAT_ERR_XFER ) incrementDevRegister( SCMD_MST_E_ERR );
@@ -501,10 +520,10 @@ void initExpansionSerial( uint8_t configBitsVar ) //Pass configuration word
     if(configBitsVar == 2) //Slave
     {
         SetExpansionScbConfigurationSlave();
+        EXPANSION_PORT_SetCustomInterruptHandler( parseSlaveI2C );
     }
     else
     {
         SetExpansionScbConfigurationMaster();
     }
-    EXPANSION_PORT_SetCustomInterruptHandler( parseSlaveI2C );
 }

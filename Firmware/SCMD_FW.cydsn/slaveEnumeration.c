@@ -25,7 +25,7 @@ Distributed as-is; no warranty is given.
 //Variables and associated #defines use in functions
 static uint8_t slaveAddrEnumerator;
 static uint8_t slaveData = 0;
-static volatile bool slaveResetRequested = false;
+volatile bool slaveResetRequested = false;
 
 #define SCMDSlaveIdle 0
 #define SCMDSlaveWaitForSync 1
@@ -44,7 +44,7 @@ uint8_t masterState = SCMDMasterIdle;
 
 extern volatile uint16_t masterSendCounter;
 extern volatile bool masterSendCounterReset; //set this to 1 to reset counter.... self clearing
-
+extern volatile bool breakCounterWait;
 //Functions
 
 void tickMasterSM( void )
@@ -146,7 +146,8 @@ void tickMasterSM( void )
         }
 		clearStatusBit( SCMD_BUSY_BIT );
         masterSendCounterReset = 1; //Request the ISR to reset the counter
-        while(masterSendCounter > 0); //Counter now = 0
+        while((masterSendCounter > 0)&&(breakCounterWait == false)); //Counter now = 0
+        breakCounterWait = false;
         masterNextState = SCMDMasterWait;
         break;
     default:
@@ -154,26 +155,6 @@ void tickMasterSM( void )
     }
     masterState = masterNextState;
 
-    //This next block deals with the config_in line and its behavior
-    if((CONFIG_IN_Read() == 1)&&(slaveResetRequested == 0))
-    {
-        //Newly detected config_in rising edge
-        slaveResetRequested = 1;
-        //Send the reset request
-        switch(readDevRegister( SCMD_MST_E_IN_FN ))
-        {
-            default:
-            case 0:
-                slaveResetRequested = 0; //belay that order
-            break;
-            case 1:
-                hardReset();
-            break;
-            case 2:
-                reEnumerate();
-            break;
-        }
-    }
     //State machine is done but the request is still high (we came from soft re-enum)
     if(masterSMDone()&&(slaveResetRequested == 1))
 	{
@@ -270,11 +251,12 @@ void hardReset( void )
 
 void reEnumerate( void )
 {
+	clearStatusBit( SCMD_ENUMERATION_BIT );  //Clear "i'm done" bit
+
+    CyDelay(100u);
     writeDevRegister( SCMD_LOCAL_USER_LOCK, USER_LOCK_KEY);
     writeDevRegister( SCMD_LOCAL_MASTER_LOCK, MASTER_LOCK_KEY);
     
-	clearStatusBit( SCMD_ENUMERATION_BIT );  //Clear "i'm done" bit
-
     //set slaveResetRequested to cause config transfer after re-enumeration
     slaveResetRequested = true;
     

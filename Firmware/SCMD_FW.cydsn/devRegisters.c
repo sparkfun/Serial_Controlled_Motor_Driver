@@ -104,8 +104,9 @@ void setColdInitValues( void )
     else if( readDevRegister( SCMD_CONFIG_BITS ) == 0x0E ) registerTable[SCMD_U_BUS_UART_BAUD] = 0x07; // Set 115200
     else registerTable[SCMD_U_BUS_UART_BAUD] = 0x02; // Default baud rate of 9600
     registerTable[SCMD_E_BUS_SPEED] = 0x01;
-    registerTable[SCMD_FSAFE_CTRL] = 0x11; //Mode reinit exp port, stop motors
-
+    registerTable[SCMD_FSAFE_CTRL] = 0x19; //Mode reinit both ports, stop motors
+    writeDevRegister(SCMD_MST_E_IN_FN, SCMD_M_IN_CYCLE_USER | SCMD_M_IN_CYCLE_EXP);
+    
     setWarmInitValues();
 }
 

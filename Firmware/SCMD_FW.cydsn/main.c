@@ -41,6 +41,10 @@ static void systemInit( void ); //get the system off the ground - calls warm ini
 //Variables for use with timer ISR to measure time. 
 volatile uint16_t masterSendCounter = 65000;
 volatile bool masterSendCounterReset = 0;
+volatile bool breakCounterWait = false;
+
+//Reboot variable
+extern volatile bool slaveResetRequested;
 
 //Functions
 int main()
@@ -97,7 +101,10 @@ CY_ISR(FSAFE_TIMER_Interrupt)
     /* Clear TC Inerrupt */
    	FSAFE_TIMER_ClearInterrupt(FSAFE_TIMER_INTR_MASK_CC_MATCH);
     incrementDevRegister( SCMD_FSAFE_FAULTS );
-
+    
+    //  Plan to escape counter wait
+    breakCounterWait = true;
+    
     //  Collect behavior information
     uint8_t drive_behavior = readDevRegister(SCMD_FSAFE_CTRL) & SCMD_FSAFE_DRIVE_KILL;
     uint8_t reset_behavior = (readDevRegister(SCMD_FSAFE_CTRL) & SCMD_FSAFE_RESTART_MASK) >> 1;
@@ -140,6 +147,57 @@ CY_ISR(FSAFE_TIMER_Interrupt)
     FSAFE_TIMER_Stop();
     FSAFE_TIMER_WriteCounter(0);
     FSAFE_TIMER_Start();
+    CyGlobalIntEnable;
+
+}
+
+/*******************************************************************************
+* Define Interrupt service routine and allocate an vector to the Interrupt
+********************************************************************************/
+CY_ISR(ConfigInBehaviorHandler)
+{
+    CyGlobalIntDisable;
+    M_IN_ISR_Stop();
+    CONFIG_IN_ClearInterrupt();
+   
+    //Send the reset request
+    switch( readDevRegister( SCMD_MST_E_IN_FN ) & SCMD_M_IN_RESTART_MASK )
+    {
+        default:
+        case 0:
+            //  Restart user or expansion ports
+            if(readDevRegister( SCMD_MST_E_IN_FN ) & SCMD_M_IN_CYCLE_USER )
+            {
+                initUserSerial( readDevRegister( SCMD_CONFIG_BITS ) );
+                CyDelay(100);
+            }
+            if(readDevRegister( SCMD_MST_E_IN_FN ) & SCMD_M_IN_CYCLE_EXP )
+            {
+                initExpansionSerial( readDevRegister( SCMD_CONFIG_BITS ) );
+                CyDelay(100);
+            }
+            M_IN_ISR_StartEx(ConfigInBehaviorHandler);
+        break;
+        case 1:
+            hardReset();
+        break;
+        case 2:
+            //  Restart user or expansion ports
+            if(readDevRegister( SCMD_MST_E_IN_FN ) & SCMD_M_IN_CYCLE_USER )
+            {
+                initUserSerial( readDevRegister( SCMD_CONFIG_BITS ) );
+                CyDelay(100);
+            }
+            if(readDevRegister( SCMD_MST_E_IN_FN ) & SCMD_M_IN_CYCLE_EXP )
+            {
+                initExpansionSerial( readDevRegister( SCMD_CONFIG_BITS ) );
+                CyDelay(100);
+            }
+            writeDevRegister( SCMD_CONTROL_1, readDevRegister( SCMD_CONTROL_1 ) & SCMD_RE_ENUMERATE_BIT ); //Set bit
+            M_IN_ISR_StartEx(ConfigInBehaviorHandler);
+        break;
+    }
+    
     CyGlobalIntEnable;
 
 }
@@ -227,6 +285,8 @@ static void systemInit( void )
     Clock_1_Stop();
     Clock_1_Start();
     
+    //Config in behavior
+    if(CONFIG_BITS != 0x02) M_IN_ISR_StartEx(ConfigInBehaviorHandler);
     
     CyGlobalIntEnable; 
     
