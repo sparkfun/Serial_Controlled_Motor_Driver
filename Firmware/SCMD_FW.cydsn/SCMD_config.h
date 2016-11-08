@@ -23,13 +23,15 @@ Distributed as-is; no warranty is given.
 #define MAX_SLAVE_ADDR             0x5F  //Max address of slaves
 #define MASTER_LOCK_KEY            0x9B
 #define USER_LOCK_KEY              0x5C
-#define FIRMWARE_VERSION           0x05
+#define FIRMWARE_VERSION           0x06
 #define POLL_ADDRESS               0x4A  //Address of an unasigned, ready slave
 #define MAX_POLL_LIMIT             0xC8  //200
 
 //SCMD_STATUS_1 bits
 #define SCMD_ENUMERATION_BIT       0x01
 #define SCMD_BUSY_BIT              0x02
+#define SCMD_REM_READ_BIT          0x04
+#define SCMD_REM_WRITE_BIT         0x08
 
 //SCMD_CONTROL_1 bits
 #define SCMD_FULL_RESET_BIT        0x01

@@ -312,7 +312,7 @@ uint8 ReadSlaveData( uint8_t address, uint8_t offset )
         //EXPANSION_PORT_I2C_MASTER_CLEAR_START;
         //EXPANSION_PORT_I2CMasterSendStop();
         //SetExpansionScbConfigurationMaster();
-        initExpansionSerial(CONFIG_BITS); 
+        //initExpansionSerial(CONFIG_BITS); 
     }
 
     //Get a byte
@@ -330,7 +330,7 @@ uint8 ReadSlaveData( uint8_t address, uint8_t offset )
         //EXPANSION_PORT_I2C_MASTER_CLEAR_START;
         //EXPANSION_PORT_I2CMasterSendStop();
         //SetExpansionScbConfigurationMaster();
-        initExpansionSerial( CONFIG_BITS );
+        //initExpansionSerial( CONFIG_BITS );
     }
     
     /* Displays transfer status */
@@ -373,7 +373,7 @@ uint8 WriteSlaveData( uint8_t address, uint8_t offset, uint8_t data )
         //EXPANSION_PORT_I2C_MASTER_CLEAR_START;
         //EXPANSION_PORT_I2CMasterSendStop();
         //SetExpansionScbConfigurationMaster();
-        initExpansionSerial(CONFIG_BITS);
+        //initExpansionSerial(CONFIG_BITS);
     }
 
     if( EXPANSION_PORT_I2CMasterClearStatus() & EXPANSION_PORT_I2C_MSTAT_ERR_XFER ) incrementDevRegister( SCMD_MST_E_ERR );
@@ -407,7 +407,7 @@ uint8 WriteSlave2Data( uint8_t address, uint8_t offset, uint8_t data0, uint8_t d
         //EXPANSION_PORT_I2C_MASTER_CLEAR_START;
         //EXPANSION_PORT_I2CMasterSendStop();
         //SetExpansionScbConfigurationMaster();
-        initExpansionSerial(CONFIG_BITS); 
+        //initExpansionSerial(CONFIG_BITS); 
     }
 
     if( EXPANSION_PORT_I2CMasterClearStatus() & EXPANSION_PORT_I2C_MSTAT_ERR_XFER ) incrementDevRegister( SCMD_MST_E_ERR );

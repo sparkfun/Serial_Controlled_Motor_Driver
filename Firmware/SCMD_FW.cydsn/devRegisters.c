@@ -17,6 +17,7 @@ Distributed as-is; no warranty is given.
 #include <stdbool.h>
 #include "devRegisters.h"
 #include "SCMD_config.h"
+#include "registerHandlers.h"
 
 //Set accessable table size here:
 #define REGISTER_TABLE_LENGTH 128
@@ -28,6 +29,22 @@ Distributed as-is; no warranty is given.
 
 static uint8_t registerTable[REGISTER_TABLE_LENGTH];
 static uint8_t registerAccessTable[REGISTER_TABLE_LENGTH]; // b0: unserviced, b1: global read-only, b2: user read-only
+
+#define BB_INV_2_9             0x00000001
+#define BB_INV_10_17           0x00000002
+#define BB_INV_18_25           0x00000004
+#define BB_INV_26_33           0x00000008
+#define BB_BRIDGE_SLV_L        0x00000010
+#define BB_BRIDGE_SLV_H        0x00000020
+#define BB_DRIVER_ENABLE       0x00000040
+#define BB_FORCE_UPDATE        0x00000080
+#define BB_MASTER_LOCK         0x00000100
+#define BB_USER_LOCK           0x00000200
+#define BB_FSAFE_TIME          0x00000400
+#define BB_REM_WRITE           0x00000800
+#define BB_REM_READ            0x00001000
+
+volatile uint32_t busyBitMemory = 0;
 
 void initDevRegisters( void )
 {
@@ -104,7 +121,7 @@ void setColdInitValues( void )
     else if( readDevRegister( SCMD_CONFIG_BITS ) == 0x0E ) registerTable[SCMD_U_BUS_UART_BAUD] = 0x07; // Set 115200
     else registerTable[SCMD_U_BUS_UART_BAUD] = 0x02; // Default baud rate of 9600
     registerTable[SCMD_E_BUS_SPEED] = 0x01;
-    registerTable[SCMD_FSAFE_CTRL] = 0x19; //Mode reinit both ports, stop motors
+    registerTable[SCMD_FSAFE_CTRL] = (SCMD_FSAFE_CYCLE_EXP | SCMD_FSAFE_CYCLE_USER | SCMD_FSAFE_DRIVE_KILL); //Mode reinit both ports, stop motors
     writeDevRegister(SCMD_MST_E_IN_FN, SCMD_M_IN_CYCLE_USER | SCMD_M_IN_CYCLE_EXP);
     
     setWarmInitValues();
@@ -176,6 +193,13 @@ void writeDevRegister( uint8_t regNumberIn, uint8_t dataToWrite )
             {
                 //Unlocked
                 registerTable[regNumberIn] = dataToWrite;
+                //*** TEMP CODE ***//
+                setBusyBitMem( regNumberIn );
+                if(busyBitMemory)
+                {
+                    setStatusBit(SCMD_BUSY_BIT);
+                }
+                //*** TEMP CODE ***//
                 registerAccessTable[regNumberIn] |= UNSERVICED; //set bit
             }
             else
@@ -191,6 +215,13 @@ void writeDevRegister( uint8_t regNumberIn, uint8_t dataToWrite )
             {
                 //Unlocked
                 registerTable[regNumberIn] = dataToWrite;
+                //*** TEMP CODE ***//
+                setBusyBitMem( regNumberIn );
+                if(busyBitMemory)
+                {
+                    setStatusBit(SCMD_BUSY_BIT);
+                }
+                //*** TEMP CODE ***//
                 registerAccessTable[regNumberIn] |= UNSERVICED; //set bit
             }
             else
@@ -204,6 +235,13 @@ void writeDevRegister( uint8_t regNumberIn, uint8_t dataToWrite )
             //Fully unlocked register
             registerTable[regNumberIn] = dataToWrite;
             registerAccessTable[regNumberIn] |= UNSERVICED; //set bit
+            //*** TEMP CODE ***//
+            setBusyBitMem( regNumberIn );
+            if(busyBitMemory)
+            {
+                setStatusBit(SCMD_BUSY_BIT);
+            }
+            //*** TEMP CODE ***//
         }
     }
 }
@@ -289,5 +327,100 @@ void clearChangedStatus( uint8_t regNumberIn )
     else
     {
         registerAccessTable[regNumberIn] &= ~UNSERVICED; //clear bit
+    }
+}
+
+void setBusyBitMem( uint8_t offset )// Send register value
+{
+    switch(offset)
+    {
+        case SCMD_INV_2_9:
+        busyBitMemory |= BB_INV_2_9;
+        break;
+        case SCMD_INV_10_17:
+        busyBitMemory |= BB_INV_10_17;
+        break;
+        case SCMD_INV_18_25:
+        busyBitMemory |= BB_INV_18_25;
+        break;
+        case SCMD_INV_26_33:
+        busyBitMemory |= BB_INV_26_33;
+        break;
+        case SCMD_BRIDGE_SLV_L:
+        busyBitMemory |= BB_BRIDGE_SLV_L;
+        break;
+        case SCMD_BRIDGE_SLV_H:
+        busyBitMemory |= BB_BRIDGE_SLV_H;
+        break;
+        case SCMD_DRIVER_ENABLE:
+        busyBitMemory |= BB_DRIVER_ENABLE;
+        break;
+        case SCMD_FORCE_UPDATE:
+        busyBitMemory |= BB_FORCE_UPDATE;
+        break;
+        case SCMD_MASTER_LOCK:
+        busyBitMemory |= BB_MASTER_LOCK;
+        break;
+        case SCMD_USER_LOCK:
+        busyBitMemory |= BB_USER_LOCK;
+        break;
+        case SCMD_FSAFE_TIME:
+        busyBitMemory |= BB_FSAFE_TIME;
+        break;
+        case SCMD_REM_WRITE:
+        busyBitMemory |= BB_REM_WRITE;
+        break;
+        case SCMD_REM_READ:
+        busyBitMemory |= BB_REM_READ;
+        default:
+        break;
+    }
+}
+
+void clearBusyBitMem( uint8_t offset )// Send register value
+{
+    switch(offset)
+    {
+        case SCMD_INV_2_9:
+        busyBitMemory &= ~( BB_INV_2_9 );
+        break;
+        case SCMD_INV_10_17:
+        busyBitMemory &= ~( BB_INV_10_17 );
+        break;
+        case SCMD_INV_18_25:
+        busyBitMemory &= ~( BB_INV_18_25 );
+        break;
+        case SCMD_INV_26_33:
+        busyBitMemory &= ~( BB_INV_26_33 );
+        break;
+        case SCMD_BRIDGE_SLV_L:
+        busyBitMemory &= ~( BB_BRIDGE_SLV_L );
+        break;
+        case SCMD_BRIDGE_SLV_H:
+        busyBitMemory &= ~( BB_BRIDGE_SLV_H );
+        break;
+        case SCMD_DRIVER_ENABLE:
+        busyBitMemory &= ~( BB_DRIVER_ENABLE );
+        break;
+        case SCMD_FORCE_UPDATE:
+        busyBitMemory &= ~( BB_FORCE_UPDATE );
+        break;
+        case SCMD_MASTER_LOCK:
+        busyBitMemory &= ~( BB_MASTER_LOCK );
+        break;
+        case SCMD_USER_LOCK:
+        busyBitMemory &= ~( BB_USER_LOCK );
+        break;
+        case SCMD_FSAFE_TIME:
+        busyBitMemory &= ~( BB_FSAFE_TIME );
+        break;
+        case SCMD_REM_WRITE:
+        busyBitMemory &= ~( BB_REM_WRITE );
+        break;
+        case SCMD_REM_READ:
+        busyBitMemory &= ~( BB_REM_READ );
+        break;
+        default:
+        break;
     }
 }

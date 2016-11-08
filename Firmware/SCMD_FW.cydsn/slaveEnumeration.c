@@ -45,6 +45,9 @@ uint8_t masterState = SCMDMasterIdle;
 extern volatile uint16_t masterSendCounter;
 extern volatile bool masterSendCounterReset; //set this to 1 to reset counter.... self clearing
 extern volatile bool breakCounterWait;
+
+extern volatile uint32_t busyBitMemory;
+
 //Functions
 
 void tickMasterSM( void )
@@ -127,13 +130,12 @@ void tickMasterSM( void )
             if(readDevRegister( SCMD_FORCE_UPDATE ))
             {
                 //clear force reg
-                writeDevRegister( SCMD_FORCE_UPDATE, 0 );
+                writeDevRegister( SCMD_FORCE_UPDATE, 0 ); //This sets a busy bit
                 masterNextState = SCMDMasterSendData;
             }
         }
         break;
     case SCMDMasterSendData:
-		setStatusBit( SCMD_BUSY_BIT );
         //Set output drive levels for master
         PWM_1_WriteCompare( readDevRegister( SCMD_MA_DRIVE ) );
         PWM_2_WriteCompare( readDevRegister( SCMD_MB_DRIVE ) ); 
@@ -144,11 +146,14 @@ void tickMasterSM( void )
             CyDelayUs(100);
             
         }
-		clearStatusBit( SCMD_BUSY_BIT );
         masterSendCounterReset = 1; //Request the ISR to reset the counter
         while((masterSendCounter > 0)&&(breakCounterWait == false)); //Counter now = 0
         breakCounterWait = false;
         masterNextState = SCMDMasterWait;
+        //*** TEMP CODE ***//
+        clearBusyBitMem( SCMD_FORCE_UPDATE );
+        //*** TEMP CODE ***//
+        
         break;
     default:
         break;
@@ -252,7 +257,8 @@ void hardReset( void )
 void reEnumerate( void )
 {
 	clearStatusBit( SCMD_ENUMERATION_BIT );  //Clear "i'm done" bit
-
+    busyBitMemory = 0;  //Clear all busy bits
+    
     CyDelay(100u);
     writeDevRegister( SCMD_LOCAL_USER_LOCK, USER_LOCK_KEY);
     writeDevRegister( SCMD_LOCAL_MASTER_LOCK, MASTER_LOCK_KEY);

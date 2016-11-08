@@ -26,5 +26,7 @@ bool getChangedStatus( uint8_t regNumberIn );
 void clearChangedStatus( uint8_t regNumberIn );
 void setColdInitValues( void );
 void setWarmInitValues( void );
+void setBusyBitMem( uint8_t );// Send register value
+void clearBusyBitMem( uint8_t );// Send register value
 
 #endif

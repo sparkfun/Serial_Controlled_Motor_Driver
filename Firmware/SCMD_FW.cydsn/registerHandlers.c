@@ -27,6 +27,8 @@ extern const uint16_t SCBCLK_I2C_DIVIDER_TABLE[4];
 static uint8_t savedUserKey = 0;
 static uint8_t savedMasterKey = 0;
 
+extern volatile uint32_t busyBitMemory;
+
 void processMasterRegChanges( void )
 {
 	//Remote reads (window reads through interface)
@@ -34,12 +36,12 @@ void processMasterRegChanges( void )
 	{
         saveKeysFullAccess(); //allow writes to registers
         
-		setStatusBit( SCMD_BUSY_BIT );
 		WriteSlaveData( readDevRegister(SCMD_REM_ADDR), readDevRegister(SCMD_REM_OFFSET), readDevRegister(SCMD_REM_DATA_WR) );
 		writeDevRegister( SCMD_REM_WRITE, 0 );
 		clearChangedStatus( SCMD_REM_WRITE );
-		clearStatusBit( SCMD_BUSY_BIT );
-        
+        //*** TEMP CODE ***//
+        clearBusyBitMem( SCMD_REM_WRITE );
+        //*** TEMP CODE ***//         
         restoreKeys();//Replace previous keys
 	}
 	//Do writes before reads if both present
@@ -47,12 +49,12 @@ void processMasterRegChanges( void )
 	{
         saveKeysFullAccess(); //allow writes to registers
         
-		setStatusBit( SCMD_BUSY_BIT );
 		writeDevRegister( SCMD_REM_DATA_RD, ReadSlaveData(readDevRegister(SCMD_REM_ADDR), readDevRegister(SCMD_REM_OFFSET)) );
 		writeDevRegister( SCMD_REM_READ, 0 );
 		clearChangedStatus(SCMD_REM_READ);
-		clearStatusBit( SCMD_BUSY_BIT );
-        
+        //*** TEMP CODE ***//
+        clearBusyBitMem( SCMD_REM_READ );
+        //*** TEMP CODE ***//
         restoreKeys();//Replace previous keys
 	} 
 	//Tell slaves to change their inversion/bridging if the master was written
@@ -72,7 +74,6 @@ void processMasterRegChanges( void )
 	
 	if(getChangedStatus( SCMD_INV_2_9 ))
 	{
-		setStatusBit( SCMD_BUSY_BIT );
 		int i;
 		for(i = 0; i < 8; i++)
 		{
@@ -93,12 +94,13 @@ void processMasterRegChanges( void )
 				WriteSlaveData( motorAddrTemp, offsetTemp, (readDevRegister( SCMD_INV_2_9 ) >> i) & 0x01 );
 			}
 		}
+        //*** TEMP CODE ***//
+        clearBusyBitMem( SCMD_INV_2_9 );
+        //*** TEMP CODE ***//
 		clearChangedStatus( SCMD_INV_2_9 );
-		clearStatusBit( SCMD_BUSY_BIT );
 	} 
 	if(getChangedStatus( SCMD_INV_10_17 ))
 	{
-		setStatusBit( SCMD_BUSY_BIT );
 		int i;
 		for(i = 0; i < 8; i++)
 		{
@@ -119,12 +121,13 @@ void processMasterRegChanges( void )
 				WriteSlaveData( motorAddrTemp, offsetTemp, (readDevRegister( SCMD_INV_10_17 ) >> i) & 0x01 );
 			}
 		}
+        //*** TEMP CODE ***//
+        clearBusyBitMem( SCMD_INV_10_17 );
+        //*** TEMP CODE ***//
 		clearChangedStatus( SCMD_INV_10_17 );
-		clearStatusBit( SCMD_BUSY_BIT );
 	}
 	if(getChangedStatus( SCMD_INV_18_25 ))
 	{
-		setStatusBit( SCMD_BUSY_BIT );
 		int i;
 		for(i = 0; i < 8; i++)
 		{
@@ -145,12 +148,13 @@ void processMasterRegChanges( void )
 				WriteSlaveData( motorAddrTemp, offsetTemp, (readDevRegister( SCMD_INV_18_25 ) >> i) & 0x01 );
 			}
 		}
+        //*** TEMP CODE ***//
+        clearBusyBitMem( SCMD_INV_18_25 );
+        //*** TEMP CODE ***//
 		clearChangedStatus( SCMD_INV_18_25 );
-		clearStatusBit( SCMD_BUSY_BIT );
 	}
 	if(getChangedStatus(SCMD_INV_26_33))
 	{
-		setStatusBit( SCMD_BUSY_BIT );
 		int i;
 		for(i = 0; i < 8; i++)
 		{
@@ -171,12 +175,13 @@ void processMasterRegChanges( void )
 				WriteSlaveData( motorAddrTemp, offsetTemp, (readDevRegister( SCMD_INV_26_33 ) >> i) & 0x01 );
 			}
 		}
+        //*** TEMP CODE ***//
+        clearBusyBitMem( SCMD_INV_26_33 );
+        //*** TEMP CODE ***//
 		clearChangedStatus( SCMD_INV_26_33 );
-		clearStatusBit( SCMD_BUSY_BIT );
 	}
 	if(getChangedStatus( SCMD_BRIDGE_SLV_L ))
 	{
-		setStatusBit( SCMD_BUSY_BIT );
 		int i;
 		uint8_t motorAddrTemp = 0x50;
 		if(readDevRegister(SCMD_SLV_TOP_ADDR) >= 0x50)
@@ -188,12 +193,13 @@ void processMasterRegChanges( void )
 				motorAddrTemp++;
 			}
 		}
+        //*** TEMP CODE ***//
+        clearBusyBitMem( SCMD_BRIDGE_SLV_L );
+        //*** TEMP CODE ***//
 		clearChangedStatus( SCMD_BRIDGE_SLV_L );
-		clearStatusBit( SCMD_BUSY_BIT );
 	} 
 	if(getChangedStatus( SCMD_BRIDGE_SLV_H ))
 	{
-		setStatusBit( SCMD_BUSY_BIT );
 		int i;
 		uint8_t motorAddrTemp = 0x58;
 		if(readDevRegister( SCMD_SLV_TOP_ADDR ) >= 0x58)
@@ -205,12 +211,13 @@ void processMasterRegChanges( void )
 				motorAddrTemp++;
 			}
 		}
+        //*** TEMP CODE ***//
+        clearBusyBitMem( SCMD_BRIDGE_SLV_H );
+        //*** TEMP CODE ***//
 		clearChangedStatus( SCMD_BRIDGE_SLV_H );
-		clearStatusBit( SCMD_BUSY_BIT );
 	}
 	if(getChangedStatus( SCMD_MASTER_LOCK ))
 	{
-		setStatusBit( SCMD_BUSY_BIT );
 		//Do local
 		writeDevRegister( SCMD_LOCAL_MASTER_LOCK, readDevRegister( SCMD_MASTER_LOCK ) );
 		//send out to slaves here
@@ -220,13 +227,13 @@ void processMasterRegChanges( void )
 			WriteSlaveData(i, SCMD_LOCAL_MASTER_LOCK, readDevRegister( SCMD_MASTER_LOCK ) );
 			CyDelayUs(100);
 		}
-
+        //*** TEMP CODE ***//
+        clearBusyBitMem( SCMD_MASTER_LOCK );
+        //*** TEMP CODE ***//
 		clearChangedStatus( SCMD_MASTER_LOCK );
-		clearStatusBit( SCMD_BUSY_BIT );
 	}
 	if(getChangedStatus( SCMD_USER_LOCK ))
 	{
-		setStatusBit( SCMD_BUSY_BIT );
 		//Do local
 		writeDevRegister( SCMD_LOCAL_USER_LOCK, readDevRegister(SCMD_USER_LOCK) );
 		//send out to slaves here
@@ -236,9 +243,10 @@ void processMasterRegChanges( void )
 			WriteSlaveData(i, SCMD_LOCAL_USER_LOCK, readDevRegister(SCMD_USER_LOCK) );
 			CyDelayUs(100);
 		}
-
+        //*** TEMP CODE ***//
+        clearBusyBitMem( SCMD_USER_LOCK );
+        //*** TEMP CODE ***//
 		clearChangedStatus( SCMD_USER_LOCK );
-		clearStatusBit( SCMD_BUSY_BIT );
 	}
 	if(getChangedStatus( SCMD_E_BUS_SPEED ))
 	{
@@ -257,7 +265,6 @@ void processMasterRegChanges( void )
 	{
 		saveKeysFullAccess(); //allow writes to registers
 
-		setStatusBit( SCMD_BUSY_BIT );
 		if( readDevRegister( SCMD_CONTROL_1 ) & SCMD_FULL_RESET_BIT )
 		{
 			hardReset();
@@ -269,7 +276,6 @@ void processMasterRegChanges( void )
 			writeDevRegister( SCMD_CONTROL_1, readDevRegister( SCMD_CONTROL_1 ) & ~SCMD_RE_ENUMERATE_BIT ); //Clear bit
 		}
 		clearChangedStatus( SCMD_CONTROL_1 );
-		clearStatusBit( SCMD_BUSY_BIT );
 		
 		restoreKeys();//Replace previous keys
 		
@@ -283,7 +289,7 @@ void processSlaveRegChanges( void )
 	{
 		EXPANSION_PORT_I2CSlaveSetAddress( readDevRegister( SCMD_SLAVE_ADDR ) );
 		clearChangedStatus( SCMD_SLAVE_ADDR );
-	} 
+	}
 
 }
 
@@ -363,7 +369,6 @@ void processRegChanges( void )
 	//  Check for change of failsafe time/enable register SCMD_FSAFE_TIME
 	if(getChangedStatus( SCMD_FSAFE_TIME ))
 	{
-		setStatusBit( SCMD_BUSY_BIT );
 		uint8_t tempValue = readDevRegister( SCMD_FSAFE_TIME );
 		if(( readDevRegister(SCMD_CONFIG_BITS) != 2 )&&(readDevRegister( SCMD_SLV_TOP_ADDR ) >= 0x50)) //if you are master, and there are slaves
 		{
@@ -388,14 +393,15 @@ void processRegChanges( void )
 			//stop timer
 			FSAFE_TIMER_Stop();
 		}
+        //*** TEMP CODE ***//
+        clearBusyBitMem( SCMD_FSAFE_TIME );
+        //*** TEMP CODE ***//
 		clearChangedStatus( SCMD_FSAFE_TIME );
-		clearStatusBit( SCMD_BUSY_BIT );
 	}
 
 	//Set enable state
 	if(getChangedStatus(SCMD_DRIVER_ENABLE))
 	{
-		setStatusBit( SCMD_BUSY_BIT );
 		A_EN_Write( readDevRegister( SCMD_DRIVER_ENABLE ) & 0x01 );
 		B_EN_Write( readDevRegister( SCMD_DRIVER_ENABLE ) & 0x01 );
 		if(( readDevRegister( SCMD_CONFIG_BITS ) != 2 )&&(readDevRegister( SCMD_SLV_TOP_ADDR ) >= 0x50)) //if you are master, and there are slaves
@@ -409,8 +415,10 @@ void processRegChanges( void )
 			}
 		}
 		
+        //*** TEMP CODE ***//
+        clearBusyBitMem( SCMD_DRIVER_ENABLE );
+        //*** TEMP CODE ***//
 		clearChangedStatus( SCMD_DRIVER_ENABLE );
-		clearStatusBit( SCMD_BUSY_BIT );
 	}
 	if(getChangedStatus( SCMD_E_PORT_CLKDIV_CTRL ))
 	{
@@ -440,6 +448,10 @@ void processRegChanges( void )
 		}
 		clearChangedStatus( SCMD_GEN_TEST_WORD );
 	}
+    if(busyBitMemory == 0)
+    {
+        clearStatusBit(SCMD_BUSY_BIT);
+    }
 
 }
 

@@ -193,7 +193,7 @@ CY_ISR(ConfigInBehaviorHandler)
                 initExpansionSerial( readDevRegister( SCMD_CONFIG_BITS ) );
                 CyDelay(100);
             }
-            writeDevRegister( SCMD_CONTROL_1, readDevRegister( SCMD_CONTROL_1 ) & SCMD_RE_ENUMERATE_BIT ); //Set bit
+            writeDevRegister( SCMD_CONTROL_1, readDevRegister( SCMD_CONTROL_1 ) | SCMD_RE_ENUMERATE_BIT ); //Set bit
             M_IN_ISR_StartEx(ConfigInBehaviorHandler);
         break;
     }

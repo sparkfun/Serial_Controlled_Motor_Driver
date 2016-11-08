@@ -53,7 +53,7 @@ int ishex(char);
 
 void setup()
 {
-	Serial.begin(9600);
+	Serial.begin(115200);
 	pinMode(LEDPIN, OUTPUT);
 	//Set spare CS lines to high for alternate CS pin
 	pinMode(9, OUTPUT);
@@ -63,8 +63,8 @@ void setup()
 
 	//Specify configuration for the driver
 	//  Can be I2C_MODE, SPI_MODE
-	myMotorDriver.settings.commInterface = I2C_MODE;
-	//myMotorDriver.settings.commInterface = SPI_MODE;
+	//myMotorDriver.settings.commInterface = I2C_MODE;
+	myMotorDriver.settings.commInterface = SPI_MODE;
 	myMotorDriver.settings.I2CAddress = 0x61;
 	myMotorDriver.settings.chipSelectPin = 9;
 	delay(500);
