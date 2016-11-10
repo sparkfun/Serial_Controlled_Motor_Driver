@@ -5,7 +5,7 @@ SparkFun Serial Controlled Motor Driver
 
 [*SparkFun Serial Controlled Motor Driver (ROB-13911)*](https://www.sparkfun.com/products/13911)
 
-The SparkFun Serial Controlled Motor Driver allows you to control up to *34* DC motors using a serial command interface over I2C, SPI, or TTL UART. 
+The expandable SparkFun Serial Controlled Motor Driver allows you to control 2 DC motors using a serial command interface over I2C, SPI, or TTL UART. 
 
 Features:
 * User port configurable to SPI, I2C, or UART.
@@ -13,7 +13,7 @@ Features:
 * Auto-enumeration based on connection of expansion 'In' and 'Out' connections - First board becomes first slave in software.
 * 1.5 A peak drive per channel
 * Bridging mode for any one board to double current drive.
-* Operates from 3 to 11 volts with 12v absolute max
+* Operates from 3 to 11 volts with 12v absolute max.
 * Stock 3.3v operation of cpu and signals, with VCC breakable to allow up to 5.5v levels.
 
 Repository Contents
