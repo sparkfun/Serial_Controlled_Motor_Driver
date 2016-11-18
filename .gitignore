@@ -54,9 +54,11 @@ local.properties
 ## Eagle
 #############
 
-# Ignore the board and schematic backup files
+# Ignore the board and schematic backup files and lock files
 *.b#?
 *.s#?
+*.l#?
+*.lck
 
 
 #################
@@ -157,6 +159,21 @@ Desktop.ini
 
 
 #############
+## Mac OS
+#############
+
+.DS_Store
+
+
+#############
+## Linux
+#############
+
+# backup files (*.bak on Win)
+*~
+
+
+#############
 ## Python
 #############
 
@@ -187,6 +204,3 @@ pip-log.txt
 
 #Mr Developer
 .mr.developer.cfg
-
-# Mac crap
-.DS_Store

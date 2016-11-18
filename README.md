@@ -21,8 +21,18 @@ Repository Contents
 * **/Documentation** - Datasheet, test information, and diagrams
 * **/Firmware** - PSoC projects of embedded firmware
 * **/Hardware** - Eagle design files (.brd, .sch)
+* **/Libraries** - Libraries for use with the motor driver
 * **/Production** - Production files
 * **/Software** - Arduino sketches and examples
+
+Documentation
+--------------
+* **[Library](https://github.com/sparkfun/SparkFun_Serial_Controlled_Motor_Driver_Arduino_Library)** - Arduino library
+* **[Hookup Guide](https://learn.sparkfun.com/tutorials/serial-controlled-motor-driver-hookup-guide)** - Basic hookup guide
+* **[SparkFun Fritzing repo](https://github.com/sparkfun/Fritzing_Parts)** - Fritzing diagrams for SparkFun products.
+* **[SparkFun 3D Model repo](https://github.com/sparkfun/3D_Models)** - 3D models of SparkFun products. 
+* **[SparkFun Graphical Datasheets](https://github.com/sparkfun/Graphical_Datasheets)** -Graphical Datasheets for various SparkFun products.
+
 
 Version History
 ---------------
@@ -30,10 +40,17 @@ Version History
 * [V_1.5](https://github.com/sparkfun/Serial_Controlled_Motor_Driver/tree/V_1.5) - Revision prototype 1
 * [V_1.6](https://github.com/sparkfun/Serial_Controlled_Motor_Driver/tree/V_1.6) - Revision prototype 2
 * [V_1.6.1](https://github.com/sparkfun/Serial_Controlled_Motor_Driver/tree/V_1.6.1) - Revision prototype 2 with non-zero width poly outlines and dev board version V_1.X
+* [V_2.0](https://github.com/sparkfun/Serial_Controlled_Motor_Driver/tree/V_2.0) - Version 2.0 of product
 
 License Information
 -------------------
-The hardware is released under [Creative Commons ShareAlike 4.0 International](https://creativecommons.org/licenses/by-sa/4.0/).
-The code is beerware; if you see me (or any other SparkFun employee) at the local, and you've found our code helpful, please buy us a round!
+
+This product is _**open source**_! 
+
+Please review the LICENSE.md file for license information. 
+
+If you have any questions or concerns on licensing, please contact techsupport@sparkfun.com.
 
 Distributed as-is; no warranty is given.
+
+- Your friends at SparkFun.
