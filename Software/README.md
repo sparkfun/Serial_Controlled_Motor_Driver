@@ -1,13 +1,13 @@
 SparkFun Serial Controlled Motor Driver (SCMD) Software
 =======================================
 
-This software is intended to be run on a 328p microcontroller.  It contains a library for processing SPI and I2C communications to the SCMD.
-Repository Contents
+This software used to test the firmware and functions.  Users should see directory /Libraries (up one level) for example code and arduino libraries.
+
+Contents:
 -------------------
-* **/SparkFun_SCMD_Arduino_Library** -- Library folder.  Copy to your Arduino library directory
-    * /src - SCMD.cpp, SCMD.h, SCMD_config.h - files required to operate SCMD.  You may find register names in SCMD_config.h useful at the sketch level, when useing readRegister() and writeRegister().
-    * /examples/RegisterRWTool - Reads and writes registers in the SCMD by serial input.  Use to explore the nature of the SCMD.
-* **/testProgram** - Program that uses the library and drives motors based on slider and switch input (not documented)
+* /FailSafeTest/ -- Configures the SCMD into a mode to allow failsafe testing
+* /FWFunctionalTest/ -- Automated portion of the functional test doc
+* /testProgram/ -- Program used in product video with sliders
 
 License Information
 -------------------
