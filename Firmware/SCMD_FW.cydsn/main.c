@@ -68,7 +68,7 @@ int main()
         }
         //parseSPI() now called from within the interrupt only
 
-        
+       
         if(CONFIG_BITS == 2) //Slave
         {
             parseSlaveI2C();
