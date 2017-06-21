@@ -33,7 +33,7 @@ Distributed as-is; no warranty is given.
 //  0x2         -- I2C slave on slave port
 //  0x3 to 0xE  -- I2C @ 0x58 to 0x63
 //  0xF         -- PWM mode (not implemented)
-volatile uint8_t CONFIG_BITS = 0x3;
+volatile uint8_t CONFIG_BITS = 0x0;
 
 //Prototypes
 static void systemInit( void ); //get the system off the ground - calls warm init - run once at start
