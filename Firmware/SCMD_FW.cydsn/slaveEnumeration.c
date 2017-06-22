@@ -136,16 +136,36 @@ void tickMasterSM( void )
         }
         break;
     case SCMDMasterSendData:
-        //Set output drive levels for master
-        PWM_1_WriteCompare( readDevRegister( SCMD_MA_DRIVE ) );
-        PWM_2_WriteCompare( readDevRegister( SCMD_MB_DRIVE ) ); 
-        for (slaveAddri = START_SLAVE_ADDR; slaveAddri <= readDevRegister(SCMD_SLV_TOP_ADDR); slaveAddri++)
+        if(ENABLE_IN_Read() == 1)
         {
-            //Write drive states out to slaves
-            WriteSlave2Data( slaveAddri, SCMD_MA_DRIVE, readDevRegister(SCMD_S1A_DRIVE + ((slaveAddri - START_SLAVE_ADDR) << 1 )), readDevRegister(SCMD_S1B_DRIVE + ((slaveAddri - START_SLAVE_ADDR) << 1 )) );
-            CyDelayUs(100);
-            
+            setStatusBit(SCMD_HW_EN_BIT); //write the status bit for enabled to the register 0x77
+            //Set output drive levels for master
+            PWM_1_WriteCompare( readDevRegister( SCMD_MA_DRIVE ) );
+            PWM_2_WriteCompare( readDevRegister( SCMD_MB_DRIVE ) ); 
+            for (slaveAddri = START_SLAVE_ADDR; slaveAddri <= readDevRegister(SCMD_SLV_TOP_ADDR); slaveAddri++)
+            {
+                //Write drive states out to slaves
+                WriteSlave2Data( slaveAddri, SCMD_MA_DRIVE, readDevRegister(SCMD_S1A_DRIVE + ((slaveAddri - START_SLAVE_ADDR) << 1 )), readDevRegister(SCMD_S1B_DRIVE + ((slaveAddri - START_SLAVE_ADDR) << 1 )) );
+                CyDelayUs(100);
+                
+            }
         }
+        else
+        {
+            clearStatusBit(SCMD_HW_EN_BIT); //clear the status bit for enabled to the register 0x77
+            //Clear outputs
+            PWM_1_WriteCompare( 127 );
+            PWM_2_WriteCompare( 127 ); 
+            for (slaveAddri = START_SLAVE_ADDR; slaveAddri <= readDevRegister(SCMD_SLV_TOP_ADDR); slaveAddri++)
+            {
+                //Write drive states out to slaves
+                WriteSlave2Data( slaveAddri, SCMD_MA_DRIVE, readDevRegister(SCMD_S1A_DRIVE + ((slaveAddri - START_SLAVE_ADDR) << 1 )), 127 );
+                CyDelayUs(100);
+                
+            }
+        }
+ 
+
         masterSendCounterReset = 1; //Request the ISR to reset the counter
         while((masterSendCounter > 0)&&(breakCounterWait == false)); //Counter now = 0
         breakCounterWait = false;

@@ -33,6 +33,10 @@ Documentation
 * **[SparkFun 3D Model repo](https://github.com/sparkfun/3D_Models)** - 3D models of SparkFun products. 
 * **[SparkFun Graphical Datasheets](https://github.com/sparkfun/Graphical_Datasheets)** -Graphical Datasheets for various SparkFun products.
 
+Hardware Compatibility
+----------------
+* [ROB-13911](https://www.sparkfun.com/products/13911) - Serial controlled motor driver.
+* [DEV-14213](https://www.sparkfun.com/products/14213) - SparkFun moto:bit (SCMD_FID_V07a.HEX).
 
 Version History
 ---------------
@@ -41,6 +45,7 @@ Version History
 * [V_1.6](https://github.com/sparkfun/Serial_Controlled_Motor_Driver/tree/V_1.6) - Revision prototype 2
 * [V_1.6.1](https://github.com/sparkfun/Serial_Controlled_Motor_Driver/tree/V_1.6.1) - Revision prototype 2 with non-zero width poly outlines and dev board version V_1.X
 * [V_2.0](https://github.com/sparkfun/Serial_Controlled_Motor_Driver/tree/V_2.0) - Version 2.0 of product
+* [V_2.0.1](https://github.com/sparkfun/Serial_Controlled_Motor_Driver/tree/V_2.0.1) - Compatible with moto:bit hardware.
 
 License Information
 -------------------
