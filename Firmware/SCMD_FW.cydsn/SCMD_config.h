@@ -32,7 +32,8 @@ Distributed as-is; no warranty is given.
 #define SCMD_BUSY_BIT              0x02
 #define SCMD_REM_READ_BIT          0x04
 #define SCMD_REM_WRITE_BIT         0x08
-
+#define SCMD_HW_EN_BIT             0x10
+    
 //SCMD_CONTROL_1 bits
 #define SCMD_FULL_RESET_BIT        0x01
 #define SCMD_RE_ENUMERATE_BIT      0x02

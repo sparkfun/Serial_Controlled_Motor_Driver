@@ -138,7 +138,7 @@ void tickMasterSM( void )
     case SCMDMasterSendData:
         if(ENABLE_IN_Read() == 1)
         {
-            setStatusBit(0x04); //write the status bit for enabled to the register 0x77
+            setStatusBit(SCMD_HW_EN_BIT); //write the status bit for enabled to the register 0x77
             //Set output drive levels for master
             PWM_1_WriteCompare( readDevRegister( SCMD_MA_DRIVE ) );
             PWM_2_WriteCompare( readDevRegister( SCMD_MB_DRIVE ) ); 
@@ -152,7 +152,7 @@ void tickMasterSM( void )
         }
         else
         {
-            clearStatusBit(0x04); //clear the status bit for enabled to the register 0x77
+            clearStatusBit(SCMD_HW_EN_BIT); //clear the status bit for enabled to the register 0x77
             //Clear outputs
             PWM_1_WriteCompare( 127 );
             PWM_2_WriteCompare( 127 ); 
