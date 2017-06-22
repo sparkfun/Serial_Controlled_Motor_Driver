@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE eagle SYSTEM "eagle.dtd">
-<eagle version="7.5.0">
+<eagle version="7.7.0">
 <drawing>
 <settings>
 <setting alwaysvectorfont="no"/>
@@ -23028,7 +23028,7 @@ VSS Gnd</text>
 1100: I2C addr 0x61
 1101: I2C addr 0x62
 1110: I2C addr 0x63
-1111: RC-style PWM</text>
+1111: Reserved</text>
 <text x="194.056" y="178.054" size="1.778" layer="97" font="vector" align="top-left">The default (all open)  is the
 UART mode.  A '1' indicates
 the jumper is bridged.</text>
