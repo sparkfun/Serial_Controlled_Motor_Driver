@@ -45,7 +45,7 @@ const uint16_t SCBCLK_I2C_DIVIDER_TABLE[4] = {
 };
 
 //Timeout for writes and reads to the slaves
-#define TIMEOUTCOUNTLIMIT 50000 //roughly 100ms
+#define TIMEOUTCOUNTLIMIT 150 //roughly 100ms
 
 const USER_PORT_I2C_INIT_STRUCT configI2C =
 {
